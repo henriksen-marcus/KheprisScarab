@@ -26,17 +26,6 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-
-public:
-
-	/** Returns the location of the playership */
-	UFUNCTION(Category = "OpenFunctions")
-	FVector GetLoc();
-
-	/** If true, freezes the player and prompts the HUD to display a win message */
-	UPROPERTY(BlueprintReadWrite, Category = "OpenVariables")
-	bool GameWon;
-
 private:
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
 	UBoxComponent* RtRpl; // Root replacement
@@ -66,55 +55,40 @@ private:
 	float MaxSpeedBoost;
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float MaxHealth;
-
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	UMaterialInterface* DamageMaterial;
-
+	float SpeedMultiplier;
+	
 	UPROPERTY(VisibleAnywhere)
 	TArray<UArrowComponent*> ThrustLocations;
-
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	UParticleSystemComponent* ThrustFX1;
-
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	UParticleSystemComponent* ThrustFX2;
-
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	UParticleSystemComponent* ThrustFX3;
-
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	UParticleSystemComponent* ThrustFX4;
-
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	UParticleSystemComponent* DeathFXComponent;
-
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	UParticleSystem* ThrustFX;
-
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	UParticleSystem* DeathFX;
-
-	UPROPERTY()
-	UMaterialInterface* InitialMaterial;
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	FVector InitialLocation;
 
-	/** Player input */
-	void Roll(float Value);
-	void Pitch(float Value);
+	/** Controls the forward movement of the root and cosmetic mesh rotation effect */
+	void Forward(float Value);
 
+	/** Controls the yaw rotation of the root and cosmetic mesh rotation effect */
+	void Turn(float Value);
+	
+	/** Uses the MouseY input to change the relative pitch rotation of the spring arm */
 	void CameraPitch(float Value);
-	void Yaw(float Value);
+
+	/** Uses the MouseX input to change the relative yaw rotation of the spring arm */
+	void CameraYaw(float Value);
 
 	void Dash();
 	void ResetDash();
+	
 	void Jump();
 	void JumpEnd();
+
+	/** Exits the game - Warning: If played in-editor, this will close the editor. */
 	void EscPressed();
+
+	/** Returns the rotation of the cross-product of the vectors between the three raycast points
+	 *	Basically it gets the rotation that the object should have relative to the surface beneath */
+	FRotator GetSurfaceNormal();
 
 	bool bPitchHasInput;
 	bool bRollHasInput;
@@ -123,25 +97,23 @@ private:
 	float NextPitchPosition;
 	float NextYawPosition;
 
-	/** Used in AddActorLocalOffset() in Tick()*/
+	/** Decides how much the root should move per tick */
 	FVector LocalMove;
+
+	/***/
+	FRotator NewRotation = FRotator::ZeroRotator;
+	
 	float TargetZ{};
 
 	float SpeedBoost;
-	float ShootTimer{};
 
 	float CurrentYaw;
 	float InitialArmLength;
-	float Health;
 	bool bIsDashing;
-	float EnemyCooldownTime;
 	bool bIsJumping;
-	bool IgnoreInput;
-	bool temp = false;
-	float ForceChange = 1.f;
 
-	TArray<float> Timers;
-
-	FVector Force = FVector::ZeroVector;
-	FRotator NewUpVector = FRotator::ZeroRotator;
+	float YawMove{};
+	
+	FRotator CameraMove = FRotator::ZeroRotator;
+	
 };
