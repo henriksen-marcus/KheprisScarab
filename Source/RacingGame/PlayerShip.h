@@ -26,8 +26,6 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	static void InitializeDefaultPawnInputBinding();	
-
 
 public:
 
@@ -145,4 +143,5 @@ private:
 	TArray<float> Timers;
 
 	FVector Force = FVector::ZeroVector;
+	FRotator NewUpVector = FRotator::ZeroRotator;
 };

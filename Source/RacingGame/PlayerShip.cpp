@@ -8,10 +8,11 @@
 //#include "Camera/CameraActor.h"
 //#include "Engine/Engine.h"
 //#include "Math/UnrealMathUtility.h"
-//#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
 //#include "Particles/ParticleSystemComponent.h"
 #include "GenericPlatform/GenericPlatformMisc.h"
+
 
 // Sets default values
 APlayerShip::APlayerShip()
@@ -130,40 +131,18 @@ void APlayerShip::Tick(float DeltaTime)
 
 	ShootTimer += DeltaTime;
 
-	///** Ship movement - Changed to physics based */ 
-	//FVector CombinedVectors = FVector::ZeroVector;
-	//CombinedVectors += Force.X * GetActorForwardVector();
-	//CombinedVectors += Force.Y * GetActorRightVector();
-	//CombinedVectors *= 20000000 * SpeedBoost;
-	//if (JumpCurve)
-	//{
-	//	CombinedVectors.Z = ForceChange * Force.Z;
-	//}
-	//
-
-	//RtRpl->AddForce(CombinedVectors);
-	//RtRpl->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
-
-	//FVector Resistance = FVector::ZeroVector;
-	//Resistance = RtRpl->GetPhysicsLinearVelocity() * -1000.f;
-	//Resistance.Z = 0;
-	//RtRpl->AddForce(Resistance);
-
 	BaseMesh->SetRelativeRotation(FRotator(NextPitchPosition, 0.f, NextRollPosition));
 
 	FVector CurLoc = GetActorLocation();
-
-	//float temp2 = FMath::Abs(0.049f * CurLoc.Z - TargetZ + 1.f);
-	//float CurveStr = FMath::Clamp(temp2, 1.f, 50.f);
-	//float CurveStr = FMath::Abs(1000 / CurLoc.Z - TargetZ);
-	//UE_LOG(LogTemp, Warning, TEXT("CurveStr: %f\nHeight: %f"), CurveStr, CurLoc.Z - TargetZ)
 
 	CurLoc.Z = FMath::FInterpTo(CurLoc.Z, TargetZ, DeltaTime, 3.f);
 	SetActorLocation(CurLoc);
 
 	AddActorLocalOffset(LocalMove * DeltaTime * 110.f, true);
-
-	SetActorRotation(FRotator(0.f, NextYawPosition, 0.f));
+	SetActorRotation(FMath::RInterpTo(GetActorRotation(), NewUpVector, DeltaTime, 2.f));
+	FRotator New2Rot = GetActorRotation();
+	New2Rot.Yaw = NextYawPosition;
+	SetActorRotation(New2Rot);
 
 	/** Springarm rotation */
 	FRotator SpringArmRotation = SpringArm->GetRelativeRotation();
@@ -171,7 +150,55 @@ void APlayerShip::Tick(float DeltaTime)
 	NewRot.Pitch = SpringArmRotation.Pitch;
 	NewRot.Roll = 0;
 	SpringArm->SetWorldRotation(NewRot);
+	
 
+	FVector A, B, C, AB, AC;
+
+	/** Raycasting advanced */
+	for (int i{}; i < 4; i++)
+	{
+		FHitResult OutHit;
+		FVector Start = ThrustLocations[i]->GetComponentLocation();
+		FVector End = Start;
+		End.Z -= 5000.f;
+		FCollisionQueryParams CollisionParams;
+
+		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, -1.f, 0, 5.f);
+		if (GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, CollisionParams))
+		{
+			if (OutHit.bBlockingHit)
+			{
+				DrawDebugSphere(GetWorld(), OutHit.Location, 50.f, 12, FColor::Blue);
+			}
+		}
+
+		
+
+		switch (i)
+		{
+		case 0:
+			break;
+		case 1:
+			B = OutHit.Location;
+			break;
+		case 2:
+			C = OutHit.Location;
+			break;
+		case 3:
+			A = OutHit.Location;
+			break;
+		default:
+			break;
+		}
+	}
+
+	AB = B - A;
+	AC = C - A;
+	FVector NUV = FVector::CrossProduct(AC, AB);
+
+	NewUpVector = UKismetMathLibrary::MakeRotFromZX(NUV, GetActorForwardVector());
+
+	//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + NUV * 15.f, FColor::Red, true);
 
 	/** Raycasting */
 	FHitResult OutHit;
@@ -181,7 +208,7 @@ void APlayerShip::Tick(float DeltaTime)
 	FCollisionQueryParams CollisionParams;
 	bool BelowNormal = false;
 
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2, 0, 2);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2, 0, 2);
 
 	if (GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, CollisionParams))
 	{
@@ -210,46 +237,16 @@ void APlayerShip::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	InitializeDefaultPawnInputBinding();
+	//InitializeDefaultPawnInputBinding();
 
-	PlayerInputComponent->BindAxis("Roll", this, &APlayerShip::Roll);
-	PlayerInputComponent->BindAxis("Pitch", this, &APlayerShip::Pitch);
+	PlayerInputComponent->BindAxis("Forward", this, &APlayerShip::Pitch);
+	PlayerInputComponent->BindAxis("Right", this, &APlayerShip::Roll);
 
-	PlayerInputComponent->BindAxis("CameraPitch", this, &APlayerShip::CameraPitch);
-	PlayerInputComponent->BindAxis("Yaw", this, &APlayerShip::Yaw);
+	PlayerInputComponent->BindAxis("MouseY", this, &APlayerShip::CameraPitch);
+	PlayerInputComponent->BindAxis("MouseX", this, &APlayerShip::Yaw);
 
-	PlayerInputComponent->BindAction("Dash", EInputEvent::IE_Pressed, this, &APlayerShip::Dash);
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &APlayerShip::Jump);
 	PlayerInputComponent->BindAction("Esc", EInputEvent::IE_Pressed, this, &APlayerShip::EscPressed);
-}
-
-
-/** Hardcode input mappings */
-void APlayerShip::InitializeDefaultPawnInputBinding()
-{
-	static bool BindingsAdded = false;
-
-	if (BindingsAdded == false)
-	{
-		BindingsAdded = true;
-
-		UPlayerInput::AddEngineDefinedAxisMapping(FInputAxisKeyMapping("Pitch", EKeys::W, 1.f));
-		UPlayerInput::AddEngineDefinedAxisMapping(FInputAxisKeyMapping("Pitch", EKeys::S, -1.f));
-
-		UPlayerInput::AddEngineDefinedAxisMapping(FInputAxisKeyMapping("Roll", EKeys::A, 1.f));
-		UPlayerInput::AddEngineDefinedAxisMapping(FInputAxisKeyMapping("Roll", EKeys::D, -1.f));
-
-		UPlayerInput::AddEngineDefinedAxisMapping(FInputAxisKeyMapping("CameraPitch", EKeys::MouseY, 1.f));
-		UPlayerInput::AddEngineDefinedAxisMapping(FInputAxisKeyMapping("Yaw", EKeys::MouseX, 1.f));
-
-		UPlayerInput::AddEngineDefinedAxisMapping(FInputAxisKeyMapping("Shoot", EKeys::LeftMouseButton, 1.f));
-
-		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Jump", EKeys::SpaceBar));
-		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Reload", EKeys::R));
-		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Dash", EKeys::LeftShift));
-		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Esc", EKeys::Escape));
-		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Tab", EKeys::Tab));
-	}
 }
 
 
@@ -266,7 +263,7 @@ void APlayerShip::Pitch(float Value)
 
 	// Interpolate rotation towards target
 	//NextPitchPosition = FMath::FInterpTo(GetActorRotation().Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 6.0f);
-	NextPitchPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 6.0f);
+	//NextPitchPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 6.0f);
 
 	float TargetXSpeed = bPitchHasInput ? (Value * 40.f * SpeedBoost) : 0.f;
 	LocalMove.X = FMath::FInterpTo(LocalMove.X, TargetXSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
@@ -282,14 +279,14 @@ void APlayerShip::Roll(float Value)
 	// Determine if there is input
 	bRollHasInput = !(Value == 0);
 	// If there is input, set rotation target to -30/30 based on input value, else set target to 0
-	float TargetRoll = bRollHasInput ? Value > 0 ? -30.0f : 30.0f : 0.f;
+	float TargetRoll = bRollHasInput ? Value > 0 ? 30.0f : -30.0f : 0.f;
 	// Interpolate rotation towards target
-	NextRollPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Roll, TargetRoll, GetWorld()->GetDeltaSeconds(), 7.5f);
+	//NextRollPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Roll, TargetRoll, GetWorld()->GetDeltaSeconds(), 6.f);
 
-	float TargetYSpeed = bRollHasInput ? (Value * -30.f) : 0.f;
+	float TargetYSpeed = bRollHasInput ? (Value * 30.f) : 0.f;
 	LocalMove.Y = FMath::FInterpTo(LocalMove.Y, TargetYSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 
-	Force.Y = bRollHasInput ? Value * (-1.f) : 0.f;
+	Force.Y = bRollHasInput ? Value : 0.f;
 }
 
 
@@ -304,7 +301,7 @@ void APlayerShip::CameraPitch(float Value)
 {
 	if (!Value || IgnoreInput) { return; }
 	FRotator CurrentRot = SpringArm->GetRelativeRotation();
-	float TargetPitch = FMath::Clamp(CurrentRot.Pitch + Value * 15.f, -50.f, 0.f);
+	float TargetPitch = FMath::Clamp(CurrentRot.Pitch + Value * 15.f, -80.f, 0.f);
 	CurrentRot.Pitch = FMath::FInterpTo(CurrentRot.Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 10.f);
 
 	SpringArm->SetRelativeRotation(CurrentRot);
