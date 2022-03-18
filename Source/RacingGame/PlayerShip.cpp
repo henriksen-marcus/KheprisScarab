@@ -83,6 +83,8 @@ void APlayerShip::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	CameraCenteringTimer += DeltaTime;
+	
 	// Z Movement
 	FVector CurLoc = GetActorLocation();
 	CurLoc.Z = FMath::FInterpTo(CurLoc.Z, TargetZ, DeltaTime, 3.f);
@@ -105,10 +107,8 @@ void APlayerShip::Tick(float DeltaTime)
 	
 	FRotator SpringArmRotation = SpringArm->GetRelativeRotation();
 	FRotator NewRot = FMath::RInterpTo(SpringArmRotation, CameraMove, DeltaTime, 10.f);
-	//NewRot.Pitch = SpringArmRotation.Pitch;
 	NewRot.Roll = 0;
 	SpringArm->SetRelativeRotation(NewRot);
-	//SpringArm->SetWorldRotation(GetActorRotation());
 	
 	
 	/** Raycasting - Keeping the ship afloat */
@@ -191,10 +191,17 @@ void APlayerShip::Turn(const float Value)
 
 void APlayerShip::CameraYaw(const float Value)
 {
-	if (!Value) { return; }
+	//if (!Value) { return; }
+	//bool bYawHasInput = !(Value == 0);
+	bool bShouldReset = !(Value == 0) || CameraCenteringTimer >= 2.f;
+
+	
+	float test = 0;
+	test = bShouldReset ? 500.f : 200.f;
+	
 	FRotator CurrentRot = SpringArm->GetRelativeRotation();
-	//CurrentRot.Yaw = FMath::FInterpTo(CurrentRot.Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 10.f);
-	CameraMove.Yaw = SpringArm->GetRelativeRotation().Yaw + Value * 15.f;
+	CameraMove.Yaw = !(Value == 0) ? SpringArm->GetRelativeRotation().Yaw + Value * 5.f : 0.f;
+	//CameraMove.Yaw = SpringArm->GetRelativeRotation().Yaw + Value * 15.f;
 	CurrentRot.Yaw = FMath::Clamp(CurrentRot.Yaw + Value, -40.f, 40.f);
 	//SpringArm->SetRelativeRotation(CurrentRot);
 	

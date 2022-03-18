@@ -115,5 +115,6 @@ private:
 	float YawMove{};
 	
 	FRotator CameraMove = FRotator::ZeroRotator;
+	float CameraCenteringTimer{};
 	
 };
