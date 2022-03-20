@@ -46,19 +46,45 @@ private:
 	UCurveFloat* JumpCurve;
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	UCurveFloat* LocalMoveCurve;
+
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	int MaxAmmo;
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float DashTimer;
+	float DashTimer{2.f};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float MaxSpeedBoost;
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float SpeedMultiplier;
+
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float TargetCameraFOV{90.f};
+
+	/** Target spring arm length, constantly interpolated towards */
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float TargetSpringArmLength{2000.f};
 	
-	UPROPERTY(VisibleAnywhere)
-	TArray<UArrowComponent*> ThrustLocations;
+	//UPROPERTY()
+	//TArray<UArrowComponent*> ThrustLocations;
+
+	UPROPERTY(EditAnywhere, Category = "Arrows")
+	UArrowComponent* Thrust1;
+
+	UPROPERTY(EditAnywhere, Category = "Arrows")
+	UArrowComponent* Thrust2;
+
+	UPROPERTY(EditAnywhere, Category = "Arrows")
+	UArrowComponent* Thrust3;
+
+	UPROPERTY(EditAnywhere, Category = "Arrows")
+	UArrowComponent* Thrust4;
+
+	/** Seconds of inactivity needed for camera to reset its rotation */
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float CameraResetTime{1.f};
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -88,7 +114,14 @@ private:
 
 	/** Returns the rotation of the cross-product of the vectors between the three raycast points
 	 *	Basically it gets the rotation that the object should have relative to the surface beneath */
-	FRotator GetSurfaceNormal();
+	FRotator GetSurfaceNormal3P();
+
+	/** Returns the rotation of the cross-product of the vectors between the four raycast points
+	 * Basically it gets the rotation that the object should have relative to the surface beneath */
+	FRotator GetSurfaceNormal4P();
+
+	/** Returns the Z height the object should have to stay a predetermined height above the ground */
+	float GetTargetZ();
 
 	bool bPitchHasInput;
 	bool bRollHasInput;
@@ -100,21 +133,19 @@ private:
 	/** Decides how much the root should move per tick */
 	FVector LocalMove;
 
-	/***/
-	FRotator NewRotation = FRotator::ZeroRotator;
-	
-	float TargetZ{};
-
 	float SpeedBoost;
 
 	float CurrentYaw;
-	float InitialArmLength;
 	bool bIsDashing;
 	bool bIsJumping;
 
 	float YawMove{};
 	
-	FRotator CameraMove = FRotator::ZeroRotator;
+	FRotator SpringArmRotTarget = FRotator::ZeroRotator;
+	FVector TempVec = FVector::ZeroVector;
+	float FallTime{};
+	bool bLowThreshold = false;
 	float CameraCenteringTimer{};
+	
 	
 };

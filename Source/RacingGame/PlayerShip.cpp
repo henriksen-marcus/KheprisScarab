@@ -27,11 +27,9 @@ APlayerShip::APlayerShip()
 	BaseMesh->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
 	BaseMesh->SetupAttachment(GetRootComponent());
 	BaseMesh->OnComponentBeginOverlap.AddDynamic(this, &APlayerShip::OnOverlapBegin);
-
-	DashTimer = 2.f;
-	MaxSpeedBoost = 2.f;
+	
+	MaxSpeedBoost = 1.2f;
 	SpeedBoost = 1.f;
-	InitialArmLength = 1000.f;
 	bIsDashing = false;
 	bIsJumping = false;
 	LocalMove = FVector::ZeroVector;
@@ -41,34 +39,45 @@ APlayerShip::APlayerShip()
 	SpringArm->SetRelativeRotation(FRotator(-30.f, 0.f, 0.f));
 	//SpringArm->SetUsingAbsoluteRotation(false);
 	//SpringArm->bUsePawnControlRotation = true;
-	SpringArm->TargetArmLength = InitialArmLength;
+	SpringArm->TargetArmLength = TargetSpringArmLength;
 	SpringArm->bEnableCameraLag = true;
-	SpringArm->CameraLagSpeed = 10.f; // Lower = More delay
+	SpringArm->CameraLagSpeed = 30.f; // Lower = More delay
 	SpringArm->bDoCollisionTest = true;
 	SpringArm->SetupAttachment(GetRootComponent());
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->bUsePawnControlRotation = false;
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-	Camera->SetRelativeRotation(FRotator(10.f, 0.f, 0.f));
+	Camera->SetRelativeRotation(FRotator(12.f, 0.f, 0.f));
 
-	UArrowComponent* Thrust1 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust1"));
-	UArrowComponent* Thrust2 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust2"));
-	UArrowComponent* Thrust3 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust3"));
-	//UArrowComponent* Thrust4 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust4"));
+	 Thrust1 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust1"));
+	 Thrust2 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust2"));
+	 Thrust3 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust3"));
+	 Thrust4 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust4"));
 
-	Thrust1->SetRelativeLocationAndRotation(FVector(500.f, -300.f, 0.f), FRotator(-90.f, 0.f, 0.f));
-	Thrust2->SetRelativeLocationAndRotation(FVector(500.f, 300.f, 0.f), FRotator(-90.f, 0.f, 0.f));
-	Thrust3->SetRelativeLocationAndRotation(FVector(-500.f, 0.f, 0.f), FRotator(-90.f, 0.f, 0.f));
-	//Thrust4->SetRelativeLocationAndRotation(FVector(-66.f, 416.f, 82.f), FRotator(-95.f, 0.f, 0.f));
-
-	ThrustLocations.Reserve(4);
+	Thrust1->SetupAttachment(GetRootComponent());
+	Thrust2->SetupAttachment(GetRootComponent());
+	Thrust3->SetupAttachment(GetRootComponent());
+	Thrust4->SetupAttachment(GetRootComponent());
+	
+	//for (int i{}; i < ThrustLocations.Num(); i++) { ThrustLocations[i]->SetupAttachment(GetRootComponent());}
+	
+	Thrust1->SetRelativeLocationAndRotation(FVector(300.f, -300.f, 0.f), FRotator(-60.f, -45.f, 0.f));
+	Thrust2->SetRelativeLocationAndRotation(FVector(300.f, 300.f, 0.f), FRotator(-60.f, 45.f, 0.f));
+	Thrust3->SetRelativeLocationAndRotation(FVector(-400.f, -300.f, 0.f), FRotator(-120.f, 45.f, 0.f));
+	Thrust4->SetRelativeLocationAndRotation(FVector(-400.f, 300.f, 0.f), FRotator(-120.f, -45.f, 0.f));
+	
+	/*ThrustLocations.Reserve(4);
 	ThrustLocations.Add(Thrust1);
 	ThrustLocations.Add(Thrust2);
 	ThrustLocations.Add(Thrust3);
-	//ThrustLocations.Add(Thrust4);
+	ThrustLocations.Add(Thrust4);*/
 
-	for (int i{}; i < ThrustLocations.Num(); i++) { ThrustLocations[i]->SetupAttachment(GetRootComponent());}
+	/*ThrustLocations.Emplace(Thrust1);
+	ThrustLocations.Emplace(Thrust2);
+	ThrustLocations.Emplace(Thrust3);
+	ThrustLocations.Emplace(Thrust4);*/
+	
 }
 
 
@@ -76,6 +85,11 @@ void APlayerShip::BeginPlay()
 {
 	Super::BeginPlay();
 	InitialLocation = GetActorLocation();
+	/*UE_LOG(LogTemp, Warning, TEXT("Length: %d"), ThrustLocations.Num())
+	for (int i{}; i < ThrustLocations.Num(); i++)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Pos: %s"), *ThrustLocations[i]->GetComponentLocation().ToString())
+	}*/
 }
 
 
@@ -83,57 +97,45 @@ void APlayerShip::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	CameraCenteringTimer += DeltaTime;
-	
 	// Z Movement
 	FVector CurLoc = GetActorLocation();
-	CurLoc.Z = FMath::FInterpTo(CurLoc.Z, TargetZ, DeltaTime, 3.f);
+	const float TargetZ = GetTargetZ();
+	if (bLowThreshold)
+	{
+		CurLoc.Z = TargetZ+1;
+		bLowThreshold = false;
+		UE_LOG(LogTemp, Warning, TEXT("Low Threshold!"))
+	}
+	else
+	{
+		CurLoc.Z = FMath::InterpEaseInOut(CurLoc.Z, TargetZ, DeltaTime, 0.6f);
+	}
 	SetActorLocation(CurLoc);
-
+	
 	// X and Y Movement
 	AddActorLocalOffset(LocalMove * DeltaTime * 110.f * SpeedBoost * SpeedMultiplier, true);
 
 	// Root Rotation
-	FRotator TargetRotation = GetSurfaceNormal();
-	SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, 2.f));
+	//FRotator TargetRotation = GetSurfaceNormal3P();
+	SetActorRotation(FMath::RInterpTo(GetActorRotation(), GetSurfaceNormal4P(), DeltaTime, 2.f));
 	AddActorLocalRotation(FRotator(0.f, YawMove, 0.f));
-
+	
 	// Cosmetic mesh rotation
 	BaseMesh->SetRelativeRotation(FRotator(NextPitchPosition, 0.f, NextRollPosition));
-
+	
 	/** Springarm rotation */
-	CameraMove.Pitch = FMath::ClampAngle(CameraMove.Pitch, -70.f, -10.f);
-	CameraMove.Yaw = FMath::ClampAngle(CameraMove.Yaw, -70.f, 70.f);
-	
-	FRotator SpringArmRotation = SpringArm->GetRelativeRotation();
-	FRotator NewRot = FMath::RInterpTo(SpringArmRotation, CameraMove, DeltaTime, 10.f);
-	NewRot.Roll = 0;
+	FRotator NewRot = SpringArm->GetRelativeRotation();
+	NewRot.Pitch = FMath::InterpEaseInOut(NewRot.Pitch, SpringArmRotTarget.Pitch, DeltaTime, 0.6f);
+	NewRot.Yaw = FMath::InterpEaseInOut(NewRot.Yaw, SpringArmRotTarget.Yaw, DeltaTime, 0.6f);
+	//NewRot.Roll = 0;
 	SpringArm->SetRelativeRotation(NewRot);
-	
-	
-	/** Raycasting - Keeping the ship afloat */
-	FHitResult OutHit;
-	FVector Start = GetActorLocation();
-	FVector End = Start;
-	End.Z -= 10000.f;
-	FCollisionQueryParams CollisionParams;
-	bool BelowNormal = false;
 
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, -1.f, 0, 8.f);
+	/** Camera effects */
+	Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, TargetCameraFOV, DeltaTime, 10.f));
+	SpringArm->TargetArmLength = FMath::FInterpTo(SpringArm->TargetArmLength, TargetSpringArmLength, DeltaTime, 10.f);
 
-	if (GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, CollisionParams))
-	{
-		if (OutHit.bBlockingHit)
-		{
-			TargetZ = OutHit.ImpactPoint.Z + 1000.f;
-			BelowNormal = true;
-		}
-	}
-	if (!BelowNormal)
-	{
-		TargetZ = Start.Z - 2000.f;
-	}
-	
+	FallTime += DeltaTime;
+	CameraCenteringTimer += DeltaTime;
 }
 
 
@@ -149,6 +151,7 @@ void APlayerShip::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &APlayerShip::Jump);
 	PlayerInputComponent->BindAction("Esc", EInputEvent::IE_Pressed, this, &APlayerShip::EscPressed);
+	PlayerInputComponent->BindAction("UseItem", EInputEvent::IE_Pressed, this, &APlayerShip::Dash);
 }
 
 
@@ -181,7 +184,7 @@ void APlayerShip::Turn(const float Value)
 	NextRollPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Roll, TargetRoll, GetWorld()->GetDeltaSeconds(), 3.f);
 
 	/** Yaw */
-	YawMove = FMath::FInterpTo(YawMove,  0.8f * Value, GetWorld()->GetDeltaSeconds(), 8.f);
+	YawMove = FMath::FInterpTo(YawMove,  Value * GetWorld()->GetDeltaSeconds() * 150.f, GetWorld()->GetDeltaSeconds(), 8.f);
 	//NextYawPosition = FMath::FInterpTo(GetActorRotation().Yaw, GetActorRotation().Yaw + Value * 40.f, GetWorld()->GetDeltaSeconds(), 0.5f);
 	
 	//const float TargetYSpeed = bRollHasInput ? (Value * 30.f) : 0.f;
@@ -191,31 +194,27 @@ void APlayerShip::Turn(const float Value)
 
 void APlayerShip::CameraYaw(const float Value)
 {
-	//if (!Value) { return; }
-	//bool bYawHasInput = !(Value == 0);
-	bool bShouldReset = !(Value == 0) || CameraCenteringTimer >= 2.f;
-
-	
-	float test = 0;
-	test = bShouldReset ? 500.f : 200.f;
-	
 	FRotator CurrentRot = SpringArm->GetRelativeRotation();
-	CameraMove.Yaw = !(Value == 0) ? SpringArm->GetRelativeRotation().Yaw + Value * 5.f : 0.f;
-	//CameraMove.Yaw = SpringArm->GetRelativeRotation().Yaw + Value * 15.f;
-	CurrentRot.Yaw = FMath::Clamp(CurrentRot.Yaw + Value, -40.f, 40.f);
-	//SpringArm->SetRelativeRotation(CurrentRot);
 	
-	//NextYawPosition = GetActorRotation().Yaw + Value * GetWorld()->GetDeltaSeconds() * 50.f;
+	// Should reset the camera target if the camera timer is over x seconds
+	const bool bShouldReset = CameraCenteringTimer >= CameraResetTime;
+	
+	if (Value) { CameraCenteringTimer = 0.f; }
+
+	// Target camera rotation should be 0 if bShouldReset is true
+	SpringArmRotTarget.Yaw = bShouldReset ? 0.f : FMath::Clamp(SpringArm->GetRelativeRotation().Yaw + Value * 5.f, -80.f, 80.f);
 }
 
 
 void APlayerShip::CameraPitch(const float Value)
 {
-	if (!Value) { return; }
-	CameraMove.Pitch = SpringArm->GetRelativeRotation().Pitch + Value * 15.f;
-	//CurrentRot.Pitch = FMath::FInterpTo(CurrentRot.Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 10.f);
+	// Should reset the camera target if the camera timer is over x seconds
+	const bool bShouldReset = CameraCenteringTimer >= CameraResetTime;
 
-	//SpringArm->SetRelativeRotation(CurrentRot);
+	if (Value) { CameraCenteringTimer = 0.f; }
+
+	// Target camera rotation should be 0 if bShouldReset is true
+	SpringArmRotTarget.Pitch = bShouldReset ? -30.f : FMath::Clamp(SpringArm->GetRelativeRotation().Pitch + Value * 10.f, -80.f, 0.f);
 }
 
 
@@ -225,7 +224,9 @@ void APlayerShip::Dash()
 	{
 		return;
 	}
-	
+
+	TargetCameraFOV += 40.f;
+	TargetSpringArmLength -= 600.f;
 	SpeedBoost = MaxSpeedBoost;
 	bIsDashing = true;
 
@@ -236,6 +237,8 @@ void APlayerShip::Dash()
 
 void APlayerShip::ResetDash()
 {
+	TargetCameraFOV -= 40.f;
+	TargetSpringArmLength += 600.f;
 	SpeedBoost = 1.f;
 	bIsDashing = false;
 }
@@ -267,28 +270,33 @@ void APlayerShip::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
 
 }
 
+
 void APlayerShip::EscPressed()
 {
 	FGenericPlatformMisc::RequestExit(false);
 }
 
-FRotator APlayerShip::GetSurfaceNormal()
-{
-	/** Raycasting - making the ship match the ground's rotation */
 
+/*
+FRotator APlayerShip::GetSurfaceNormal3P()
+{
 	// We need three points and two vectors to determine the cross product and get the new up vector
-	FVector A, B, C, VecAb, VecAc;
+	FVector A = FVector::ZeroVector, B = FVector::ZeroVector, C = FVector::ZeroVector, NewUpVector = FVector::ZeroVector;
+	
+	float RayCastLength = 1500.f;
 	
 	for (int i{}; i < 3; i++)
 	{
 		FHitResult OutHit;
 		FVector Start = ThrustLocations[i]->GetComponentLocation();
 		FVector End = Start;
-		End.Z -= 2000.f;
+		End.Z -= RayCastLength;
 		FCollisionQueryParams CollisionParams;
-
+		FVector downvec = -GetActorUpVector();
+		FVector temp2 = Start.GetSafeNormal();
 		// Raycast visualization, red line
-		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, -1.f, 0, 12.f);
+		//DrawDebugLine(GetWorld(), Start, Start + (-GetActorUpVector() * 1000.f), FColor::Red, false, -1.f, 0, 12.f);
+		//DrawDebugLine(GetWorld(), Start + (Start.GetSafeNormal() * 1000.f), Start + (Start.GetSafeNormal() * 200.f), FColor::Green, false, -1.f, 0, 12.f);
 
 		// Raycast
 		if (GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, CollisionParams))
@@ -296,7 +304,7 @@ FRotator APlayerShip::GetSurfaceNormal()
 			// If raycast hit something
 			if (OutHit.bBlockingHit)
 			{
-				DrawDebugSphere(GetWorld(), OutHit.Location, 60.f, 16, FColor::Blue);
+				//DrawDebugSphere(GetWorld(), OutHit.Location, 60.f, 16, FColor::Blue);
 
 				switch (i)
 				{
@@ -317,25 +325,307 @@ FRotator APlayerShip::GetSurfaceNormal()
 	}
 	
 	// Check if we are getting collision on all points before doing the math
-	if (A != FVector::ZeroVector && B != FVector::ZeroVector && C != FVector::ZeroVector)
+	if (!A.IsZero() && !B.IsZero() && !C.IsZero())
 	{
-		VecAb = C - A;
-		VecAc = B - A;
+		FVector VecAb, VecAc;
 		
-		FVector NewUpVector = FVector::CrossProduct(VecAc, VecAb);
-		NewRotation = UKismetMathLibrary::MakeRotFromZX(NewUpVector, GetActorForwardVector());
+		VecAb = B - A;
+		VecAc = C - A;
 
-		// Clamp angles so that  the ship cannot flip
-		NewRotation.Pitch = FMath::ClampAngle(NewRotation.Pitch, -40.f, 40.f);
-		NewRotation.Roll = FMath::ClampAngle(NewRotation.Roll, -40.f, 40.f);
-		
-		// Upwards line
-		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + GetActorUpVector() * 1000, FColor::Green, false, -1.f, 0, 12.f);
-	} else
-	{
-		NewRotation = FRotator::ZeroRotator;
+		NewUpVector = FVector::CrossProduct(VecAb, VecAc);
 	}
+	else
+	{
+		if (A.IsZero())
+		{
+			A = ThrustLocations[0]->GetComponentLocation();
+			A.Z -= RayCastLength;
+			DrawDebugSphere(GetWorld(), A, 80.f, 16, FColor::Orange);
+			
+			FVector VecAb = B - A;
+			FVector VecAc = C - A;
+			NewUpVector = FVector::CrossProduct(VecAb, VecAc);
+		}
+		if (B.IsZero())
+		{
+			B = ThrustLocations[0]->GetComponentLocation();
+			B.Z -= RayCastLength;
+			DrawDebugSphere(GetWorld(), B, 80.f, 16, FColor::Orange);
+			
+			FVector VecBa = A - B;
+			FVector VecBc = C - B;
+			NewUpVector = FVector::CrossProduct(VecBc, VecBa);
+		}
+		if (C.IsZero())
+		{
+			C = ThrustLocations[0]->GetComponentLocation();
+			C.Z -= RayCastLength;
+			DrawDebugSphere(GetWorld(), C, 80.f, 16, FColor::Orange);
+			
+			FVector VecCa = B - C;
+			FVector VecCb = C - C;
+			NewUpVector = FVector::CrossProduct(VecCa, VecCb);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Error in PlayerShip::GetSurfaceNormal: This else statement should not be triggered."))
+			return GetActorRotation();
+		}
+	}
+
+	// Upwards line
+	//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + GetActorUpVector() * 1000, FColor::Green, false, -1.f, 0, 12.f);
+	
+	NewRotation = UKismetMathLibrary::MakeRotFromZX(NewUpVector, GetActorForwardVector());
+
+	// Clamp angles so that  the ship cannot flip
+	NewRotation.Pitch = FMath::ClampAngle(NewRotation.Pitch, -40.f, 40.f);
+	NewRotation.Roll = FMath::ClampAngle(NewRotation.Roll, -40.f, 40.f);
+	NewRotation.Yaw = GetActorRotation().Yaw;
+
+	return NewRotation;
+}
+*/
+
+
+FRotator APlayerShip::GetSurfaceNormal3P() // Edited so that we don't use tarray
+{
+	// We need three points and two vectors to determine the cross product and get the new up vector
+	FVector A = FVector::ZeroVector, B = FVector::ZeroVector, C = FVector::ZeroVector, NewUpVector = FVector::ZeroVector;
+	
+	float RayCastLength = 1500.f;
+	
+	for (int i{}; i < 3; i++)
+	{
+		FHitResult OutHit;
+		FVector Start;
+		
+		switch (i)
+		{
+		case 0:
+			Start = Thrust1->GetComponentLocation();
+			break;
+		case 1:
+			Start = Thrust2->GetComponentLocation();
+			break;
+		case 2:
+			Start = Thrust3->GetComponentLocation();
+			break;
+		default:
+			Start = FVector::ZeroVector;
+		}
+		
+		FVector End = Start;
+		End.Z -= RayCastLength;
+		FCollisionQueryParams CollisionParams;
+
+		// Raycast
+		if (GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, CollisionParams))
+		{
+			// If raycast hit something
+			if (OutHit.bBlockingHit)
+			{
+				//DrawDebugSphere(GetWorld(), OutHit.Location, 60.f, 16, FColor::Blue);
+
+				switch (i)
+				{
+				case 0:
+					A = OutHit.Location;
+					break;
+				case 1:
+					B = OutHit.Location;
+					break;
+				case 2:
+					C = OutHit.Location;
+					break;
+				default:
+					break;
+				}
+			}
+		}
+	}
+	
+	// Check if we are getting collision on all points before doing the math
+	if (!A.IsZero() && !B.IsZero() && !C.IsZero())
+	{
+		FVector VecAb, VecAc;
+		
+		VecAb = B - A;
+		VecAc = C - A;
+
+		NewUpVector = FVector::CrossProduct(VecAb, VecAc);
+	}
+	else
+	{
+		if (A.IsZero())
+		{
+			A = Thrust1->GetComponentLocation();
+			A.Z -= RayCastLength;
+			DrawDebugSphere(GetWorld(), A, 80.f, 16, FColor::Orange);
+			
+			FVector VecAb = B - A;
+			FVector VecAc = C - A;
+			NewUpVector = FVector::CrossProduct(VecAb, VecAc);
+		}
+		else if (B.IsZero())
+		{
+			B = Thrust2->GetComponentLocation();
+			B.Z -= RayCastLength;
+			DrawDebugSphere(GetWorld(), B, 80.f, 16, FColor::Orange);
+			
+			FVector VecBa = A - B;
+			FVector VecBc = C - B;
+			NewUpVector = FVector::CrossProduct(VecBc, VecBa);
+		}
+		else if (C.IsZero())
+		{
+			C = Thrust3->GetComponentLocation();
+			C.Z -= RayCastLength;
+			DrawDebugSphere(GetWorld(), C, 80.f, 16, FColor::Orange);
+			
+			FVector VecCa = B - C;
+			FVector VecCb = C - C;
+			NewUpVector = FVector::CrossProduct(VecCa, VecCb);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Error in PlayerShip::GetSurfaceNormal: This else statement should not be triggered."))
+			return GetActorRotation();
+		}
+	}
+
+	// Upwards line
+	//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + GetActorUpVector() * 1000, FColor::Green, false, -1.f, 0, 12.f);
+	
+	FRotator NewRotation = UKismetMathLibrary::MakeRotFromZX(NewUpVector, GetActorForwardVector());
+
+	// Clamp angles so that  the ship cannot flip
+	NewRotation.Pitch = FMath::ClampAngle(NewRotation.Pitch, -40.f, 40.f);
+	NewRotation.Roll = FMath::ClampAngle(NewRotation.Roll, -40.f, 40.f);
+	NewRotation.Yaw = GetActorRotation().Yaw;
+
 	return NewRotation;
 }
 
 
+FRotator APlayerShip::GetSurfaceNormal4P()
+{
+	float RayCastLength = 4000.f;
+	
+	TArray<FHitResult> HitPoints;
+	HitPoints.Init(FHitResult(), 4);
+	//FVector NewUpVector = FVector::ZeroVector;
+	
+	for (int i{}; i < 4; i++)
+	{
+		FVector Start, End;
+		
+		switch (i)
+		{
+		case 0:
+			Start = Thrust1->GetComponentLocation();
+			End = Start + Thrust1->GetComponentRotation().Vector() * RayCastLength;
+			break;
+		case 1:
+			Start = Thrust2->GetComponentLocation();
+			End = Start + Thrust2->GetComponentRotation().Vector() * RayCastLength;
+			break;
+		case 2:
+			Start = Thrust3->GetComponentLocation();
+			End = Start + Thrust3->GetComponentRotation().Vector() * RayCastLength;
+			break;
+		case 3:
+			Start = Thrust4->GetComponentLocation();
+			End = Start + Thrust4->GetComponentRotation().Vector() * RayCastLength;
+			break;
+		default:
+			Start = FVector::ZeroVector;
+		}
+		
+		FCollisionQueryParams CollisionParams;
+
+		DrawDebugLine(GetWorld(), Start, End, FColor::White, false, -1.f, 0, 12.f);
+		
+		// Raycast
+		if (GetWorld()->LineTraceSingleByChannel(HitPoints[i], Start, End, ECC_Visibility, CollisionParams))
+		{
+			// If raycast hit something
+			if (HitPoints[i].bBlockingHit)
+			{
+				// Raycast visuals
+				
+				DrawDebugSphere(GetWorld(), HitPoints[i].Location, 60.f, 16, FColor::Blue);
+			}
+		}
+		else
+		{
+			FRotator TempRot = GetActorRotation();
+			TempRot.Pitch = 0.f;
+			TempRot.Roll = 0.f;
+			return TempRot;
+		}
+	}
+
+	// A -> B Vector
+	const FVector A_B = HitPoints[1].Location - HitPoints[0].Location;
+
+	// A -> C Vector
+	const FVector A_C = HitPoints[2].Location - HitPoints[0].Location;
+
+	// D -> B Vector
+	const FVector D_B = HitPoints[1].Location - HitPoints[3].Location;
+
+	// D -> C Vector
+	const FVector D_C = HitPoints[2].Location - HitPoints[3].Location;
+
+	const FVector CrossA = FVector::CrossProduct(A_B, A_C);
+	const FVector CrossD = FVector::CrossProduct(D_C, D_B);
+	const FVector NewUpVector = (CrossA + CrossD) / 2;
+
+
+	FRotator NewRotation = UKismetMathLibrary::MakeRotFromZX(NewUpVector, GetActorForwardVector());
+
+	// Upwards line
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + GetActorUpVector() * 1000, FColor::Green, false, -1.f, 0, 12.f);
+
+	// Clamp angles so that  the ship cannot flip
+	NewRotation.Pitch = FMath::ClampAngle(NewRotation.Pitch, -40.f, 40.f);
+	NewRotation.Roll = FMath::ClampAngle(NewRotation.Roll, -40.f, 40.f);
+	NewRotation.Yaw = GetActorRotation().Yaw;
+
+	return NewRotation;
+}
+
+
+float APlayerShip::GetTargetZ()
+{
+	/** Raycasting - Keeping the ship afloat */
+	FHitResult OutHit;
+	FVector Start = GetActorLocation();
+	FVector End = Start;
+	End.Z -= 1500.f;
+	FCollisionQueryParams CollisionParams;
+
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, -1.f, 0, 18.f);
+
+	if (!GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, CollisionParams))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Raycast did not hit anything. FallSpeed is: %f"), 300.f + FallTime * 100)
+		return Start.Z - (500.f + FallTime * 800);
+	}
+	else if (OutHit.bBlockingHit)
+	{
+		if (Start.Z - OutHit.ImpactPoint.Z < 350.f)
+		{
+			bLowThreshold = true;
+			return OutHit.ImpactPoint.Z + 350.f;
+		}
+		FallTime = 0.f;
+		return OutHit.ImpactPoint.Z + 1000.f;
+	}
+	else
+	{
+		FallTime = 0.f;
+		return GetActorLocation().Z;
+	}
+}
