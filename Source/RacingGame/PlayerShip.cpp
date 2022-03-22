@@ -161,6 +161,7 @@ void APlayerShip::Forward(const float Value)
 {
 	// Determine if there is input
 	bPitchHasInput = !(Value == 0);
+	
 	// If there is input, set rotation target to -25/25 based on input value, else set target to 0
 	float TargetPitch = bPitchHasInput ? Value > 0.f ? -10.0f : 10.0f : 0.f;
 
@@ -169,7 +170,6 @@ void APlayerShip::Forward(const float Value)
 
 	const float TargetXSpeed = bPitchHasInput ? (Value * 40.f * SpeedBoost) : 0.f;
 	LocalMove.X = FMath::FInterpTo(LocalMove.X, TargetXSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
-	
 }
 
 
@@ -178,17 +178,14 @@ void APlayerShip::Turn(const float Value)
 	// Determine if there is input
 	bRollHasInput = !(Value == 0);
 
-	/** Roll */
+	// Roll
 	float TargetRoll = bRollHasInput ? Value > 0 ? 15.0f : -15.0f : 0.f;
+	
 	// Interpolate rotation towards target
 	NextRollPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Roll, TargetRoll, GetWorld()->GetDeltaSeconds(), 3.f);
 
-	/** Yaw */
+	// Yaw
 	YawMove = FMath::FInterpTo(YawMove,  Value * GetWorld()->GetDeltaSeconds() * 150.f, GetWorld()->GetDeltaSeconds(), 8.f);
-	//NextYawPosition = FMath::FInterpTo(GetActorRotation().Yaw, GetActorRotation().Yaw + Value * 40.f, GetWorld()->GetDeltaSeconds(), 0.5f);
-	
-	//const float TargetYSpeed = bRollHasInput ? (Value * 30.f) : 0.f;
-	//LocalMove.Y = FMath::FInterpTo(LocalMove.Y, TargetYSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
 
@@ -226,7 +223,7 @@ void APlayerShip::Dash()
 	}
 
 	TargetCameraFOV += 40.f;
-	TargetSpringArmLength -= 600.f;
+	TargetSpringArmLength -= 800.f;
 	SpeedBoost = MaxSpeedBoost;
 	bIsDashing = true;
 
@@ -238,7 +235,7 @@ void APlayerShip::Dash()
 void APlayerShip::ResetDash()
 {
 	TargetCameraFOV -= 40.f;
-	TargetSpringArmLength += 600.f;
+	TargetSpringArmLength += 800.f;
 	SpeedBoost = 1.f;
 	bIsDashing = false;
 }
@@ -388,6 +385,7 @@ FRotator APlayerShip::GetSurfaceNormal3P()
 */
 
 
+/*
 FRotator APlayerShip::GetSurfaceNormal3P() // Edited so that we don't use tarray
 {
 	// We need three points and two vectors to determine the cross product and get the new up vector
@@ -506,6 +504,7 @@ FRotator APlayerShip::GetSurfaceNormal3P() // Edited so that we don't use tarray
 
 	return NewRotation;
 }
+*/
 
 
 FRotator APlayerShip::GetSurfaceNormal4P()
@@ -565,6 +564,20 @@ FRotator APlayerShip::GetSurfaceNormal4P()
 			return TempRot;
 		}
 	}
+
+	// Inserted code
+
+	FVector NUV = FVector::ZeroVector;
+	for (int i{}; i < 4; i++)
+	{
+		NUV += HitPoints[i].ImpactNormal;
+	}
+	NUV /= 4;
+	FRotator NR = UKismetMathLibrary::MakeRotFromZX(NUV, GetActorForwardVector());
+	NR.Yaw = GetActorRotation().Yaw;
+	return NR;
+	
+	// End of inserted code
 
 	// A -> B Vector
 	const FVector A_B = HitPoints[1].Location - HitPoints[0].Location;
