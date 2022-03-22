@@ -25,11 +25,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
 private:
+	/** Root replacement */
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
-	UBoxComponent* RtRpl; // Root replacement
+	UBoxComponent* RtRpl;
 
+	/** Ship main body */
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
 	UStaticMeshComponent* BaseMesh;
 
@@ -40,17 +42,15 @@ private:
 	UCameraComponent* Camera;
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	UCurveFloat* DistanceCurve;
+	UCurveFloat* CustomCurve1;
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	UCurveFloat* JumpCurve;
-
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	UCurveFloat* LocalMoveCurve;
+	UCurveFloat* CustomCurve2;
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	int MaxAmmo;
 
+	/** How long the dash lasts */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float DashTimer{2.f};
 
@@ -60,12 +60,17 @@ private:
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float SpeedMultiplier;
 
+	/** What field of view the camera should interpolate towards */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float TargetCameraFOV{90.f};
 
 	/** Target spring arm length, constantly interpolated towards */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float TargetSpringArmLength{2000.f};
+
+	/** The ship's target height above the ground */
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float TargetHeight{1000.f};
 	
 	//UPROPERTY()
 	//TArray<UArrowComponent*> ThrustLocations;
@@ -82,7 +87,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Arrows")
 	UArrowComponent* Thrust4;
 
-	/** Seconds of inactivity needed for camera to reset its rotation */
+	/** Seconds of inactivity needed for the spring arm to reset its rotation */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float CameraResetTime{1.f};
 
@@ -109,19 +114,33 @@ private:
 	void Jump();
 	void JumpEnd();
 
+	void Crouch();
+	void CrouchEnd();
+
+	void CameraZoomIn();
+	void CameraZoomOut();
+
 	/** Exits the game - Warning: If played in-editor, this will close the editor. */
 	void EscPressed();
 
-	/** Returns the rotation of the cross-product of the vectors between the three raycast points
-	 *	Basically it gets the rotation that the object should have relative to the surface beneath */
-	FRotator GetSurfaceNormal3P();
+	
+	/** Returns the rotation from the ships current to target rotation, where the target rotation is
+	 * the cross-product of the vectors between the four raycast hit locations.
+	 * Basically it gets the rotation that the object should have relative to the surface beneath. */
+	FRotator GetSurfaceNormal();
 
-	/** Returns the rotation of the cross-product of the vectors between the four raycast points
-	 * Basically it gets the rotation that the object should have relative to the surface beneath */
-	FRotator GetSurfaceNormal4P();
+	/** Returns the rotation from the ships current to target rotation, where the target rotation is
+	 * the average between the normals of the four raycast hits.
+	 * Basically it gets the rotation that the object should have relative to the surface beneath. */
+	FRotator GetSurfaceNormalSimple() ;
 
 	/** Returns the Z height the object should have to stay a predetermined height above the ground */
 	float GetTargetZ();
+
+	/** Interpolates towards the target using a custom curve. Returns the next position (not the delta) */
+	float CustomInterp(float Current, float Target, float DeltaTime, float InterpSpeed = 4.f);
+
+	float CustomInterp2(float Current, float Target, float DeltaTime, float InterpSpeed = 4.f);
 
 	bool bPitchHasInput;
 	bool bRollHasInput;
@@ -143,9 +162,16 @@ private:
 	
 	FRotator SpringArmRotTarget = FRotator::ZeroRotator;
 	FVector TempVec = FVector::ZeroVector;
-	float FallTime{};
+	float FallSpeed{10.f};
 	bool bLowThreshold = false;
 	float CameraCenteringTimer{};
+	float TargetZ2 = 0.f;
 	
+	
+	// Old code
+
+	/** Returns the rotation of the cross-product of the vectors between the three raycast points
+	 *	Basically it gets the rotation that the object should have relative to the surface beneath */
+	//FRotator GetSurfaceNormal3P();
 	
 };
