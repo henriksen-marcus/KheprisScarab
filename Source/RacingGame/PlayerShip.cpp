@@ -102,13 +102,19 @@ void APlayerShip::Tick(float DeltaTime)
 	const float TargetZ = GetTargetZ();
 	CurLoc.Z = CustomInterp(CurLoc.Z, TargetZ, DeltaTime, 4.f);
 	//CurLoc.Z = TargetZ;
-	SetActorLocation(CurLoc);
+	//SetActorLocation(CurLoc);
 	
 	// X and Y Movement
-	AddActorLocalOffset(LocalMove * DeltaTime * 110.f * SpeedBoost * SpeedMultiplier, true);
+	FVector Result = GetActorRotation().RotateVector(LocalMove) * 100;
+	SetActorLocation(FMath::VInterpTo(GetActorLocation(), TargetLocation + Result, DeltaTime, 10.f)); 
+	//UE_LOG(LogTemp, Warning, TEXT("TargetLoc = %s"), *TargetLocation.ToString())
+	//AddActorLocalOffset(LocalMove);
+	//AddActorLocalOffset(LocalMove * DeltaTime * 110.f * SpeedBoost * SpeedMultiplier, true);
 
 	// Root Rotation
-	SetActorRotation(FMath::RInterpTo(GetActorRotation(), GetSurfaceNormal(), DeltaTime, 5.f));
+	FRotator abcdefg  = GetSurfaceNormal();
+	UE_LOG(LogTemp, Warning, TEXT("\nActor Rot: %s\nTarget Rot:%s"), *GetActorRotation().ToString(), *abcdefg.ToString())
+	SetActorRotation(FMath::RInterpTo(GetActorRotation(), abcdefg, DeltaTime, 10.f));
 	AddActorLocalRotation(FRotator(0.f, YawMove, 0.f));
 	
 	// Cosmetic mesh rotation
@@ -362,6 +368,8 @@ FRotator APlayerShip::GetSurfaceNormal()
 		return TempRot;
 	}
 
+	
+
 	// A -> B Vector
 	const FVector A_B = HitPoints[1].Location - HitPoints[0].Location;
 
@@ -376,13 +384,30 @@ FRotator APlayerShip::GetSurfaceNormal()
 
 	const FVector CrossA = FVector::CrossProduct(A_B, A_C);
 	const FVector CrossD = FVector::CrossProduct(D_C, D_B);
-	const FVector NewUpVector = (CrossA + CrossD) / 2;
+	const FVector NewUpVector = (CrossA + CrossD);
+
+	// Inserted code
+	FVector TempVec = HitPoints[0].Location + HitPoints[1].Location + HitPoints[2].Location + HitPoints[3].Location;
+	TempVec /= 4;
+	TempVec += NewUpVector.GetSafeNormal() * TargetHeight;
+	TargetLocation = TempVec;
+	DrawDebugSphere(GetWorld(), TargetLocation, 100.f, 16, FColor::Emerald);
+	// End inserted code
 
 
 	FRotator NewRotation = UKismetMathLibrary::MakeRotFromZX(NewUpVector, GetActorForwardVector());
 
-	// Upwards line
-	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + GetActorUpVector() * 1000, FColor::Green, false, -1.f, 0, 12.f);
+	// Mass debugging
+	DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[0].Location + CrossA.GetSafeNormal() * 1000, FColor::Red, false, -1.f, 0, 12.f);
+	DrawDebugLine(GetWorld(), HitPoints[3].Location, HitPoints[3].Location + CrossD.GetSafeNormal() * 1000, FColor::Blue, false, -1.f, 0, 12.f);
+	
+	DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[1].Location, FColor::White, false, -1.f, 0, 10.f);
+	DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[2].Location, FColor::White, false, -1.f, 0, 10.f);
+	DrawDebugLine(GetWorld(), HitPoints[2].Location, HitPoints[1].Location, FColor::Red, false, -1.f, 0, 10.f);
+	DrawDebugLine(GetWorld(), HitPoints[1].Location, HitPoints[3].Location, FColor::White, false, -1.f, 0, 10.f);
+	DrawDebugLine(GetWorld(), HitPoints[2].Location, HitPoints[3].Location, FColor::White, false, -1.f, 0, 10.f);
+
+	DrawDebugLine(GetWorld(), (HitPoints[0].Location + HitPoints[3].Location) / 2, (HitPoints[0].Location + HitPoints[3].Location) / 2 + NewUpVector.GetSafeNormal() * 500, FColor::Green, false, -1.f, 0, 12.f);
 
 	// Clamp angles so that  the ship cannot flip
 	/*NewRotation.Pitch = FMath::ClampAngle(NewRotation.Pitch, -40.f, 40.f);
@@ -580,7 +605,7 @@ float APlayerShip::GetTargetZ()
 	}
 
 	const float TargetZ = ((HitPoints[0].Location.Z + HitPoints[1].Location.Z + HitPoints[2].Location.Z + HitPoints[3].Location.Z) / 4) + TargetHeight;
-	UE_LOG(LogTemp, Warning, TEXT("TargetZ: %f"), TargetZ)
+	//UE_LOG(LogTemp, Warning, TEXT("TargetZ: %f"), TargetZ)
 	if (Counter == 4)
 	{
 		FallSpeed = CustomInterp2(FallSpeed, 1000.f, GetWorld()->GetDeltaSeconds());
@@ -592,6 +617,12 @@ float APlayerShip::GetTargetZ()
 		FallSpeed = 10.f;
 		return TargetZ;
 	}
+}
+
+
+FVector APlayerShip::GetTargetLocation()
+{
+	return FVector::ZeroVector;
 }
 
 

@@ -137,6 +137,8 @@ private:
 	/** Returns the Z height the object should have to stay a predetermined height above the ground */
 	float GetTargetZ();
 
+	FVector GetTargetLocation();
+
 	/** Interpolates towards the target using a custom curve. Returns the next position (not the delta) */
 	float CustomInterp(float Current, float Target, float DeltaTime, float InterpSpeed = 4.f);
 
@@ -161,11 +163,12 @@ private:
 	float YawMove{};
 	
 	FRotator SpringArmRotTarget = FRotator::ZeroRotator;
-	FVector TempVec = FVector::ZeroVector;
 	float FallSpeed{10.f};
 	bool bLowThreshold = false;
 	float CameraCenteringTimer{};
 	float TargetZ2 = 0.f;
+
+	FVector TargetLocation = FVector::ZeroVector;
 	
 	
 	// Old code
