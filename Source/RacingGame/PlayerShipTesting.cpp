@@ -91,7 +91,7 @@ void APlayerShipTesting::Tick(float DeltaTime)
 	//TargetRot.Yaw = GetActorRotation().Yaw;
 
 	SetActorRotation(TargetRot);
-	//AddActorLocalRotation(FRotator(0.f, YawMove, 0.f));
+	AddActorLocalRotation(FRotator(0.f, YawMove, 0.f));
 	
 	
 	//RtRpl->SetWorldRotation(abcdefg);
@@ -138,7 +138,7 @@ void APlayerShipTesting::Forward(const float Value)
 {
 	// Determine if there is input
 	bPitchHasInput = !(Value == 0);
-	UE_LOG(LogTemp, Warning, TEXT("Value: %f"), Value)	
+	
 	// If there is input, set rotation target to -25/25 based on input value, else set target to 0
 	float TargetPitch = bPitchHasInput ? Value > 0.f ? -10.0f : 10.0f : 0.f;
 
@@ -261,6 +261,7 @@ FRotator APlayerShipTesting::GetSurfaceNormal()
 	// If we are fully in-air, start to pitch downwards
 	if (Counter == 4)
 	{
+		UE_LOG(LogTemp,Warning,TEXT("In-air"))
 		FRotator TempRot = GetActorRotation();
 		TempRot.Pitch = FMath::FInterpTo(TempRot.Pitch, -30.f, GetWorld()->GetDeltaSeconds(), 20.f);
 		TempRot.Roll = 0.f;

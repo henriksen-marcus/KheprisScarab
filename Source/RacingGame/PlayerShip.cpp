@@ -105,20 +105,32 @@ void APlayerShip::Tick(float DeltaTime)
 	//SetActorLocation(CurLoc);
 	
 	// X and Y Movement
-	FVector Result = GetActorRotation().RotateVector(LocalMove) * 100;
-	SetActorLocation(FMath::VInterpTo(GetActorLocation(), TargetLocation + Result, DeltaTime, 10.f)); 
+	FVector Result = GetActorRotation().RotateVector(LocalMove) * 50;
+	SetActorLocation(FMath::VInterpTo(GetActorLocation(), TargetLocation + Result, DeltaTime, 15.f)); 
 	//UE_LOG(LogTemp, Warning, TEXT("TargetLoc = %s"), *TargetLocation.ToString())
 	//AddActorLocalOffset(LocalMove);
 	//AddActorLocalOffset(LocalMove * DeltaTime * 110.f * SpeedBoost * SpeedMultiplier, true);
 
 	// Root Rotation
 	FRotator abcdefg  = GetSurfaceNormal();
-	UE_LOG(LogTemp, Warning, TEXT("\nActor Rot: %s\nTarget Rot:%s"), *GetActorRotation().ToString(), *abcdefg.ToString())
-	SetActorRotation(FMath::RInterpTo(GetActorRotation(), abcdefg, DeltaTime, 10.f));
+	
+	if (FMath::IsNearlyEqual(GetActorRotation().Pitch, 90.f, 5.f) ||
+		FMath::IsNearlyEqual(GetActorRotation().Roll, 90.f, 5.f) ||
+		FMath::IsNearlyEqual(GetActorRotation().Yaw, 90.f, 5.f))
+	{
+		SetActorRotation(abcdefg);
+	} else
+	{
+		SetActorRotation(FMath::RInterpTo(GetActorRotation(), abcdefg, DeltaTime, 5.f));
+	}
+	
+	
+	//SetActorRotation(abcdefg);
+	//SetActorRotation(FMath::RInterpConstantTo(GetActorRotation(), abcdefg, DeltaTime, 100.f));
 	AddActorLocalRotation(FRotator(0.f, YawMove, 0.f));
 	
 	// Cosmetic mesh rotation
-	BaseMesh->SetRelativeRotation(FRotator(NextPitchPosition, 0.f, NextRollPosition));
+	//BaseMesh->SetRelativeRotation(FRotator(NextPitchPosition, 0.f, NextRollPosition));
 	
 	/** Springarm rotation */
 	FRotator NewRot = SpringArm->GetRelativeRotation();
@@ -395,7 +407,8 @@ FRotator APlayerShip::GetSurfaceNormal()
 	// End inserted code
 
 
-	FRotator NewRotation = UKismetMathLibrary::MakeRotFromZX(NewUpVector, GetActorForwardVector());
+	//FRotator NewRotation = UKismetMathLibrary::MakeRotFromZX(NewUpVector, GetActorForwardVector());
+	FRotator NewRotation = UKismetMathLibrary::MakeRotationFromAxes(-A_C.GetSafeNormal(), A_B,NewUpVector.GetSafeNormal());
 
 	// Mass debugging
 	DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[0].Location + CrossA.GetSafeNormal() * 1000, FColor::Red, false, -1.f, 0, 12.f);
@@ -412,11 +425,12 @@ FRotator APlayerShip::GetSurfaceNormal()
 	// Clamp angles so that  the ship cannot flip
 	/*NewRotation.Pitch = FMath::ClampAngle(NewRotation.Pitch, -40.f, 40.f);
 	NewRotation.Roll = FMath::ClampAngle(NewRotation.Roll, -40.f, 40.f);*/
-	NewRotation.Yaw = GetActorRotation().Yaw;
+	//NewRotation.Yaw = GetActorRotation().Yaw;
 	
 	return NewRotation;
 }
 
+//Disable interp when you are 90 deg
 
 FRotator APlayerShip::GetSurfaceNormalSimple() 
 {
