@@ -11,6 +11,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
 //#include "Particles/ParticleSystemComponent.h"
+#include "AnimGraphRuntime/Public/CommonAnimationTypes.h"
 #include "GenericPlatform/GenericPlatformMisc.h"
 
 
@@ -41,7 +42,10 @@ APlayerShip::APlayerShip()
 	//SpringArm->bUsePawnControlRotation = true;
 	SpringArm->TargetArmLength = TargetSpringArmLength;
 	SpringArm->bEnableCameraLag = true;
-	SpringArm->CameraLagSpeed = 30.f; // Lower = More delay
+	SpringArm->CameraLagSpeed = 15.f; // Lower = More delay
+	SpringArm->bEnableCameraRotationLag = true;
+	SpringArm->CameraLagMaxDistance = 5000.f;
+	SpringArm->CameraRotationLagSpeed = 15.f;
 	SpringArm->bDoCollisionTest = true;
 	SpringArm->SetupAttachment(GetRootComponent());
 
@@ -97,36 +101,39 @@ void APlayerShip::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Z Movement
-	FVector CurLoc = GetActorLocation();
-	const float TargetZ = GetTargetZ();
-	CurLoc.Z = CustomInterp(CurLoc.Z, TargetZ, DeltaTime, 4.f);
-	//CurLoc.Z = TargetZ;
-	//SetActorLocation(CurLoc);
+	FRotator SurfaceNormal = GetSurfaceNormal();
+	FRotator NewRotation = GetActorRotation();
+	float RotInterpSpeed = 10.f;
 	
 	// X and Y Movement
-	FVector Result = GetActorRotation().RotateVector(LocalMove) * 50;
-	SetActorLocation(FMath::VInterpTo(GetActorLocation(), TargetLocation + Result, DeltaTime, 15.f)); 
-	//UE_LOG(LogTemp, Warning, TEXT("TargetLoc = %s"), *TargetLocation.ToString())
-	//AddActorLocalOffset(LocalMove);
+	//FRotator RotAmount = UKismetMathLibrary::MakeRotFromXZ(GetActorForwardVector(), GetActorUpVector());
+	//FVector Result = RotAmount.RotateVector(LocalMove)*50;
+	SetActorLocation(FMath::VInterpTo(GetActorLocation(), TargetLocation, DeltaTime, 20.f));
+	AddActorLocalOffset(LocalMove * DeltaTime * 200.f);
 	//AddActorLocalOffset(LocalMove * DeltaTime * 110.f * SpeedBoost * SpeedMultiplier, true);
 
 	// Root Rotation
-	FRotator abcdefg  = GetSurfaceNormal();
+
+	// If we are close to 90 degrees, disable rotation interpolation
+	//NewRotation.Pitch = FMath::FInterpTo(NewRotation.Pitch, SurfaceNormal.Pitch, DeltaTime, RotInterpSpeed);
 	
-	if (FMath::IsNearlyEqual(GetActorRotation().Pitch, 90.f, 5.f) ||
-		FMath::IsNearlyEqual(GetActorRotation().Roll, 90.f, 5.f) ||
-		FMath::IsNearlyEqual(GetActorRotation().Yaw, 90.f, 5.f))
-	{
-		SetActorRotation(abcdefg);
-	} else
-	{
-		SetActorRotation(FMath::RInterpTo(GetActorRotation(), abcdefg, DeltaTime, 5.f));
-	}
-	
-	
-	//SetActorRotation(abcdefg);
-	//SetActorRotation(FMath::RInterpConstantTo(GetActorRotation(), abcdefg, DeltaTime, 100.f));
+	if (FMath::IsNearlyEqual(SurfaceNormal.Pitch, 90.f, 5.f) || FMath::IsNearlyEqual(SurfaceNormal.Pitch, -90.f, 5.f))
+	{ NewRotation.Pitch = SurfaceNormal.Pitch; UE_LOG(LogTemp, Warning, TEXT("Pitch is 90 deg %f"), FMath::RandRange(0.f,1.f))}
+	else
+	{ NewRotation.Pitch = FMath::FInterpTo(NewRotation.Pitch, SurfaceNormal.Pitch, DeltaTime, RotInterpSpeed); }
+
+	if (FMath::IsNearlyEqual(SurfaceNormal.Yaw, 90.f, 2.f) || FMath::IsNearlyEqual(SurfaceNormal.Yaw, -90.f, 2.f))
+	{ NewRotation.Yaw = SurfaceNormal.Yaw; }
+	else
+	{ NewRotation.Yaw = FMath::FInterpTo(NewRotation.Yaw, SurfaceNormal.Yaw, DeltaTime, RotInterpSpeed); }
+
+	if (FMath::IsNearlyEqual(SurfaceNormal.Roll, 90.f, 2.f) || FMath::IsNearlyEqual(SurfaceNormal.Roll, -90.f, 2.f))
+	{ NewRotation.Roll = SurfaceNormal.Roll; }
+	else
+	{ NewRotation.Roll = FMath::FInterpTo(NewRotation.Roll, SurfaceNormal.Roll, DeltaTime, RotInterpSpeed); }
+
+	//UE_LOG(LogTemp, Warning, TEXT("Pitch: %f, Yaw: %f, Roll: %f"), NewRotation.Pitch, NewRotation.Yaw, NewRotation.Roll)
+	SetActorRotation(NewRotation);
 	AddActorLocalRotation(FRotator(0.f, YawMove, 0.f));
 	
 	// Cosmetic mesh rotation
@@ -134,9 +141,8 @@ void APlayerShip::Tick(float DeltaTime)
 	
 	/** Springarm rotation */
 	FRotator NewRot = SpringArm->GetRelativeRotation();
-	NewRot.Pitch = FMath::InterpEaseInOut(NewRot.Pitch, SpringArmRotTarget.Pitch, DeltaTime, 0.6f);
-	NewRot.Yaw = FMath::InterpEaseInOut(NewRot.Yaw, SpringArmRotTarget.Yaw, DeltaTime, 0.6f);
-	//NewRot.Roll = 0;
+	NewRot = FMath::RInterpTo(NewRot, SpringArmRotTarget, DeltaTime, 5.f);
+	NewRot.Roll = 0.f;
 	SpringArm->SetRelativeRotation(NewRot);
 
 	/** Camera effects */
@@ -186,7 +192,7 @@ void APlayerShip::Forward(const float Value)
 
 	const float TargetXSpeed = bPitchHasInput ? (Value * 40.f * SpeedBoost) : 0.f;
 	float InterpSpeed = bPitchHasInput ? 2.f : 0.5f;
-	InterpSpeed = Value < 0.f ? InterpSpeed / 4.f : InterpSpeed;
+	InterpSpeed = Value < 0.f ? InterpSpeed / 3.f : InterpSpeed;
 	LocalMove.X = FMath::FInterpTo(LocalMove.X, TargetXSpeed, GetWorld()->GetDeltaSeconds(), InterpSpeed);
 }
 
@@ -316,11 +322,12 @@ void APlayerShip::EscPressed()
 
 FRotator APlayerShip::GetSurfaceNormal()
 {
-	const float RayCastLength = 2000.f;
+	float RayCastLength = 2000.f;
 	
 	TArray<FHitResult> HitPoints;
 	HitPoints.Init(FHitResult(), 4);
 
+	// Used to determine if we are in the air - Counter == 4 -> Four raycast misses
 	int32 Counter{};
 	
 	for (int i{}; i < 4; i++)
@@ -347,41 +354,51 @@ FRotator APlayerShip::GetSurfaceNormal()
 			break;
 		default:
 			Start = FVector::ZeroVector;
+			break;
 		}
 		
 		FCollisionQueryParams CollisionParams;
 
-		DrawDebugLine(GetWorld(), Start, End, FColor::White, false, -1.f, 0, 12.f);
+		if (bEnableDebugLines)
+		{
+			DrawDebugLine(GetWorld(), Start, End, FColor::White, false, -1.f, 0, 12.f);
+		}
 		
 		// Raycast
 		if (GetWorld()->LineTraceSingleByChannel(HitPoints[i], Start, End, ECC_Visibility, CollisionParams))
 		{
-			// If raycast hit something
-			if (HitPoints[i].bBlockingHit)
+			if (bEnableDebugLines)
 			{
-				// Raycast visuals
+				// Sphere at collision point
 				DrawDebugSphere(GetWorld(), HitPoints[i].Location, 60.f, 16, FColor::Blue);
 			}
 		}
-		else
+		else // If the raycast didn't hit anything within the raycast length
 		{
-			End.Z += 500;
-			HitPoints[i].Location = End;
-			++Counter;
+			/*End.Z += 500;
+			HitPoints[i].Location = End;*/
+			Counter++;
 		}
 	}
 
-	// If we are fully in-air, start to pitch downwards
+	// If we are fully in-air, return to upright rotation and pitch downward gradually
 	if (Counter == 4)
 	{
-		FRotator TempRot = GetActorRotation();
-		TempRot.Pitch = FMath::FInterpTo(TempRot.Pitch, -30.f, GetWorld()->GetDeltaSeconds(), 10.f);
-		TempRot.Roll = 0.f;
-		return TempRot;
+		FRotator InAirRot = GetActorRotation();
+		InAirRot.Pitch = FMath::FInterpTo(InAirRot.Pitch, -40.f, GetWorld()->GetDeltaSeconds(), 10.f);
+		InAirRot.Roll = FMath::FInterpTo(InAirRot.Roll, -40.f, GetWorld()->GetDeltaSeconds(), 10.f);
+		FVector ChangeLoc = GetActorLocation();
+		ChangeLoc.Z -= 100.f;
+		SetActorLocation(ChangeLoc);
+		// Yaw remains unchanged, let the player have some control
+		return InAirRot;
 	}
-
+	else if (Counter)
+	{
+		// If we are missing a hit point then doing the maths will be hard... just keep current rotation
+		return GetActorRotation();
+	}
 	
-
 	// A -> B Vector
 	const FVector A_B = HitPoints[1].Location - HitPoints[0].Location;
 
@@ -398,39 +415,44 @@ FRotator APlayerShip::GetSurfaceNormal()
 	const FVector CrossD = FVector::CrossProduct(D_C, D_B);
 	const FVector NewUpVector = (CrossA + CrossD);
 
-	// Inserted code
-	FVector TempVec = HitPoints[0].Location + HitPoints[1].Location + HitPoints[2].Location + HitPoints[3].Location;
-	TempVec /= 4;
-	TempVec += NewUpVector.GetSafeNormal() * TargetHeight;
-	TargetLocation = TempVec;
-	DrawDebugSphere(GetWorld(), TargetLocation, 100.f, 16, FColor::Emerald);
-	// End inserted code
-
-
-	//FRotator NewRotation = UKismetMathLibrary::MakeRotFromZX(NewUpVector, GetActorForwardVector());
-	FRotator NewRotation = UKismetMathLibrary::MakeRotationFromAxes(-A_C.GetSafeNormal(), A_B,NewUpVector.GetSafeNormal());
-
-	// Mass debugging
-	DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[0].Location + CrossA.GetSafeNormal() * 1000, FColor::Red, false, -1.f, 0, 12.f);
-	DrawDebugLine(GetWorld(), HitPoints[3].Location, HitPoints[3].Location + CrossD.GetSafeNormal() * 1000, FColor::Blue, false, -1.f, 0, 12.f);
+	// Get the target vector in world space, relative to the hit points casted from the player. This detaches us from world "up" & "down".
+	{
+		TargetLocation = (HitPoints[0].Location + HitPoints[1].Location + HitPoints[2].Location + HitPoints[3].Location) / 4;
+		TargetLocation += NewUpVector.GetSafeNormal() * TargetHeight;
+		
+		if (bEnableDebugLines) { DrawDebugSphere(GetWorld(), TargetLocation, 100.f, 16, FColor::Emerald); }
+	}
 	
-	DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[1].Location, FColor::White, false, -1.f, 0, 10.f);
-	DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[2].Location, FColor::White, false, -1.f, 0, 10.f);
-	DrawDebugLine(GetWorld(), HitPoints[2].Location, HitPoints[1].Location, FColor::Red, false, -1.f, 0, 10.f);
-	DrawDebugLine(GetWorld(), HitPoints[1].Location, HitPoints[3].Location, FColor::White, false, -1.f, 0, 10.f);
-	DrawDebugLine(GetWorld(), HitPoints[2].Location, HitPoints[3].Location, FColor::White, false, -1.f, 0, 10.f);
+	FRotator NewRotation = UKismetMathLibrary::MakeRotFromZX(NewUpVector, GetActorForwardVector());
+	
+	//FRotator NewRotation = UKismetMathLibrary::MakeRotationFromAxes(-A_C.GetSafeNormal(), A_B, NewUpVector.GetSafeNormal());
+	
+	// Math visualization
+	if (bEnableDebugLines)
+	{
+		// Cross product above A
+		DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[0].Location + CrossA.GetSafeNormal() * 1000, FColor::Red, false, -1.f, 0, 12.f);
+		
+		//Cross product above D
+		DrawDebugLine(GetWorld(), HitPoints[3].Location, HitPoints[3].Location + CrossD.GetSafeNormal() * 1000, FColor::Blue, false, -1.f, 0, 12.f);
+		
+		//Lines between points
+		DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[1].Location, FColor::White, false, -1.f, 0, 10.f);
+		DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[2].Location, FColor::White, false, -1.f, 0, 10.f);
+		DrawDebugLine(GetWorld(), HitPoints[2].Location, HitPoints[1].Location, FColor::Red, false, -1.f, 0, 10.f);
+		DrawDebugLine(GetWorld(), HitPoints[1].Location, HitPoints[3].Location, FColor::White, false, -1.f, 0, 10.f);
+		DrawDebugLine(GetWorld(), HitPoints[2].Location, HitPoints[3].Location, FColor::White, false, -1.f, 0, 10.f);
 
-	DrawDebugLine(GetWorld(), (HitPoints[0].Location + HitPoints[3].Location) / 2, (HitPoints[0].Location + HitPoints[3].Location) / 2 + NewUpVector.GetSafeNormal() * 500, FColor::Green, false, -1.f, 0, 12.f);
+		//Center line representing the combination of the cross product vectors (new up vector)
+		DrawDebugLine(GetWorld(), (HitPoints[0].Location + HitPoints[3].Location) / 2, (HitPoints[0].Location + HitPoints[3].Location) / 2 + NewUpVector.GetSafeNormal() * 500, FColor::Green, false, -1.f, 0, 12.f);	
+	}
 
-	// Clamp angles so that  the ship cannot flip
-	/*NewRotation.Pitch = FMath::ClampAngle(NewRotation.Pitch, -40.f, 40.f);
-	NewRotation.Roll = FMath::ClampAngle(NewRotation.Roll, -40.f, 40.f);*/
-	//NewRotation.Yaw = GetActorRotation().Yaw;
+	//Find a way to negate the yaw change!
 	
 	return NewRotation;
 }
 
-//Disable interp when you are 90 deg
+
 
 FRotator APlayerShip::GetSurfaceNormalSimple() 
 {
@@ -634,17 +656,19 @@ float APlayerShip::GetTargetZ()
 }
 
 
-FVector APlayerShip::GetTargetLocation()
+/*FVector APlayerShip::GetTargetLocation()
 {
 	return FVector::ZeroVector;
-}
+}*/
 
 
 float APlayerShip::CustomInterp(float Current, float Target, float DeltaTime, float InterpSpeed)
 {
+	if (!CustomCurve1) { return 0; }
+	
 	// Distance left to move
 	const float Distance = Target - Current;
-
+	//FMath::InterpEaseIn()
 	// If distance is too small, just set the desired location (copied from UnrealMath.cpp)
 	if( FMath::Square(Distance) < SMALL_NUMBER )
 	{
@@ -652,10 +676,12 @@ float APlayerShip::CustomInterp(float Current, float Target, float DeltaTime, fl
 	}
 
 	// Where on the custom curve we should be (based off how far we have come)
-	const float Alpha = FMath::Clamp<float>( FMath::Abs( Current / Target ), 0.f, 1.f );
+	//float Alpha = FMath::Clamp<float>( FMath::Abs( Current / Target ), 0.f, 1.f );
+	float Alpha = Distance > 0.f ? Current / Target : Distance;
+	UE_LOG(LogTemp, Warning, TEXT("Alpha: %f"), Alpha)
 
 	// How far we should move this tick
-	float DeltaMove = Distance * DeltaTime * CustomCurve1->GetFloatValue( Alpha ) * InterpSpeed;
+	const float DeltaMove = Distance * DeltaTime * CustomCurve1->GetFloatValue( Alpha ) * InterpSpeed;
 
 	// Return the next position
 	return Current + DeltaMove;
@@ -664,6 +690,8 @@ float APlayerShip::CustomInterp(float Current, float Target, float DeltaTime, fl
 
 float APlayerShip::CustomInterp2(float Current, float Target, float DeltaTime, float InterpSpeed)
 {
+	if (!CustomCurve2) { return 0; }
+	
 	// Distance left to move
 	const float Distance = Target - Current;
 

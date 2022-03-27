@@ -311,13 +311,6 @@ FRotator APlayerShipTesting::GetSurfaceNormal()
 	DrawDebugLine(GetWorld(), HitPoints[2].Location, HitPoints[3].Location, FColor::White, false, -1.f, 0, 10.f);
 
 	DrawDebugLine(GetWorld(), (HitPoints[0].Location + HitPoints[3].Location) / 2, (HitPoints[0].Location + HitPoints[3].Location) / 2 + NewUpVector.GetSafeNormal() * 500, FColor::Green, false, -1.f, 0, 12.f);
-
-	// Clamp angles so that  the ship cannot flip
-	/*NewRotation.Pitch = FMath::ClampAngle(NewRotation.Pitch, -40.f, 40.f);
-	NewRotation.Roll = FMath::ClampAngle(NewRotation.Roll, -40.f, 40.f);*/
-	//NewRotation.Yaw = GetActorRotation().Yaw;
-	//NewRotation.Roll = 0;
-	
 	
 	return NewRotation;
 }

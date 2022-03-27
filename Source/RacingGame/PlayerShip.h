@@ -71,6 +71,10 @@ private:
 	/** The ship's target height above the ground */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float TargetHeight{1000.f};
+
+	/** Whether debug vector math lines should be drawn */
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	bool bEnableDebugLines{true};
 	
 	//UPROPERTY()
 	//TArray<UArrowComponent*> ThrustLocations;
@@ -137,7 +141,7 @@ private:
 	/** Returns the Z height the object should have to stay a predetermined height above the ground */
 	float GetTargetZ();
 
-	FVector GetTargetLocation();
+	//FVector GetTargetLocation();
 
 	/** Interpolates towards the target using a custom curve. Returns the next position (not the delta) */
 	float CustomInterp(float Current, float Target, float DeltaTime, float InterpSpeed = 4.f);
@@ -170,11 +174,6 @@ private:
 
 	FVector TargetLocation = FVector::ZeroVector;
 	
-	
-	// Old code
-
-	/** Returns the rotation of the cross-product of the vectors between the three raycast points
-	 *	Basically it gets the rotation that the object should have relative to the surface beneath */
-	//FRotator GetSurfaceNormal3P();
+	FRotator LastRotation = FRotator::ZeroRotator;
 	
 };
