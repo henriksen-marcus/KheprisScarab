@@ -2,15 +2,11 @@
 
 
 #include "PlayerShip.h"
-//#include "GameFramework/PlayerInput.h"
-//#include "Components/InputComponent.h"
-//#include "Engine/World.h"
-//#include "Camera/CameraActor.h"
-//#include "Engine/Engine.h"
-//#include "Math/UnrealMathUtility.h"
+
+//#include <dsound.h>
+
 #include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
-//#include "Particles/ParticleSystemComponent.h"
 #include "AnimGraphRuntime/Public/CommonAnimationTypes.h"
 #include "GenericPlatform/GenericPlatformMisc.h"
 
@@ -54,10 +50,14 @@ APlayerShip::APlayerShip()
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	Camera->SetRelativeRotation(FRotator(12.f, 0.f, 0.f));
 
-	 Thrust1 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust1"));
-	 Thrust2 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust2"));
-	 Thrust3 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust3"));
-	 Thrust4 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust4"));
+	// Sheesh
+	AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+	AudioComp->SetupAttachment(GetRootComponent());
+	
+	Thrust1 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust1"));
+	Thrust2 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust2"));
+	Thrust3 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust3"));
+	Thrust4 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust4"));
 
 	Thrust1->SetupAttachment(GetRootComponent());
 	Thrust2->SetupAttachment(GetRootComponent());
@@ -89,62 +89,56 @@ void APlayerShip::BeginPlay()
 	Super::BeginPlay();
 	InitialLocation = GetActorLocation();
 	TargetLocation = GetActorLocation();
-	/*UE_LOG(LogTemp, Warning, TEXT("Length: %d"), ThrustLocations.Num())
-	for (int i{}; i < ThrustLocations.Num(); i++)
+	if (StartSound)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Pos: %s"), *ThrustLocations[i]->GetComponentLocation().ToString())
-	}*/
+		UGameplayStatics::PlaySound2D(GetWorld(), StartSound, 0.2f);
+	}
 }
+
+//theta = pi/2 * alpha
 
 
 void APlayerShip::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	UE_LOG(LogTemp, Warning, TEXT("Loc: %s"), *TargetLocation.ToString())
-
-	FRotator SurfaceNormal = GetSurfaceNormal();
+	const FVector OldPos = GetActorLocation();
+	
+	const FRotator SurfaceNormal = GetSurfaceNormal();
 	FRotator NewRotation = GetActorRotation();
-	float RotInterpSpeed = 5.f;
 	
-	// X and Y Movement
-	//FRotator RotAmount = UKismetMathLibrary::MakeRotFromXZ(GetActorForwardVector(), GetActorUpVector());
-	//FVector Result = RotAmount.RotateVector(LocalMove)*50;
-	if (!RtRpl->IsSimulatingPhysics())
-	{
-		SetActorLocation(UKismetMathLibrary::VInterpTo(GetActorLocation(), TargetLocation, DeltaTime, 10.f), true);
-		//SetActorLocation(FMath::VInterpTo(GetActorLocation(), TargetLocation, DeltaTime, 10.f));
-	}
-	AddActorLocalOffset(LocalMove * DeltaTime * 200.f * SpeedMultiplier, true);
-	
-	//AddActorLocalOffset(LocalMove * DeltaTime * 110.f * SpeedBoost * SpeedMultiplier, true);
+	// Movement
+	SetActorLocation(UKismetMathLibrary::VInterpTo(GetActorLocation(), TargetLocation, DeltaTime, 10.f), true);
+	AddActorLocalOffset(LocalMove * DeltaTime * 200.f * SpeedMultiplier * SpeedBoost, true);
 
+	// Engine dynamic audio
+	const FVector Diff = OldPos - GetActorLocation();
+	const float Speed = FMath::Abs(Diff.Size());
+	// Interp to smooth out speed/audio fluctuations
+	PitchMultiplier = FMath::FInterpTo(PitchMultiplier, (CustomCurve2->GetFloatValue(Speed/200.f) + 1), DeltaTime, 1.5f);
+	AudioComp->SetPitchMultiplier(PitchMultiplier);
+	
 	// Root Rotation
-
 	// If we are close to 90 degrees, disable rotation interpolation
 	/*NewRotation.Pitch = SurfaceNormal.Pitch;
 	NewRotation.Yaw = SurfaceNormal.Yaw;
 	NewRotation.Roll = SurfaceNormal.Roll;*/
-	
 	/*if (FMath::IsNearlyEqual(SurfaceNormal.Pitch, 90.f, 2.f) || FMath::IsNearlyEqual(SurfaceNormal.Pitch, -90.f, 2.f))
 	{ NewRotation.Pitch = SurfaceNormal.Pitch; UE_LOG(LogTemp, Warning, TEXT("Pitch is 90 deg %f"), FMath::RandRange(0.f,1.f))}
 	else
 	{ NewRotation.Pitch = FMath::FInterpTo(NewRotation.Pitch, SurfaceNormal.Pitch, DeltaTime, RotInterpSpeed); }*/
-	
 	/*if (FMath::IsNearlyEqual(SurfaceNormal.Yaw, 90.f, 2.f) || FMath::IsNearlyEqual(SurfaceNormal.Yaw, -90.f, 2.f))
 	{ NewRotation.Yaw = SurfaceNormal.Yaw; }
 	else
 	{ NewRotation.Yaw = FMath::FInterpTo(NewRotation.Yaw, SurfaceNormal.Yaw, DeltaTime, RotInterpSpeed); }*/
-
 	/*if (FMath::IsNearlyEqual(SurfaceNormal.Roll, 90.f, 2.f) || FMath::IsNearlyEqual(SurfaceNormal.Roll, -90.f, 2.f))
 	{ NewRotation.Roll = SurfaceNormal.Roll; }
 	else
 	{ NewRotation.Roll = FMath::FInterpTo(NewRotation.Roll, SurfaceNormal.Roll, DeltaTime, RotInterpSpeed); }*/
 
 	if (
-		FMath::IsNearlyEqual(SurfaceNormal.Pitch, 90.f, 3.f) || FMath::IsNearlyEqual(SurfaceNormal.Pitch, -90.f, 3.f) ||
+		FMath::IsNearlyEqual(SurfaceNormal.Pitch, 90.f, 1.f) || FMath::IsNearlyEqual(SurfaceNormal.Pitch, -90.f, 1.f) //||
 		/*FMath::IsNearlyEqual(SurfaceNormal.Yaw, 90.f, 3.f) || FMath::IsNearlyEqual(SurfaceNormal.Yaw, -90.f, 3.f) ||*/
-		FMath::IsNearlyEqual(SurfaceNormal.Roll, 90.f, 3.f) || FMath::IsNearlyEqual(SurfaceNormal.Roll, -90.f, 3.f)
+		/*FMath::IsNearlyEqual(SurfaceNormal.Roll, 90.f, 1.f) || FMath::IsNearlyEqual(SurfaceNormal.Roll, -90.f, 1.f)*/
 		)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Stop interp"))
@@ -155,12 +149,11 @@ void APlayerShip::Tick(float DeltaTime)
 		NewRotation = FMath::RInterpTo(NewRotation, SurfaceNormal, DeltaTime, 8.f);
 	}
 
-	//UE_LOG(LogTemp, Warning, TEXT("Pitch: %f, Yaw: %f, Roll: %f"), NewRotation.Pitch, NewRotation.Yaw, NewRotation.Roll)
 	SetActorRotation(NewRotation);
 	AddActorLocalRotation(FRotator(0.f, YawMove, 0.f));
 	
 	// Cosmetic mesh rotation
-	//BaseMesh->SetRelativeRotation(FRotator(NextPitchPosition, 0.f, NextRollPosition));
+	BaseMesh->SetRelativeRotation(FRotator(NextPitchPosition, 0.f, NextRollPosition));
 	
 	/** Springarm rotation */
 	FRotator NewRot = SpringArm->GetRelativeRotation();
@@ -171,8 +164,7 @@ void APlayerShip::Tick(float DeltaTime)
 	/** Camera effects */
 	Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, TargetCameraFOV, DeltaTime, 10.f));
 	SpringArm->TargetArmLength = FMath::FInterpTo(SpringArm->TargetArmLength, TargetSpringArmLength, DeltaTime, 10.f);
-
-	//FallTime += DeltaTime;
+	
 	CameraCenteringTimer += DeltaTime;
 }
 
@@ -208,7 +200,7 @@ void APlayerShip::Forward(const float Value)
 	bPitchHasInput = !(Value == 0);
 	
 	// If there is input, set rotation target to -25/25 based on input value, else set target to 0
-	float TargetPitch = bPitchHasInput ? Value > 0.f ? -10.0f : 10.0f : 0.f;
+	const float TargetPitch = bPitchHasInput ? Value > 0.f ? -10.0f : 10.0f : 0.f;
 
 	// Interpolate rotation towards target
 	NextPitchPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 6.0f);
@@ -218,7 +210,6 @@ void APlayerShip::Forward(const float Value)
 	InterpSpeed = Value < 0.f ? InterpSpeed / 3.f : InterpSpeed;
 	LocalMove.X = FMath::FInterpTo(LocalMove.X, TargetXSpeed, GetWorld()->GetDeltaSeconds(), InterpSpeed);
 }
-
 
 void APlayerShip::Turn(const float Value)
 {
@@ -235,7 +226,6 @@ void APlayerShip::Turn(const float Value)
 	YawMove = FMath::FInterpTo(YawMove,  Value * GetWorld()->GetDeltaSeconds() * 150.f, GetWorld()->GetDeltaSeconds(), 8.f);
 }
 
-
 void APlayerShip::CameraYaw(const float Value)
 {
 	// Should reset the camera target if the camera timer is over x seconds
@@ -246,7 +236,6 @@ void APlayerShip::CameraYaw(const float Value)
 	// Target camera rotation should be 0 if bShouldReset is true
 	SpringArmRotTarget.Yaw = bShouldReset ? 0.f : FMath::Clamp(SpringArm->GetRelativeRotation().Yaw + Value * 5.f, -80.f, 80.f);
 }
-
 
 void APlayerShip::CameraPitch(const float Value)
 {
@@ -259,7 +248,6 @@ void APlayerShip::CameraPitch(const float Value)
 	SpringArmRotTarget.Pitch = bShouldReset ? -20.f : FMath::Clamp(SpringArm->GetRelativeRotation().Pitch + Value * 10.f, -80.f, 0.f);
 }
 
-
 void APlayerShip::Dash() 
 {
 	if (bIsDashing) 
@@ -267,22 +255,34 @@ void APlayerShip::Dash()
 		return;
 	}
 
-	TargetCameraFOV += 40.f;
-	TargetSpringArmLength -= 800.f;
+	static float CamFovChange = 30.f;
+	static float SpringArmChange = 800.f;
+
+	TargetCameraFOV += CamFovChange;
+	TargetSpringArmLength -= SpringArmChange;
 	SpeedBoost = MaxSpeedBoost;
 	bIsDashing = true;
 
-	FTimerHandle handle;
-	GetWorld()->GetTimerManager().SetTimer(handle, this, &APlayerShip::ResetDash, DashTimer, false);
-}
+	if (BoostSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), BoostSound, 0.5f);
+	}
+	
+	
+	UKismetSystemLibrary::PrintText(GetWorld(), FText::FromString(FString("Looool")), true, true, FLinearColor::Red, 5.f);
 
+	FTimerHandle TimerHandle;
+	FTimerDelegate TimerDelegate;
+	// Lambda expression
+	TimerDelegate.BindLambda([&]
+		{
+			TargetCameraFOV -= CamFovChange;
+			TargetSpringArmLength += SpringArmChange;
+			SpeedBoost = 1.f;
+			bIsDashing = false;
+		});
 
-void APlayerShip::ResetDash()
-{
-	TargetCameraFOV -= 40.f;
-	TargetSpringArmLength += 800.f;
-	SpeedBoost = 1.f;
-	bIsDashing = false;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, DashTimer, false);
 }
 
 
@@ -617,13 +617,6 @@ FRotator APlayerShip::GetSurfaceNormalSimple()
 	
 	// Upwards line
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + NewUpVector * 1000, FColor::Green, false, -1.f, 0, 12.f);
-	
-	TargetZ2 = 0.f;
-	for (auto i : HitPoints)
-	{
-		TargetZ2 += i.ImpactPoint.Z + TargetHeight;
-	}
-	TargetZ2 /= 4;
 	
 	return NewRotation;
 	// Clamp angles so that  the ship cannot flip

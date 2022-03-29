@@ -41,10 +41,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	UCameraComponent* Camera;
 
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	UPROPERTY(EditAnywhere, Category = "Curves")
 	UCurveFloat* CustomCurve1;
 
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	UPROPERTY(EditAnywhere, Category = "Curves")
 	UCurveFloat* CustomCurve2;
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
@@ -75,9 +75,16 @@ private:
 	/** Whether debug vector math lines should be drawn */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	bool bEnableDebugLines{true};
+
+	/** This controls the engine running sound */
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	UAudioComponent* AudioComp;
 	
-	//UPROPERTY()
-	//TArray<UArrowComponent*> ThrustLocations;
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* StartSound{};
+	
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* BoostSound{};
 
 	UPROPERTY(EditAnywhere, Category = "Arrows")
 	UArrowComponent* Thrust1;
@@ -100,6 +107,8 @@ private:
 
 	FVector InitialLocation;
 
+	
+	
 	/** Controls the forward movement of the root and cosmetic mesh rotation effect */
 	void Forward(float Value);
 
@@ -170,7 +179,8 @@ private:
 	float FallSpeed{10.f};
 	bool bLowThreshold = false;
 	float CameraCenteringTimer{};
-	float TargetZ2 = 0.f;
+	float PitchMultiplier{1.f};
+	
 
 	FVector TargetLocation = FVector::ZeroVector;
 	
