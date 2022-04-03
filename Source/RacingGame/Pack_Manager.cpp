@@ -23,7 +23,7 @@ APack_Manager::APack_Manager()
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->SetupAttachment(RootComponent);
 	
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshComponentAsset(TEXT("StaticMesh'/Game/3DAssets/Packs/Placeholder_Pack.Placeholder_Pack'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshComponentAsset(TEXT("StaticMesh'/Game/3DAssets/Environment/AdrianCube.AdrianCube'"));
 	if (MeshComponentAsset.Succeeded())
 	{
 		MeshComponent->SetStaticMesh(MeshComponentAsset.Object);
@@ -31,7 +31,7 @@ APack_Manager::APack_Manager()
 
 	//--------- SETUP COLLISION ---------//
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &APack_Manager::OnOverlapBegin);
-
+	// Should not be in constructor
 	UGameplayStatics::PlaySound2D(GetWorld(), PackSound_Default); // Play Default Sound
 }
 
