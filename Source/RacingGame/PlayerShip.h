@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "Components/StaticMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
+#include "HoveringMovementComponent.h"
 #include "PlayerShip.generated.h"
 
 UCLASS()
@@ -25,6 +24,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraVariables")
+	UCameraComponent* Camera;
 	
 private:
 	/** Root replacement */
@@ -38,8 +40,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	USpringArmComponent* SpringArm;
 
-	UPROPERTY(EditAnywhere, Category = "CameraVariables")
-	UCameraComponent* Camera;
+	
 
 	UPROPERTY(EditAnywhere, Category = "Curves")
 	UCurveFloat* CustomCurve1;
@@ -47,18 +48,21 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Curves")
 	UCurveFloat* CustomCurve2;
 
+	UPROPERTY(EditAnywhere, Category = "Curves")
+	UCurveFloat* JumpCurve;
+
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	int MaxAmmo;
+	int MaxAmmo{30};
 
 	/** How long the dash lasts */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float DashTimer{2.f};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float MaxSpeedBoost;
+	float MaxSpeedBoost{1.5f};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float SpeedMultiplier;
+	float SpeedMultiplier{1.f};
 
 	/** What field of view the camera should interpolate towards */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
@@ -81,10 +85,10 @@ private:
 	UAudioComponent* AudioComp;
 	
 	UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundBase* StartSound{};
+	USoundBase* StartSound;
 	
 	UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundBase* BoostSound{};
+	USoundBase* BoostSound;
 
 	UPROPERTY(EditAnywhere, Category = "Arrows")
 	UArrowComponent* Thrust1;
@@ -100,13 +104,19 @@ private:
 
 	/** Seconds of inactivity needed for the spring arm to reset its rotation */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float CameraResetTime{1.f};
+	float CameraResetTime{1.2f};
+
+	UPROPERTY(EditAnywhere, Category = "CameraVariables")
+	TSubclassOf<UCameraShakeBase> CamShake;
+
+	UPROPERTY()
+	UHoveringMovementComponent* MoveComp;
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
 
-	FVector InitialLocation;
-
+	// ---------- Functions ---------- //
 	
 	
 	/** Controls the forward movement of the root and cosmetic mesh rotation effect */
@@ -122,10 +132,7 @@ private:
 	void CameraYaw(float Value);
 
 	void Dash();
-	void ResetDash();
-	
 	void Jump();
-	void JumpEnd();
 
 	void Crouch();
 	void CrouchEnd();
@@ -135,7 +142,6 @@ private:
 
 	/** Exits the game - Warning: If played in-editor, this will close the editor. */
 	void EscPressed();
-
 	
 	/** Returns the rotation from the ships current to target rotation, where the target rotation is
 	 * the cross-product of the vectors between the four raycast hit locations.
@@ -145,45 +151,54 @@ private:
 	/** Returns the rotation from the ships current to target rotation, where the target rotation is
 	 * the average between the normals of the four raycast hits.
 	 * Basically it gets the rotation that the object should have relative to the surface beneath. */
-	FRotator GetSurfaceNormalSimple() ;
-
-	/** Returns the Z height the object should have to stay a predetermined height above the ground */
-	float GetTargetZ();
-
-	//FVector GetTargetLocation();
-
+	FRotator GetSurfaceNormalSimple();
+	
 	/** Interpolates towards the target using a custom curve. Returns the next position (not the delta) */
 	float CustomInterp(float Current, float Target, float DeltaTime, float InterpSpeed = 4.f);
 
 	float CustomInterp2(float Current, float Target, float DeltaTime, float InterpSpeed = 4.f);
 
-	bool bPitchHasInput;
-	bool bRollHasInput;
+	
+	// ---------- Variables ---------- //
+	
+	bool bPitchHasInput{};
+	bool bRollHasInput{};
 
-	float NextRollPosition;
-	float NextPitchPosition;
-	float NextYawPosition;
+	float NextRollPosition{};
+	float NextPitchPosition{};
+	float NextYawPosition{};
 
-	/** Decides how much the root should move per tick */
-	FVector LocalMove;
+	/** Decides how much the root should move additionally, per tick */
+	FVector LocalMove = FVector::ZeroVector;
 
-	float SpeedBoost;
+	float SpeedBoost{1.f};
+	
+	bool bIsDashing{};
+	bool bIsJumping{};
 
-	float CurrentYaw;
-	bool bIsDashing;
-	bool bIsJumping;
-
+	/** How much the players local yaw should change per tick */
 	float YawMove{};
 	
 	FRotator SpringArmRotTarget = FRotator::ZeroRotator;
-	float FallSpeed{10.f};
+	
 	bool bLowThreshold = false;
 	float CameraCenteringTimer{};
-	float PitchMultiplier{1.f};
-	
 
+	/** Increases the longer the player in in the air, decides how fast the Z location decreases */
+	float FallSpeed{1.f};
+
+	/** Decides what curve value the FallSpeed interpolation should be at */
+	float FallTimer{};
+
+	/** Number that the engine sound pitch is multiplied with */
+	float PitchMultiplier{1.f};
+
+	float JumpTimer{};
+	
 	FVector TargetLocation = FVector::ZeroVector;
-	
-	FRotator LastRotation = FRotator::ZeroRotator;
-	
+	FVector InitialLocation;
+	float InitialTargetHeight{};
+	float LocationInterpolationSpeed{10.f};
+
+	FTimerHandle GlobalTimerHandle;
 };
