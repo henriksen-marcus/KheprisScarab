@@ -181,7 +181,7 @@ void APlayerShip::Turn(const float Value)
 	NextRollPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Roll, TargetRoll, GetWorld()->GetDeltaSeconds(), 3.f);
 
 	/** Yaw */
-	YawMove = FMath::FInterpTo(YawMove,  0.8f * Value, GetWorld()->GetDeltaSeconds(), 8.f);
+	YawMove = FMath::FInterpTo(YawMove,  1.2f * Value, GetWorld()->GetDeltaSeconds(), 8.f);
 	//NextYawPosition = FMath::FInterpTo(GetActorRotation().Yaw, GetActorRotation().Yaw + Value * 40.f, GetWorld()->GetDeltaSeconds(), 0.5f);
 	
 	//const float TargetYSpeed = bRollHasInput ? (Value * 30.f) : 0.f;
