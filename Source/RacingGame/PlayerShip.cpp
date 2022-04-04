@@ -126,8 +126,6 @@ void APlayerShip::Tick(float DeltaTime)
 	// Jumping functionality
 	if(bIsJumping && JumpCurve)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("InitTH: %f"), InitialTargetHeight)
-		UE_LOG(LogTemp, Warning, TEXT("TH: %f"), TargetHeight)
 		TargetHeight = InitialTargetHeight * (JumpCurve->GetFloatValue ( JumpTimer/3.f ) + 1.f);
 		//AddActorLocalOffset(GetActorUpVector() *  200.f * JumpCurve->GetFloatValue ( JumpTimer/4.f ));
 
@@ -147,6 +145,11 @@ void APlayerShip::Tick(float DeltaTime)
 	// Engine dynamic audio
 	const FVector Diff = OldPos - GetActorLocation();
 	const float Speed = FMath::Abs(Diff.Size());
+
+	if (bLogSpeed)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("Speed is: %f"), Speed);
+	}
 	
 	// Interp to smooth out speed/audio fluctuations
 	AudioComp->PitchMultiplier = FMath::FInterpTo(AudioComp->PitchMultiplier, (CustomCurve2->GetFloatValue(Speed/200.f) + 1), DeltaTime, 1.5f);
@@ -176,7 +179,6 @@ void APlayerShip::Tick(float DeltaTime)
 		/*FMath::IsNearlyEqual(SurfaceNormal.Roll, 90.f, 1.f) || FMath::IsNearlyEqual(SurfaceNormal.Roll, -90.f, 1.f)*/
 		)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Stop interp"))
 		NewRotation = SurfaceNormal;
 	}
 	else
@@ -452,8 +454,10 @@ FRotator APlayerShip::GetSurfaceNormal()
 		TargetLocation = GetActorLocation();
 		TargetLocation.Z -= FallSpeed;
 		FallTimer += GetWorld()->GetDeltaSeconds();
-		UE_LOG(LogTemp, Warning,TEXT("FallSpeed! %f"), FallSpeed)
-		
+		if (!bLogSpeed)
+		{
+			UE_LOG(LogTemp, Warning,TEXT("FallSpeed! %f"), FallSpeed)
+		}
 		// Yaw remains unchanged, let the player have some control
 		return InAirRot;
 	}
@@ -468,7 +472,6 @@ FRotator APlayerShip::GetSurfaceNormal()
 		}
 		
 		const float Length = 2000.f;
-		UE_LOG(LogTemp, Warning, TEXT("Not all points hit"))
 		for (int i{}; i < 4; i++)
 		{
 			if (!HitPoints[i].bBlockingHit)
@@ -522,7 +525,6 @@ FRotator APlayerShip::GetSurfaceNormal()
 		// Impact camera shake
 		if (FallSpeed >= 1000.f && CamShake)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Camera Shake!"))
 			UGameplayStatics::PlayWorldCameraShake(Camera, CamShake, Camera->GetComponentLocation(), 100.f, 1000.f);
 		}
 		
@@ -685,7 +687,6 @@ float APlayerShip::CustomInterp(float Current, float Target, float DeltaTime, fl
 	// Where on the custom curve we should be (based off how far we have come)
 	//float Alpha = FMath::Clamp<float>( FMath::Abs( Current / Target ), 0.f, 1.f );
 	float Alpha = Distance > 0.f ? Current / Target : Distance;
-	UE_LOG(LogTemp, Warning, TEXT("Alpha: %f"), Alpha)
 
 	// How far we should move this tick
 	const float DeltaMove = Distance * DeltaTime * CustomCurve1->GetFloatValue( Alpha ) * InterpSpeed;

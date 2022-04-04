@@ -80,6 +80,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	bool bEnableDebugLines{true};
 
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	bool bLogSpeed{false};
+
 	/** This controls the engine running sound */
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	UAudioComponent* AudioComp;
