@@ -2,6 +2,7 @@
 
 
 #include "Menu_Shop.h"
+#include "Components/TextBlock.h"
 
 void UMenu_Shop::NativeConstruct()
 {
@@ -14,7 +15,7 @@ void UMenu_Shop::NativeOnInitialized()
 	//Buttons
 
 	//Text on Buttons
-
+	Back_Button_Text->SetText(FText::FromString("Back"));
 }
 void UMenu_Shop::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {

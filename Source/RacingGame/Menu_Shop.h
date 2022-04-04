@@ -21,4 +21,7 @@ class RACINGGAME_API UMenu_Shop : public UUserWidget
 public:
 	UFUNCTION()
 		void Test_Button_Clickd();
+
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* Back_Button_Text;
 };
