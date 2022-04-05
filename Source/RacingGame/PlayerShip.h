@@ -51,9 +51,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Curves")
 	UCurveFloat* JumpCurve;
 
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	int MaxAmmo{30};
-
 	/** How long the dash lasts */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float DashTimer{2.f};
@@ -204,4 +201,21 @@ private:
 	float LocationInterpolationSpeed{10.f};
 
 	FTimerHandle GlobalTimerHandle;
+
+	//Upgradeable Variables by Adrian
+public:
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		float CurrentHealth{};
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		float MaxHealth{};
+
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		int CurrentAmmo{};
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		int MaxAmmo{};
+
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		int Currency1{};
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		int Currency2{};
 };

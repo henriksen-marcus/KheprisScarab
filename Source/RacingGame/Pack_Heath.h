@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Pack_Manager.generated.h"
+#include "Pack_Heath.generated.h"
 
 UCLASS()
-class RACINGGAME_API APack_Manager : public AActor
+class RACINGGAME_API APack_Heath : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	APack_Manager();
+	APack_Heath();
 
 protected:
 	// Called when the game starts or when spawned
@@ -24,26 +24,23 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
-	class UBoxComponent* BoxComponent;
-
-	UPROPERTY(EditAnywhere, Category = "Mesh")
-	class UStaticMeshComponent* MeshComponent;
-
-	UPROPERTY(EditAnywhere)
-	class UMaterialInterface* BaseMaterial;
-
-	UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundBase* PackSound_OnPlayerHit;
-
-	UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundBase* PackSound_Default;
-
 	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
+		void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 		void Movement(float DeltaTime);
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+		class UBoxComponent* BoxComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+		class UStaticMeshComponent* MeshComponent;
+
+	UPROPERTY(EditAnywhere)
+		class UMaterialInterface* BaseMaterial;
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+		USoundBase* Pack_Health_HitSound;
 
 public:
 	float BounceSpeed;
@@ -52,8 +49,4 @@ public:
 
 	float RunningTime;
 	float WaitingTime;
-
-	FVector Velocity;
-	FRotator Rotation;
-
 };

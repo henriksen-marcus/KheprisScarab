@@ -1,19 +1,24 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Pack_Manager.h"
+#include "Pack_Heath.h"
 #include "PlayerShip.h"
+#include "Pack_Manager.h"
 #include "Components/BoxComponent.h"
 
 // Sets default values
-APack_Manager::APack_Manager()
+APack_Heath::APack_Heath()
 {
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	//--------- VARIABLES ---------//
 	BounceSpeed = 1.f;
 	BounceHight = 1.5f;
 	RotationSpeed = 0.3f;
+
+
+	//-------------------------------
 
 
 	#pragma region BUILD PACK
@@ -31,57 +36,49 @@ APack_Manager::APack_Manager()
 	#pragma endregion
 
 	#pragma region SETUP COLLISION
-	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &APack_Manager::OnOverlapBegin);
+	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &APack_Heath::OnOverlapBegin);
 	#pragma endregion
-
 }
 
 // Called when the game starts or when spawned
-void APack_Manager::BeginPlay()
+void APack_Heath::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UGameplayStatics::PlaySound2D(GetWorld(), PackSound_Default); // Play Default Sound
+	
 }
 
 // Called every frame
-void APack_Manager::Tick(float DeltaTime)
+void APack_Heath::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	Movement(DeltaTime);
-
-	//Just for TESTING
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
-	{
-		WaitingTime += DeltaTime;
-
-		if (WaitingTime >= 2)
-		{
-			PlayerShip->CurrentHealth -= 1;
-			WaitingTime = 0;
-		}
-	}
 }
 
 
 //-------------- OWN FUNCTIONS --------------//
 
 
-void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void APack_Heath::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	//Collide with SpaceShip
 	if (OtherActor->IsA(APlayerShip::StaticClass()))
 	{
-		UGameplayStatics::PlaySound2D(GetWorld(), PackSound_OnPlayerHit); // Play Sound
+		APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		if (PlayerShip)
+		{
+			PlayerShip->CurrentHealth = PlayerShip->MaxHealth;
+			UE_LOG(LogTemp, Warning, TEXT("Pack_Health | Max Health: %i"), PlayerShip->MaxHealth);
+		}
+
+		UGameplayStatics::PlaySound2D(GetWorld(), Pack_Health_HitSound); // Play Health Sound
 
 		this->Destroy();
-		UE_LOG(LogTemp, Warning, TEXT("Pack_Manager - Overlapp - SUCSESS"));
+		UE_LOG(LogTemp, Warning, TEXT("Pack_Health - Overlapp - SUCSESS"));
 	}
 }
 
-void APack_Manager::Movement(float DeltaTime)
+void APack_Heath::Movement(float DeltaTime)
 {
 	//Location - Z-axis
 	FVector NewLocation = GetActorLocation();
@@ -95,3 +92,4 @@ void APack_Manager::Movement(float DeltaTime)
 	FRotator Rotate{ 0.f, RotationSpeed, 0.f };
 	SetActorRotation(NewRotation + Rotate);
 }
+
