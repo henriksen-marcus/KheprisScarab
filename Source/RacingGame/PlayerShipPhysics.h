@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "HoveringMovementComponent.h"
 #include "PlayerShipPhysics.generated.h"
 
 UCLASS()
@@ -26,72 +27,176 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraVariables")
+	UCameraComponent* Camera;
+	
 private:
+	/** Root replacement */
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
-		UBoxComponent* RtRpl; // Root replacement
+	UBoxComponent* Root;
 
+	/** Ship main body */
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
-		UStaticMeshComponent* BaseMesh;
+	UStaticMeshComponent* BaseMesh;
 
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
-		USpringArmComponent* SpringArm;
+	USpringArmComponent* SpringArm;
+
+	UPROPERTY(EditAnywhere, Category = "Curves")
+	UCurveFloat* CustomCurve1;
+
+	UPROPERTY(EditAnywhere, Category = "Curves")
+	UCurveFloat* CustomCurve2;
+
+	UPROPERTY(EditAnywhere, Category = "Curves")
+	UCurveFloat* JumpCurve;
+
+	UPROPERTY(EditAnywhere, Category = "Curves")
+	UCurveFloat* HoverForceCurve;
+
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	int MaxAmmo{30};
+
+	/** How long the dash lasts */
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float DashTimer{2.f};
+
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float MaxSpeedBoost{1.5f};
+
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float SpeedMultiplier{1.f};
+
+	/** What field of view the camera should interpolate towards */
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float TargetCameraFOV{90.f};
+
+	/** Target spring arm length, constantly interpolated towards */
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float TargetSpringArmLength{2000.f};
+
+	/** The ship's target height above the ground */
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float TargetHeight{1000.f};
+
+	/** Whether debug vector math lines should be drawn */
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	bool bEnableDebugLines{true};
+
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	bool bLogSpeed{false};
+
+	/** This controls the engine running sound */
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	UAudioComponent* AudioComp;
+	
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* StartSound;
+	
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* BoostSound;
+
+	UPROPERTY(EditAnywhere, Category = "Arrows")
+	UArrowComponent* Thrust1;
+
+	UPROPERTY(EditAnywhere, Category = "Arrows")
+	UArrowComponent* Thrust2;
+
+	UPROPERTY(EditAnywhere, Category = "Arrows")
+	UArrowComponent* Thrust3;
+
+	UPROPERTY(EditAnywhere, Category = "Arrows")
+	UArrowComponent* Thrust4;
+
+	/** Seconds of inactivity needed for the spring arm to reset its rotation */
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float CameraResetTime{1.2f};
 
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
-		UCameraComponent* Camera;
+	TSubclassOf<UCameraShakeBase> CamShake;
 
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-		UCurveFloat* DistanceCurve;
+	UPROPERTY()
+	UHoveringMovementComponent* MoveComp;
 
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-		UCurveFloat* JumpCurve;
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
 
+	// ---------- Functions ---------- //
+	
+	
+	/** Controls the forward movement of the root and cosmetic mesh rotation effect */
+	void Forward(float Value);
 
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-		float DashTimer;
-
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-		UMaterialInterface* DamageMaterial;
-
-	UPROPERTY(VisibleAnywhere)
-		TArray<UArrowComponent*> ThrustLocations;
-
-
-	FVector InitialLocation;
-
-	/** Player input */
-	void Roll(float Value);
-	void Pitch(float Value);
-
+	/** Controls the yaw rotation of the root and cosmetic mesh rotation effect */
+	void Turn(float Value);
+	
+	/** Uses the MouseY input to change the relative pitch rotation of the spring arm */
 	void CameraPitch(float Value);
-	void Yaw(float Value);
+
+	/** Uses the MouseX input to change the relative yaw rotation of the spring arm */
+	void CameraYaw(float Value);
 
 	void Dash();
-	void ResetDash();
 	void Jump();
-	void JumpEnd();
-	void EscPressed();
 
-	bool bPitchHasInput;
-	bool bRollHasInput;
+	void Crouch();
+	void CrouchEnd();
 
-	float NextRollPosition;
-	float NextPitchPosition;
-	float NextYawPosition;
+	void CameraZoomIn();
+	void CameraZoomOut();
+	
+	/** Returns the rotation from the ships current to target rotation, where the target rotation is
+	 * the cross-product of the vectors between the four raycast hit locations.
+	 * Basically it gets the rotation that the object should have relative to the surface beneath. */
+	FRotator GetSurfaceNormal();
+	
+	// ---------- Variables ---------- //
+	
+	bool bPitchHasInput{};
+	bool bRollHasInput{};
 
-	float TargetZ{};
+	float NextRollPosition{};
+	float NextPitchPosition{};
+	float NextYawPosition{};
 
-	float SpeedBoost;
+	/** Decides how much the root should move additionally, per tick */
+	FVector LocalMove = FVector::ZeroVector;
 
-	float CurrentYaw;
-	float InitialArmLength;
+	float SpeedBoost{1.f};
+	
+	bool bIsDashing{};
+	bool bIsJumping{};
 
-	bool bIsDashing;
+	/** How much the players local yaw should change per tick */
+	float YawMove{};
+	
+	FRotator SpringArmRotTarget = FRotator::ZeroRotator;
+	
+	bool bLowThreshold = false;
+	float CameraCenteringTimer{};
 
-	bool bIsJumping;
-	bool IgnoreInput;
-	bool temp = false;
-	float ForceChange = 1.f;
+	/** Increases the longer the player in in the air, decides how fast the Z location decreases */
+	float FallSpeed{1.f};
 
+	/** Decides what curve value the FallSpeed interpolation should be at */
+	float FallTimer{};
+
+	/** Number that the engine sound pitch is multiplied with */
+	float PitchMultiplier{1.f};
+
+	float JumpTimer{};
+	
+	FVector TargetLocation = FVector::ZeroVector;
+	FVector InitialLocation;
+	float InitialTargetHeight{};
+	float LocationInterpolationSpeed{10.f};
+	float DistanceFromGround{1000.f};
+	
 	FVector Force = FVector::ZeroVector;
+	FVector RForce = FVector::ZeroVector;
+	
+	float ShipWeight{};
 
+	TArray<float>ForceArray;
 };

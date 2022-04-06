@@ -2,9 +2,6 @@
 
 
 #include "PlayerShip.h"
-
-//#include <dsound.h>
-
 #include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
 #include "ToolContextInterfaces.h"
@@ -164,24 +161,6 @@ void APlayerShip::Tick(float DeltaTime)
 	// Interp to smooth out speed/audio fluctuations
 	AudioComp->PitchMultiplier = FMath::FInterpTo(AudioComp->PitchMultiplier, (CustomCurve2->GetFloatValue(Speed/200.f) + 1), DeltaTime, 1.5f);
 	AudioComp->SetPitchMultiplier(AudioComp->PitchMultiplier);
-	
-	// Root Rotation
-	// If we are close to 90 degrees, disable rotation interpolation
-	/*NewRotation.Pitch = SurfaceNormal.Pitch;
-	NewRotation.Yaw = SurfaceNormal.Yaw;
-	NewRotation.Roll = SurfaceNormal.Roll;*/
-	/*if (FMath::IsNearlyEqual(SurfaceNormal.Pitch, 90.f, 2.f) || FMath::IsNearlyEqual(SurfaceNormal.Pitch, -90.f, 2.f))
-	{ NewRotation.Pitch = SurfaceNormal.Pitch; UE_LOG(LogTemp, Warning, TEXT("Pitch is 90 deg %f"), FMath::RandRange(0.f,1.f))}
-	else
-	{ NewRotation.Pitch = FMath::FInterpTo(NewRotation.Pitch, SurfaceNormal.Pitch, DeltaTime, RotInterpSpeed); }*/
-	/*if (FMath::IsNearlyEqual(SurfaceNormal.Yaw, 90.f, 2.f) || FMath::IsNearlyEqual(SurfaceNormal.Yaw, -90.f, 2.f))
-	{ NewRotation.Yaw = SurfaceNormal.Yaw; }
-	else
-	{ NewRotation.Yaw = FMath::FInterpTo(NewRotation.Yaw, SurfaceNormal.Yaw, DeltaTime, RotInterpSpeed); }*/
-	/*if (FMath::IsNearlyEqual(SurfaceNormal.Roll, 90.f, 2.f) || FMath::IsNearlyEqual(SurfaceNormal.Roll, -90.f, 2.f))
-	{ NewRotation.Roll = SurfaceNormal.Roll; }
-	else
-	{ NewRotation.Roll = FMath::FInterpTo(NewRotation.Roll, SurfaceNormal.Roll, DeltaTime, RotInterpSpeed); }*/
 
 	if (
 		FMath::IsNearlyEqual(SurfaceNormal.Pitch, 90.f, 1.f) || FMath::IsNearlyEqual(SurfaceNormal.Pitch, -90.f, 1.f) //||
@@ -227,7 +206,6 @@ void APlayerShip::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("MouseX", this, &APlayerShip::CameraYaw);
 
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &APlayerShip::Jump);
-	PlayerInputComponent->BindAction("Esc", EInputEvent::IE_Pressed, this, &APlayerShip::EscPressed);
 	PlayerInputComponent->BindAction("UseItem", EInputEvent::IE_Pressed, this, &APlayerShip::Dash);
 
 	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &APlayerShip::Crouch);
