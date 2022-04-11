@@ -50,19 +50,6 @@ void APack_Manager::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	Movement(DeltaTime);
-
-	//Just for TESTING
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
-	{
-		WaitingTime += DeltaTime;
-
-		if (WaitingTime >= 2)
-		{
-			PlayerShip->CurrentHealth -= 1;
-			WaitingTime = 0;
-		}
-	}
 }
 
 
@@ -74,10 +61,61 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 	//Collide with SpaceShip
 	if (OtherActor->IsA(APlayerShip::StaticClass()))
 	{
+		APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+
+		if (HealthPack)
+		{
+			if (PlayerShip)
+			{
+				PlayerShip->CurrentHealth = PlayerShip->MaxHealth;
+				UE_LOG(LogTemp, Warning, TEXT("Pack_Health | Max Health: %i"), PlayerShip->MaxHealth);
+				UE_LOG(LogTemp, Warning, TEXT("HealthPack - SUCCESS"));
+			}
+		}
+		else if (AmmoPack)
+		{
+			if (PlayerShip)
+			{
+				PlayerShip->CurrentAmmo = PlayerShip->MaxAmmo;
+				UE_LOG(LogTemp, Warning, TEXT("AmmoPack - SUCCESS"));
+			}
+		}
+		else if (BoostPack)
+		{
+			if (PlayerShip)
+			{
+				PlayerShip->BoostPickup = true;
+				UE_LOG(LogTemp, Warning, TEXT("BoostPack - SUCCESS"));
+			}
+		}
+		else if (Currency1)
+		{
+			if (PlayerShip)
+			{
+				PlayerShip->Currency1 += 1;
+				UE_LOG(LogTemp, Warning, TEXT("Currency1 - SUCCESS | %dp."), PlayerShip->Currency1);
+			}
+		}
+		else if (Currency2)
+		{
+			if (PlayerShip)
+			{
+				PlayerShip->Currency2 += 1;
+				UE_LOG(LogTemp, Warning, TEXT("Currency2 - SUCCESS | %dp."), PlayerShip->Currency2);
+			}
+		}
+		else if (TimePack)
+		{
+			if (PlayerShip)
+			{
+				PlayerShip->TimeCount += 15;
+				UE_LOG(LogTemp, Warning, TEXT("TimePack - SUCCESS"));
+			}
+		}
+
 		UGameplayStatics::PlaySound2D(GetWorld(), PackSound_OnPlayerHit); // Play Sound
 
 		this->Destroy();
-		UE_LOG(LogTemp, Warning, TEXT("Pack_Manager - Overlapp - SUCSESS"));
 	}
 }
 

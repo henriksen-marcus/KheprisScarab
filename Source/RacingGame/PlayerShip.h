@@ -204,18 +204,31 @@ private:
 
 	//Upgradeable Variables by Adrian
 public:
+	void TestHUDVariables();
+	void TimeAttackMode_Timer(float DeltaTime);
+
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		float CurrentHealth{};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		float MaxHealth{};
 
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		int CurrentAmmo{};
+		float CurrentAmmo{};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		int MaxAmmo{};
+		float MaxAmmo{};
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		float AmmoPrecentage{};
 
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		int Currency1{};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		int Currency2{};
+
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		bool BoostPickup{};
+
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		int TimeCount{};
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		float DeltaTimeCount{};
 };

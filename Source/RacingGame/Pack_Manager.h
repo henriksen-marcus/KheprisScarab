@@ -24,23 +24,23 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
-	class UBoxComponent* BoxComponent;
+	UPROPERTY(EditAnywhere, Category = "Collision")
+		class UBoxComponent* BoxComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
-	class UStaticMeshComponent* MeshComponent;
+		class UStaticMeshComponent* MeshComponent;
 
-	UPROPERTY(EditAnywhere)
-	class UMaterialInterface* BaseMaterial;
-
-	UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundBase* PackSound_OnPlayerHit;
+	UPROPERTY(EditAnywhere, Category = "Material")
+		class UMaterialInterface* BaseMaterial;
 
 	UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundBase* PackSound_Default;
+		USoundBase* PackSound_OnPlayerHit;
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+		USoundBase* PackSound_Default;
 
 	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+		void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
 		void Movement(float DeltaTime);
@@ -55,5 +55,19 @@ public:
 
 	FVector Velocity;
 	FRotator Rotation;
+
+	//Variables when changed in Blueprint, changes the packs' function on collision
+	UPROPERTY(EditAnywhere, Category = "Editable Variable")
+		bool HealthPack;
+	UPROPERTY(EditAnywhere, Category = "Editable Variable")
+		bool AmmoPack;
+	UPROPERTY(EditAnywhere, Category = "Editable Variable")
+		bool BoostPack;
+	UPROPERTY(EditAnywhere, Category = "Editable Variable")
+		bool Currency1;
+	UPROPERTY(EditAnywhere, Category = "Editable Variable")
+		bool Currency2;
+	UPROPERTY(EditAnywhere, Category = "Editable Variable")
+		bool TimePack;
 
 };

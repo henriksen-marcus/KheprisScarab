@@ -18,6 +18,7 @@ APlayerShip::APlayerShip()
 	CurrentHealth = MaxHealth;
 	MaxAmmo = 20;
 	CurrentAmmo = MaxAmmo;
+	TimeCount = 60;
 
 
 	//------------------------------------------
@@ -88,7 +89,6 @@ APlayerShip::APlayerShip()
 	MoveComp = CreateDefaultSubobject<UHoveringMovementComponent>(TEXT("HoverComponentMoveStuffLol"));
 }
 
-
 void APlayerShip::BeginPlay()
 {
 	Super::BeginPlay();
@@ -114,7 +114,6 @@ void APlayerShip::BeginPlay()
 }
 
 //theta = pi/2 * alpha
-
 
 void APlayerShip::Tick(float DeltaTime)
 {
@@ -155,7 +154,7 @@ void APlayerShip::Tick(float DeltaTime)
 
 	if (bLogSpeed)
 	{
-		UE_LOG(LogTemp,Warning,TEXT("Speed is: %f"), Speed);
+		//UE_LOG(LogTemp,Warning,TEXT("Speed is: %f"), Speed);
 	}
 	
 	// Interp to smooth out speed/audio fluctuations
@@ -192,8 +191,10 @@ void APlayerShip::Tick(float DeltaTime)
 	SpringArm->TargetArmLength = FMath::FInterpTo(SpringArm->TargetArmLength, TargetSpringArmLength, DeltaTime, 10.f);
 	
 	CameraCenteringTimer += DeltaTime;
-}
 
+	//Timer to Time Attack Mode
+	TimeAttackMode_Timer(DeltaTime);
+}
 
 void APlayerShip::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -213,6 +214,9 @@ void APlayerShip::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAction("ScrollUp", EInputEvent::IE_Pressed, this, &APlayerShip::CameraZoomIn);
 	PlayerInputComponent->BindAction("ScrollDown", EInputEvent::IE_Pressed, this, &APlayerShip::CameraZoomOut);
+
+	//TestVariablesForHUD
+	PlayerInputComponent->BindAction("TestVariablesForHUD", EInputEvent::IE_Pressed, this, &APlayerShip::TestHUDVariables);
 }
 
 
@@ -275,38 +279,44 @@ void APlayerShip::CameraPitch(const float Value)
 
 void APlayerShip::Dash() 
 {
-	if (bIsDashing) 
+	//have to get the Boost Pick-up to be able to Dash
+	if (BoostPickup == true)
 	{
-		return;
-	}
+		BoostPickup = false;
 
-	static float CamFovChange = 30.f;
-	static float SpringArmChange = 800.f;
-
-	TargetCameraFOV += CamFovChange;
-	TargetSpringArmLength -= SpringArmChange;
-	SpeedBoost = MaxSpeedBoost;
-	bIsDashing = true;
-
-	if (BoostSound)
-	{
-		UGameplayStatics::PlaySound2D(GetWorld(), BoostSound, 0.5f);
-	}
-
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDelegate;
-	// Lambda expression
-	TimerDelegate.BindLambda([&]
+		if (bIsDashing)
 		{
-			TargetCameraFOV -= CamFovChange;
-			TargetSpringArmLength += SpringArmChange;
-			SpeedBoost = 1.f;
-			bIsDashing = false;
-		});
+			return;
+		}
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, DashTimer, false);
+		static float CamFovChange = 30.f;
+		static float SpringArmChange = 800.f;
+
+		TargetCameraFOV += CamFovChange;
+		TargetSpringArmLength -= SpringArmChange;
+		SpeedBoost = MaxSpeedBoost;
+		bIsDashing = true;
+
+		if (BoostSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), BoostSound, 0.5f);
+		}
+
+		FTimerHandle TimerHandle;
+		FTimerDelegate TimerDelegate;
+		// Lambda expression
+		TimerDelegate.BindLambda([&]
+			{
+				TargetCameraFOV -= CamFovChange;
+				TargetSpringArmLength += SpringArmChange;
+				SpeedBoost = 1.f;
+				bIsDashing = false;
+			});
+
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, DashTimer, false);
+
+	}
 }
-
 
 void APlayerShip::Jump()
 {
@@ -339,13 +349,11 @@ void APlayerShip::CrouchEnd()
 	TargetHeight *= 2.f;
 }
 
-
 void APlayerShip::CameraZoomIn()
 {
 	if (bIsDashing) { return; }
 	TargetSpringArmLength = FMath::Clamp(TargetSpringArmLength - 200.f, 1000.f, 3500.f);
 }
-
 
 void APlayerShip::CameraZoomOut()
 {
@@ -353,19 +361,16 @@ void APlayerShip::CameraZoomOut()
 	TargetSpringArmLength = FMath::Clamp(TargetSpringArmLength + 200.f, 1000.f, 3500.f);
 }
 
-
 void APlayerShip::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!OtherActor || OtherActor == this || !OtherComponent) { return; }
 
 }
 
-
 void APlayerShip::EscPressed()
 {
 	FGenericPlatformMisc::RequestExit(false);
 }
-
 
 FRotator APlayerShip::GetSurfaceNormal()
 {
@@ -578,8 +583,6 @@ FRotator APlayerShip::GetSurfaceNormal()
 	return NewRotation;
 }
 
-
-
 FRotator APlayerShip::GetSurfaceNormalSimple() 
 {
 	const float RayCastLength = 4000.f;
@@ -658,7 +661,6 @@ FRotator APlayerShip::GetSurfaceNormalSimple()
 	return NewRotation;*/
 }
 
-
 float APlayerShip::CustomInterp(float Current, float Target, float DeltaTime, float InterpSpeed)
 {
 	if (!CustomCurve1) { return 0; }
@@ -704,4 +706,21 @@ float APlayerShip::CustomInterp2(float Current, float Target, float DeltaTime, f
 
 	// Return the next position
 	return Current + DeltaMove;
+}
+
+//Test
+void APlayerShip::TestHUDVariables()
+{
+	//Reduce Ammo when "O" is pressed
+	CurrentAmmo -= 1;
+}
+
+void APlayerShip::TimeAttackMode_Timer(float DeltaTime)
+{
+	DeltaTimeCount += DeltaTime;
+	if (DeltaTimeCount >= 1)
+	{
+		DeltaTimeCount = 0;
+		TimeCount -= 1;
+	}
 }
