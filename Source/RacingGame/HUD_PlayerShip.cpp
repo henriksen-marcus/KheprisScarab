@@ -19,6 +19,8 @@ void UHUD_PlayerShip::NativeOnInitialized()
 }
 void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {
+	SetHUDVisibility();
+
 	SetBarPercentage();
 	SetCurrency1_Display();
 	SetCurrency2_Display();
@@ -30,6 +32,61 @@ void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 //-------------- OWN FUNCTIONS --------------//
 
+
+void UHUD_PlayerShip::SetHUDVisibility()
+{
+	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (PlayerShip)
+	{
+		if (PlayerShip->Health_Display == true)
+			PlayerHealth_Bar->SetVisibility(ESlateVisibility::Visible);
+		else
+			PlayerHealth_Bar->SetVisibility(ESlateVisibility::Hidden);
+
+		if (PlayerShip->Ammo_Display == true)
+			Ammo_Bar->SetVisibility(ESlateVisibility::Visible);
+		else
+			Ammo_Bar->SetVisibility(ESlateVisibility::Hidden);
+
+		if (PlayerShip->Boost_Display == true)
+			Boost_Image->SetVisibility(ESlateVisibility::Visible);
+		else
+			Boost_Image->SetVisibility(ESlateVisibility::Hidden);
+
+		if (PlayerShip->Time_Display == true)
+			Time_Text->SetVisibility(ESlateVisibility::Visible);
+		else
+			Time_Text->SetVisibility(ESlateVisibility::Hidden);
+
+		if (PlayerShip->Currency1_Display == true)
+		{
+			Currency1_Image->SetVisibility(ESlateVisibility::Visible);
+			Currency1_Text->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			Currency1_Image->SetVisibility(ESlateVisibility::Hidden);
+			Currency1_Text->SetVisibility(ESlateVisibility::Hidden);
+		}
+
+		if (PlayerShip->Currency2_Display == true)
+		{
+			Currency2_Image->SetVisibility(ESlateVisibility::Visible);
+			Currency2_Text->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			Currency2_Image->SetVisibility(ESlateVisibility::Hidden);
+			Currency2_Text->SetVisibility(ESlateVisibility::Hidden);
+		}
+
+		
+
+		
+		
+	}
+	
+}
 
 void UHUD_PlayerShip::SetBarPercentage()
 {

@@ -237,4 +237,17 @@ public:
 		int TimeAdded{};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		float DeltaTimeCount{};
+
+	bool Health_Display{true};
+	bool Boost_Display{true};
+	bool Ammo_Display{true};
+	bool Time_Display{true};
+	bool Currency1_Display{true};
+	bool Currency2_Display{true};
+
+	bool Difficulty_Easy{false};
+	bool Difficulty_Normal{true};
+	bool Difficulty_Hard{false};
+
+	bool Sound{true};
 };

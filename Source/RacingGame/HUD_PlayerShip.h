@@ -18,6 +18,7 @@ class RACINGGAME_API UHUD_PlayerShip : public UUserWidget
 	virtual void NativeOnInitialized() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float DeltaTime);
 
+	void SetHUDVisibility();
 	void SetBarPercentage();
 	void SetCurrency1_Display();
 	void SetCurrency2_Display();
