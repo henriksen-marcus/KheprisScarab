@@ -19,6 +19,8 @@ APlayerShip::APlayerShip()
 	MaxAmmo = 20;
 	CurrentAmmo = MaxAmmo;
 	TimeCount = 60;
+	MaxBoost = 10;
+	TimeAdded = 15;
 
 
 	//------------------------------------------

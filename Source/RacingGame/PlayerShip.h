@@ -51,10 +51,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Curves")
 	UCurveFloat* JumpCurve;
 
+public:
 	/** How long the dash lasts */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float DashTimer{2.f};
 
+private:
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float MaxSpeedBoost{1.5f};
 
@@ -226,9 +228,13 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		bool BoostPickup{};
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		float MaxBoost{};
 
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		int TimeCount{};
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		int TimeAdded{};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		float DeltaTimeCount{};
 };
