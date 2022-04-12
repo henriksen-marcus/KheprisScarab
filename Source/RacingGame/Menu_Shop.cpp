@@ -26,7 +26,7 @@ void UMenu_Shop::NativeOnInitialized()
 	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
-		PlayerShip->Currency1 = 1000;
+		PlayerShip->Currency1 = 100;
 		PlayerShip->Currency2 = 3;
 	}
 
@@ -42,6 +42,7 @@ void UMenu_Shop::NativeOnInitialized()
 	AmmoShop_Button->OnClicked.AddDynamic(this, &UMenu_Shop::AmmoShop_Button_Clicked);
 	BoostShop_Button->OnClicked.AddDynamic(this, &UMenu_Shop::BoostShop_Button_Clicked);
 	TimeShop_Button->OnClicked.AddDynamic(this, &UMenu_Shop::TimeShop_Button_Clicked);
+	Back_Button->OnClicked.AddDynamic(this, &UMenu_Shop::Back_Button_Clicked);
 }
 void UMenu_Shop::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {
@@ -64,6 +65,11 @@ void UMenu_Shop::Currency_Dispaly()
 		Currency1_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(PlayerShip->Currency1)));
 		Currency2_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(PlayerShip->Currency2)));
 	}
+}
+
+void UMenu_Shop::Back_Button_Clicked()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), BackSound);
 }
 
 void UMenu_Shop::SetHealthUpgrade_Display()
@@ -121,11 +127,18 @@ void UMenu_Shop::HealthShop_Button_Clicked()
 			{
 				if (PlayerShip->Currency1 >= HealthUpgradeCost)
 				{
+					if (HealthUpgradeTier == 9)
+						UGameplayStatics::PlaySound2D(GetWorld(), LastUpgradeSound);
+					else
+						UGameplayStatics::PlaySound2D(GetWorld(), UpgradeSound);
+
 					PlayerShip->Currency1 -= HealthUpgradeCost;
 					HealthUpgradeTier += 1;
-					HealthUpgradeCost *= 1.3f;
+					HealthUpgradeCost += 1;
 					PlayerShip->MaxHealth += 1;
 				}
+				else
+					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound);
 			}
 		}
 	}
@@ -138,6 +151,8 @@ void UMenu_Shop::HealthShop_Button_Clicked()
 			{
 				HealthActivate = true;
 				PlayerShip->Currency2 -= 1;
+
+				UGameplayStatics::PlaySound2D(GetWorld(), UnlockSound);
 			}
 			else
 				UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound);
@@ -200,11 +215,18 @@ void UMenu_Shop::AmmoShop_Button_Clicked()
 			{
 				if (PlayerShip->Currency1 >= AmmoUpgradeCost)
 				{
+					if (AmmoUpgradeTier == 9)
+						UGameplayStatics::PlaySound2D(GetWorld(), LastUpgradeSound);
+					else
+						UGameplayStatics::PlaySound2D(GetWorld(), UpgradeSound);
+
 					PlayerShip->Currency1 -= AmmoUpgradeCost;
 					AmmoUpgradeTier += 1;
-					AmmoUpgradeCost *= 1.3f;
+					AmmoUpgradeCost += 1;
 					PlayerShip->MaxAmmo += 5;
 				}
+				else
+					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound);
 			}
 		}
 	}
@@ -217,6 +239,8 @@ void UMenu_Shop::AmmoShop_Button_Clicked()
 			{
 				AmmoActivate = true;
 				PlayerShip->Currency2 -= 1;
+
+				UGameplayStatics::PlaySound2D(GetWorld(), UnlockSound);
 			}
 			else
 				UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound);
@@ -279,11 +303,18 @@ void UMenu_Shop::BoostShop_Button_Clicked()
 			{
 				if (PlayerShip->Currency1 >= BoostUpgradeCost)
 				{
+					if (BoostUpgradeTier == 9)
+						UGameplayStatics::PlaySound2D(GetWorld(), LastUpgradeSound);
+					else
+						UGameplayStatics::PlaySound2D(GetWorld(), UpgradeSound);
+
 					PlayerShip->Currency1 -= BoostUpgradeCost;
 					BoostUpgradeTier += 1;
-					BoostUpgradeCost *= 1.3f;
+					BoostUpgradeCost += 1;
 					PlayerShip->DashTimer += 0.5f;
 				}
+				else
+					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound);
 			}
 		}
 	}
@@ -296,6 +327,8 @@ void UMenu_Shop::BoostShop_Button_Clicked()
 			{
 				BoostActivate = true;
 				PlayerShip->Currency2 -= 1;
+
+				UGameplayStatics::PlaySound2D(GetWorld(), UnlockSound);
 			}
 			else
 				UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound);
@@ -356,17 +389,20 @@ void UMenu_Shop::TimeShop_Button_Clicked()
 		{
 			if (TimeUpgradeTier < 10)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("BoostShop_Button_Clicked 2"));
-
 				if (PlayerShip->Currency1 >= TimeUpgradeCost)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("BoostShop_Button_Clicked 3"));
+					if (TimeUpgradeTier == 9)
+						UGameplayStatics::PlaySound2D(GetWorld(), LastUpgradeSound);
+					else
+						UGameplayStatics::PlaySound2D(GetWorld(), UpgradeSound);
 
 					PlayerShip->Currency1 -= TimeUpgradeCost;
 					TimeUpgradeTier += 1;
-					TimeUpgradeCost *= 1.3f;
-					PlayerShip->TimeAdded += 1.f;
+					TimeUpgradeCost += 1;
+					PlayerShip->TimeAdded += 2;
 				}
+				else
+					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound);
 			}
 		}
 	}
@@ -379,6 +415,8 @@ void UMenu_Shop::TimeShop_Button_Clicked()
 			{
 				TimeActivate = true;
 				PlayerShip->Currency2 -= 1;
+
+				UGameplayStatics::PlaySound2D(GetWorld(), UnlockSound);
 			}
 			else
 				UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound);

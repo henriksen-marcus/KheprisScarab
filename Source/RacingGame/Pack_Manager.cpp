@@ -4,6 +4,7 @@
 #include "Pack_Manager.h"
 #include "PlayerShip.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APack_Manager::APack_Manager()
@@ -67,6 +68,8 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (PlayerShip)
 			{
+				UGameplayStatics::PlaySound2D(GetWorld(), HealthPack_Sound);
+
 				PlayerShip->CurrentHealth = PlayerShip->MaxHealth;
 				UE_LOG(LogTemp, Warning, TEXT("Pack_Health | Max Health: %i"), PlayerShip->MaxHealth);
 				UE_LOG(LogTemp, Warning, TEXT("HealthPack - SUCCESS"));
@@ -76,6 +79,8 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (PlayerShip)
 			{
+				UGameplayStatics::PlaySound2D(GetWorld(), AmmoPack_Sound);
+
 				PlayerShip->CurrentAmmo = PlayerShip->MaxAmmo;
 				UE_LOG(LogTemp, Warning, TEXT("AmmoPack - SUCCESS"));
 			}
@@ -84,6 +89,8 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (PlayerShip)
 			{
+				UGameplayStatics::PlaySound2D(GetWorld(), BoostPack_Sound);
+
 				PlayerShip->BoostPickup = true;
 				UE_LOG(LogTemp, Warning, TEXT("BoostPack - SUCCESS"));
 			}
@@ -92,6 +99,8 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (PlayerShip)
 			{
+				UGameplayStatics::PlaySound2D(GetWorld(), Currency1_Sound);
+
 				PlayerShip->Currency1 += 1;
 				UE_LOG(LogTemp, Warning, TEXT("Currency1 - SUCCESS | %dp."), PlayerShip->Currency1);
 			}
@@ -100,6 +109,8 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (PlayerShip)
 			{
+				UGameplayStatics::PlaySound2D(GetWorld(), Currency2_Sound);
+
 				PlayerShip->Currency2 += 1;
 				UE_LOG(LogTemp, Warning, TEXT("Currency2 - SUCCESS | %dp."), PlayerShip->Currency2);
 			}
@@ -108,7 +119,9 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (PlayerShip)
 			{
-				PlayerShip->TimeCount += 15;
+				UGameplayStatics::PlaySound2D(GetWorld(), Time_Sound);
+
+				PlayerShip->TimeCount += PlayerShip->TimeAdded;
 				UE_LOG(LogTemp, Warning, TEXT("TimePack - SUCCESS"));
 			}
 		}

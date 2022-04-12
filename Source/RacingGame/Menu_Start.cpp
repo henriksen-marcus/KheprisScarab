@@ -5,6 +5,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Kismet/KismetStringLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 void UMenu_Start::NativeConstruct()
 {
@@ -36,15 +37,20 @@ void UMenu_Start::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 void UMenu_Start::Start_Button_Clickd()
 {
+	UGameplayStatics::PlaySound2D(GetWorld(), SelectSound);
 }
 void UMenu_Start::Shop_Button_Clickd()
 {
+	UGameplayStatics::PlaySound2D(GetWorld(), SelectSound);
 }
 void UMenu_Start::Settings_Button_Clickd()
 {
+	UGameplayStatics::PlaySound2D(GetWorld(), SelectSound);
 }
 void UMenu_Start::Quit_Button_Clickd()
 {
+	UGameplayStatics::PlaySound2D(GetWorld(), SelectSound);
+
 	TEnumAsByte<EQuitPreference::Type> Quit;
 	UKismetSystemLibrary::QuitGame(GetWorld(), 0, Quit, false);
 }

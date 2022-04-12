@@ -23,6 +23,9 @@ class RACINGGAME_API UMenu_Shop : public UUserWidget
 public:
 	void Currency_Dispaly();
 
+	UFUNCTION()
+		void Back_Button_Clicked();
+
 	UPROPERTY(meta = (BindWidget))
 		class UButton* Back_Button;
 	UPROPERTY(meta = (BindWidget))
@@ -30,6 +33,16 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Sound Effect")
 		USoundBase* ErrorSound;
+	UPROPERTY(EditAnywhere, Category = "Sound Effect")
+		USoundBase* UnlockSound;
+	UPROPERTY(EditAnywhere, Category = "Sound Effect")
+		USoundBase* UpgradeSound;
+	UPROPERTY(EditAnywhere, Category = "Sound Effect")
+		USoundBase* LastUpgradeSound;
+	UPROPERTY(EditAnywhere, Category = "Sound Effect")
+		USoundBase* NotEnoughMoneySound;
+	UPROPERTY(EditAnywhere, Category = "Sound Effect")
+		USoundBase* BackSound;
 
 	UPROPERTY(EditAnywhere, Category = "Upgrade Bar - Base")
 		UTexture2D* Base;
@@ -64,7 +77,7 @@ public:
 		class UTextBlock* MaxHealth_Text;
 
 	int HealthUpgradeTier{};
-	float HealthUpgradeCost{};
+	int HealthUpgradeCost{};
 
 	#pragma region Upgrade Health Texture
 	UPROPERTY(EditAnywhere, Category = "Upgrade Bar - Health")

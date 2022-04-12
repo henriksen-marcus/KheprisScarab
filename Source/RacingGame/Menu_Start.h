@@ -19,6 +19,9 @@ class RACINGGAME_API UMenu_Start : public UUserWidget
 	virtual void NativeTick(const FGeometry& MyGeometry, float DeltaTime);
 
 public:
+	UPROPERTY(EditAnywhere, Category = "Sound Effect")
+		USoundBase* SelectSound;
+
 	UFUNCTION()
 		void Start_Button_Clickd();
 	UFUNCTION()

@@ -16,10 +16,9 @@ APlayerShip::APlayerShip()
 	//Variables
 	MaxHealth = 5.f;
 	CurrentHealth = MaxHealth;
-	MaxAmmo = 20;
+	MaxAmmo = 10;
 	CurrentAmmo = MaxAmmo;
 	TimeCount = 60;
-	MaxBoost = 10;
 	TimeAdded = 15;
 
 

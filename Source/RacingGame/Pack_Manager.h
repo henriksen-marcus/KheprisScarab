@@ -70,4 +70,18 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Editable Variable")
 		bool TimePack;
 
+	//Collision Sound
+	UPROPERTY(EditAnywhere, Category = "Collision Sound")
+		USoundBase* HealthPack_Sound;
+	UPROPERTY(EditAnywhere, Category = "Collision Sound")
+		USoundBase* AmmoPack_Sound;
+	UPROPERTY(EditAnywhere, Category = "Collision Sound")
+		USoundBase* BoostPack_Sound;
+	UPROPERTY(EditAnywhere, Category = "Collision Sound")
+		USoundBase* Currency1_Sound;
+	UPROPERTY(EditAnywhere, Category = "Collision Sound")
+		USoundBase* Currency2_Sound;
+	UPROPERTY(EditAnywhere, Category = "Collision Sound")
+		USoundBase* Time_Sound;
+
 };

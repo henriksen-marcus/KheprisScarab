@@ -20,7 +20,12 @@ class RACINGGAME_API UMenu_Settings : public UUserWidget
 
 public:
 	UFUNCTION()
-		void Test_Button_Clickd();
+		void Back_Button_Clicked();
+
+	UPROPERTY(meta = (BindWidget))
+		class UButton* Back_Button;
+	UPROPERTY(EditAnywhere, Category = "Sound Effect")
+		USoundBase* BackSound;
 
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Back_Button_Text;
