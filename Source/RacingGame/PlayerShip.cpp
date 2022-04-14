@@ -86,8 +86,6 @@ APlayerShip::APlayerShip()
 	ThrustLocations.Emplace(Thrust2);
 	ThrustLocations.Emplace(Thrust3);
 	ThrustLocations.Emplace(Thrust4);*/
-	
-	MoveComp = CreateDefaultSubobject<UHoveringMovementComponent>(TEXT("HoverComponentMoveStuffLol"));
 }
 
 void APlayerShip::BeginPlay()

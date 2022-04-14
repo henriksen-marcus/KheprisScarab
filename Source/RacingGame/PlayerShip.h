@@ -7,7 +7,6 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
-#include "HoveringMovementComponent.h"
 #include "PlayerShip.generated.h"
 
 UCLASS()
@@ -110,9 +109,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	TSubclassOf<UCameraShakeBase> CamShake;
-
-	UPROPERTY()
-	UHoveringMovementComponent* MoveComp;
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);

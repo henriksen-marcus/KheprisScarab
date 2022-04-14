@@ -27,21 +27,33 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraVariables")
-	UCameraComponent* Camera;
+	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
+	UStaticMeshComponent* BaseMesh;
 	
-private:
 	/** Root replacement */
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
 	UBoxComponent* Root;
-
-	/** Ship main body */
-	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
-	UStaticMeshComponent* BaseMesh;
+	
+	
 
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
-	USpringArmComponent* SpringArm;
+	UCameraComponent* BackCamera;
 
+	UPROPERTY(EditAnywhere, Category = "CameraVariables")
+	UCameraComponent* FrontCamera;
+
+	UPROPERTY(EditAnywhere, Category = "CameraVariables")
+	USpringArmComponent* BackSpringArm;
+
+	UPROPERTY(EditAnywhere, Category = "CameraVariables")
+	USpringArmComponent* FrontSpringArm;
+
+	UPROPERTY(EditAnywhere, Category = "CameraVariables")
+	TSubclassOf<UCameraShakeBase> CamShake;
+
+
+	/* CURVES */
+	
 	UPROPERTY(EditAnywhere, Category = "Curves")
 	UCurveFloat* CustomCurve1;
 
@@ -49,14 +61,15 @@ private:
 	UCurveFloat* CustomCurve2;
 
 	UPROPERTY(EditAnywhere, Category = "Curves")
-	UCurveFloat* JumpCurve;
-
-	UPROPERTY(EditAnywhere, Category = "Curves")
 	UCurveFloat* HoverForceCurve;
 
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	int MaxAmmo{30};
+	UPROPERTY(EditAnywhere, Category = "Curves")
+	UCurveFloat* MinusHoverForceCurve;
+	
 
+	
+	/* BLUEPRINT VARIABLES */
+	
 	/** How long the dash lasts */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float DashTimer{2.f};
@@ -73,11 +86,19 @@ private:
 
 	/** Target spring arm length, constantly interpolated towards */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float TargetSpringArmLength{2000.f};
+	float TargetSpringArmLength{1000.f};
 
 	/** The ship's target height above the ground */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float TargetHeight{1000.f};
+	float TargetHeight{800.f};
+
+	/** Seconds of inactivity needed for the spring arm to reset its rotation */
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float CameraResetTime{1.2f};
+
+	/** Changes how powerful the gravity affecting the ship is */
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float GravityScalar{1.f};
 
 	/** Whether debug vector math lines should be drawn */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
@@ -86,6 +107,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	bool bLogSpeed{false};
 
+
+	/* AUDIO */
+	
 	/** This controls the engine running sound */
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	UAudioComponent* AudioComp;
@@ -95,6 +119,9 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* BoostSound;
+
+
+	/* LOCATION PLACEHOLDERS */
 
 	UPROPERTY(EditAnywhere, Category = "Arrows")
 	UArrowComponent* Thrust1;
@@ -108,22 +135,14 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Arrows")
 	UArrowComponent* Thrust4;
 
-	/** Seconds of inactivity needed for the spring arm to reset its rotation */
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float CameraResetTime{1.2f};
-
-	UPROPERTY(EditAnywhere, Category = "CameraVariables")
-	TSubclassOf<UCameraShakeBase> CamShake;
-
-	UPROPERTY()
-	UHoveringMovementComponent* MoveComp;
-
-	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	UHoveringMovementComponent* MovementComponent;
 	
 
 	// ---------- Functions ---------- //
 	
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
 	/** Controls the forward movement of the root and cosmetic mesh rotation effect */
 	void Forward(float Value);
@@ -145,15 +164,23 @@ private:
 
 	void CameraZoomIn();
 	void CameraZoomOut();
-	
-	/** Returns the rotation from the ships current to target rotation, where the target rotation is
-	 * the cross-product of the vectors between the four raycast hit locations.
-	 * Basically it gets the rotation that the object should have relative to the surface beneath. */
-	FRotator GetSurfaceNormal();
+
+	/** Switch between front and back camera/look behind */
+	void CameraSwap();
+
+	void MovementUpdate();
+
+	/**
+	 *  Adds force at one of the 4 thrust locations.
+	 *  @param End			Hit location of the raycast.
+	 *  @param Num			Which of the four thrust locations to apply the thrust force.
+	 */
+	void AddForce(FVector_NetQuantize End, int Num) const;
+
 	
 	// ---------- Variables ---------- //
 	
-	bool bPitchHasInput{};
+	bool bForwardHasInput{};
 	bool bRollHasInput{};
 
 	float NextRollPosition{};
@@ -163,6 +190,7 @@ private:
 	/** Decides how much the root should move additionally, per tick */
 	FVector LocalMove = FVector::ZeroVector;
 
+	/** The actual value that is multiplied with the speed. Will copy MaxSpeedBoost when Dash() is used. */
 	float SpeedBoost{1.f};
 	
 	bool bIsDashing{};
@@ -172,31 +200,30 @@ private:
 	float YawMove{};
 	
 	FRotator SpringArmRotTarget = FRotator::ZeroRotator;
-	
-	bool bLowThreshold = false;
+
+	/** Takes the time for how long the camera movement has been idle */
 	float CameraCenteringTimer{};
-
-	/** Increases the longer the player in in the air, decides how fast the Z location decreases */
-	float FallSpeed{1.f};
-
-	/** Decides what curve value the FallSpeed interpolation should be at */
-	float FallTimer{};
-
+	
 	/** Number that the engine sound pitch is multiplied with */
 	float PitchMultiplier{1.f};
 
 	float JumpTimer{};
-	
-	FVector TargetLocation = FVector::ZeroVector;
+
+	/** The location the player spawns at, aka the position of the player start */
 	FVector InitialLocation;
+	
 	float InitialTargetHeight{};
-	float LocationInterpolationSpeed{10.f};
-	float DistanceFromGround{1000.f};
-	
+	float DistanceFromGround{500.f};
+	float Gravity{};
+
+	/** The amount of force to be applied the next tick */
 	FVector Force = FVector::ZeroVector;
-	FVector RForce = FVector::ZeroVector;
-	
+
+	/** Well, it's... the ships weight. */
 	float ShipWeight{};
 
-	TArray<float>ForceArray;
+	float InitialLinearDamping{};
+
+	float ForwardsSpeed{5500.f};
+	float ActualSpeed{};
 };
