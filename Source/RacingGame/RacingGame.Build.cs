@@ -8,9 +8,9 @@ public class RacingGame : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" , "AnimGraphRuntime"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" , "AnimGraphRuntime", "Niagara"});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		//PrivateDependencyModuleNames.AddRange(new string[] {  });
 
 		//Codeblock gotten from https://forums.unrealengine.com/t/faster-compile-times/148765/3
 		PrivatePCHHeaderFile = "MaulProtoPrecompiled.h";
