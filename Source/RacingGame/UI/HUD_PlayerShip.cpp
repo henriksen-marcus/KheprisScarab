@@ -2,7 +2,7 @@
 
 
 #include "HUD_PlayerShip.h"
-#include "../Vehicles/PlayerShip.h"
+#include "../Vehicles/PlayerShipPhysics.h"
 #include <Components/ProgressBar.h>
 #include <Components/TextBlock.h>
 #include "Kismet/KismetStringLibrary.h"
@@ -35,7 +35,7 @@ void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 void UHUD_PlayerShip::SetHUDVisibility()
 {
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (PlayerShip->Health_Display == true)
@@ -90,7 +90,7 @@ void UHUD_PlayerShip::SetHUDVisibility()
 
 void UHUD_PlayerShip::SetBarPercentage()
 {
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		Player_Precentage = PlayerShip->CurrentHealth / PlayerShip->MaxHealth;
@@ -100,7 +100,7 @@ void UHUD_PlayerShip::SetBarPercentage()
 
 void UHUD_PlayerShip::SetCurrency1_Display()
 {
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		FString PlayerCurrency1 = UKismetStringLibrary::Conv_IntToString(PlayerShip->Currency1);
@@ -109,7 +109,7 @@ void UHUD_PlayerShip::SetCurrency1_Display()
 }
 void UHUD_PlayerShip::SetCurrency2_Display()
 {
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		FString PlayerCurrency2 = UKismetStringLibrary::Conv_IntToString(PlayerShip->Currency2);
@@ -119,7 +119,7 @@ void UHUD_PlayerShip::SetCurrency2_Display()
 
 void UHUD_PlayerShip::Boost_Display()
 {
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (PlayerShip->BoostPickup == true)
@@ -135,7 +135,7 @@ void UHUD_PlayerShip::Boost_Display()
 
 void UHUD_PlayerShip::SetAmmoPrecentage()
 {
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		PlayerShip->AmmoPrecentage = PlayerShip->CurrentAmmo / PlayerShip->MaxAmmo;
@@ -145,10 +145,10 @@ void UHUD_PlayerShip::SetAmmoPrecentage()
 
 void UHUD_PlayerShip::SetTimer_Display()
 {
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	APlayerShipPhysics* PlayerShipPhysics = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (PlayerShipPhysics)
 	{
-		FString Timer = UKismetStringLibrary::Conv_IntToString(PlayerShip->TimeCount);
+		FString Timer = UKismetStringLibrary::Conv_IntToString(PlayerShipPhysics->TimeCount);
 		Time_Text->SetText(FText::FromString(Timer));
 	}
 }

@@ -2,7 +2,7 @@
 
 
 #include "Menu_Shop.h"
-#include "../Vehicles/PlayerShip.h"
+#include "../Vehicles/PlayerShipPhysics.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
@@ -23,7 +23,7 @@ void UMenu_Shop::NativeOnInitialized()
 	BoostUpgradeCost = 2;
 	TimeUpgradeCost = 2;
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		PlayerShip->Currency1 = 100;
@@ -59,7 +59,7 @@ void UMenu_Shop::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 void UMenu_Shop::Currency_Dispaly()
 {
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		Currency1_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(PlayerShip->Currency1)));
@@ -105,7 +105,7 @@ void UMenu_Shop::SetHealthUpgrade_Display()
 		Health_Info_Text->SetText(FText::FromString("Your Health has reached its max"));
 	}
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (HealthActivate == true)
@@ -120,7 +120,7 @@ void UMenu_Shop::HealthShop_Button_Clicked()
 {
 	if (HealthActivate == true)
 	{
-		APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 		if (PlayerShip)
 		{
 			if (HealthUpgradeTier < 10)
@@ -144,7 +144,7 @@ void UMenu_Shop::HealthShop_Button_Clicked()
 	}
 	else
 	{
-		APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 		if (PlayerShip)
 		{
 			if (PlayerShip->Currency2 >= 1)
@@ -193,7 +193,7 @@ void UMenu_Shop::SetAmmoUpgrade_Display()
 		Ammo_Info_Text->SetText(FText::FromString("Your Ammo has reached its max"));
 	}
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (AmmoActivate == true)
@@ -208,7 +208,7 @@ void UMenu_Shop::AmmoShop_Button_Clicked()
 {
 	if (AmmoActivate == true)
 	{
-		APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 		if (PlayerShip)
 		{
 			if (AmmoUpgradeTier < 10)
@@ -232,7 +232,7 @@ void UMenu_Shop::AmmoShop_Button_Clicked()
 	}
 	else
 	{
-		APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 		if (PlayerShip)
 		{
 			if (PlayerShip->Currency2 >= 1)
@@ -281,7 +281,7 @@ void UMenu_Shop::SetBoostUpgrade_Display()
 		Boost_Info_Text->SetText(FText::FromString("Your Boost has reached its max"));
 	}
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (BoostActivate == true)
@@ -296,7 +296,7 @@ void UMenu_Shop::BoostShop_Button_Clicked()
 {
 	if (BoostActivate == true)
 	{
-		APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 		if (PlayerShip)
 		{
 			if (BoostUpgradeTier < 10)
@@ -320,7 +320,7 @@ void UMenu_Shop::BoostShop_Button_Clicked()
 	}
 	else
 	{
-		APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 		if (PlayerShip)
 		{
 			if (PlayerShip->Currency2 >= 1)
@@ -369,7 +369,7 @@ void UMenu_Shop::SetTimeUpgrade_Display()
 		Time_Info_Text->SetText(FText::FromString("Your Extra Time has reached its max"));
 	}
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (TimeActivate == true)
@@ -384,7 +384,7 @@ void UMenu_Shop::TimeShop_Button_Clicked()
 {
 	if (TimeActivate == true)
 	{
-		APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 		if (PlayerShip)
 		{
 			if (TimeUpgradeTier < 10)
@@ -408,7 +408,7 @@ void UMenu_Shop::TimeShop_Button_Clicked()
 	}
 	else
 	{
-		APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 		if (PlayerShip)
 		{
 			if (PlayerShip->Currency2 >= 1)

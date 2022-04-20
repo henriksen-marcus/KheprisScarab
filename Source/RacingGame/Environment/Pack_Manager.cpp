@@ -2,7 +2,7 @@
 
 
 #include "Pack_Manager.h"
-#include "../Vehicles/PlayerShip.h"
+#include "../Vehicles/PlayerShipPhysics.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -60,9 +60,9 @@ void APack_Manager::Tick(float DeltaTime)
 void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	//Collide with SpaceShip
-	if (OtherActor->IsA(APlayerShip::StaticClass()))
+	if (OtherActor->IsA(APlayerShipPhysics::StaticClass()))
 	{
-		APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 
 		if (HealthPack)
 		{

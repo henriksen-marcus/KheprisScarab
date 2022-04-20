@@ -130,7 +130,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 	//Variables
 	MaxHealth = 5.f;
 	CurrentHealth = MaxHealth;
-	MaxAmmo = 50; // Is now 50 - Marcus
+	MaxAmmo = 10; // Is now 50 - Marcus
 	CurrentAmmo = MaxAmmo;
 	TimeCount = 60;
 	TimeAdded = 15;
@@ -323,8 +323,8 @@ void APlayerShipPhysics::Shoot(const float Value)
 
 	ShootTimer = 0.f;
 
-	if (Ammo > 0) {
-		--Ammo;
+	if (CurrentAmmo > 0) {
+		--CurrentAmmo;
 		if (GetWorld())
 		{
 			// Spawn bullet
@@ -362,7 +362,7 @@ void APlayerShipPhysics::Reload()
 	// Lambda expression
 	TimerDelegate.BindLambda([&]
 		{
-			Ammo = MaxAmmo;
+			CurrentAmmo = MaxAmmo;
 			bIsReloading = false;
 		});
 
@@ -371,40 +371,45 @@ void APlayerShipPhysics::Reload()
 
 void APlayerShipPhysics::Dash() 
 {
-	if (bIsDashing) 
+	if (BoostPickup == true)
 	{
-		return;
-	}
+		BoostPickup = false;
 
-	static float CamFovChange = 15.f;
-	static float SpringArmChange = 400.f;
-
-	TargetCameraFOV += CamFovChange;
-	TargetSpringArmLength -= SpringArmChange;
-	BackSpringArm->CameraLagSpeed = 35.f;
-	BackSpringArm->CameraRotationLagSpeed = 20.f;
-	SpeedBoost = MaxSpeedBoost;
-	bIsDashing = true;
-
-	if (BoostSound)
-	{
-		UGameplayStatics::PlaySound2D(GetWorld(), BoostSound, 0.5f);
-	}
-
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDelegate;
-	// Lambda expression
-	TimerDelegate.BindLambda([&]
+		if (bIsDashing)
 		{
-			TargetCameraFOV -= CamFovChange;
-			TargetSpringArmLength += SpringArmChange;
-			BackSpringArm->CameraLagSpeed = 30.f;
-			BackSpringArm->CameraRotationLagSpeed = 15.f;
-			SpeedBoost = 1.f;
-			bIsDashing = false;
-		});
+			return;
+		}
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, DashTimer, false);
+		static float CamFovChange = 15.f;
+		static float SpringArmChange = 400.f;
+
+		TargetCameraFOV += CamFovChange;
+		TargetSpringArmLength -= SpringArmChange;
+		BackSpringArm->CameraLagSpeed = 35.f;
+		BackSpringArm->CameraRotationLagSpeed = 20.f;
+		SpeedBoost = MaxSpeedBoost;
+		bIsDashing = true;
+
+		if (BoostSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), BoostSound, 0.5f);
+		}
+
+		FTimerHandle TimerHandle;
+		FTimerDelegate TimerDelegate;
+		// Lambda expression
+		TimerDelegate.BindLambda([&]
+			{
+				TargetCameraFOV -= CamFovChange;
+				TargetSpringArmLength += SpringArmChange;
+				BackSpringArm->CameraLagSpeed = 30.f;
+				BackSpringArm->CameraRotationLagSpeed = 15.f;
+				SpeedBoost = 1.f;
+				bIsDashing = false;
+			});
+
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, DashTimer, false);
+	}
 }
 
 void APlayerShipPhysics::Jump()

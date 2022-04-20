@@ -2,7 +2,7 @@
 
 
 #include "Menu_Settings.h"
-#include "../Vehicles/PlayerShip.h"
+#include "../Vehicles/PlayerShipPhysics.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/Button.h"
@@ -48,7 +48,7 @@ void UMenu_Settings::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 void UMenu_Settings::SetBoxesSelected()
 {
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		#pragma region HUD Display
@@ -129,7 +129,7 @@ void UMenu_Settings::HealthDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (PlayerShip->Health_Display == true)
@@ -142,7 +142,7 @@ void UMenu_Settings::AmmoDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (PlayerShip->Ammo_Display == true)
@@ -155,7 +155,7 @@ void UMenu_Settings::BoostDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (PlayerShip->Boost_Display == true)
@@ -168,7 +168,7 @@ void UMenu_Settings::TimeDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (PlayerShip->Time_Display == true)
@@ -181,7 +181,7 @@ void UMenu_Settings::Currency1Display_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (PlayerShip->Currency1_Display == true)
@@ -194,7 +194,7 @@ void UMenu_Settings::Currency2Display_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (PlayerShip->Currency2_Display == true)
@@ -208,7 +208,7 @@ void UMenu_Settings::EasyDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		PlayerShip->Difficulty_Easy = true;
@@ -222,7 +222,7 @@ void UMenu_Settings::NormalDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		PlayerShip->Difficulty_Easy = false;
@@ -236,7 +236,7 @@ void UMenu_Settings::HardDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		PlayerShip->Difficulty_Easy = false;
@@ -249,7 +249,7 @@ void UMenu_Settings::HardDisplay_Button_Clicked()
 
 void UMenu_Settings::Sound_Button_Clicked()
 {
-	APlayerShip* PlayerShip = Cast<APlayerShip>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (PlayerShip)
 	{
 		if (PlayerShip->Sound == true)

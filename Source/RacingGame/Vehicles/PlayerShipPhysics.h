@@ -236,7 +236,7 @@ public:
 	float ForwardsSpeed{4500.f};
 	float ActualSpeed{};
 	float ShootTimer{};
-	uint8 Ammo{50}; // This value can only go from 0-255
+	uint8 CurrentAmmo{50}; // This value can only go from 0-255
 
 
 	//Upgradeable Variables by Adrian
@@ -245,33 +245,32 @@ public:
 	void TimeAttackMode_Timer(float DeltaTime);
 
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	float CurrentHealth{};
+		float CurrentHealth{};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	float MaxHealth{};
+		float MaxHealth{};
 
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	float CurrentAmmo{};
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	float MaxAmmo{};
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	float AmmoPrecentage{};
+		float MaxAmmo{};
 
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	int Currency1{};
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	int Currency2{};
+		float AmmoPrecentage{};
 
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	bool BoostPickup{};
+		int Currency1{};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	float MaxBoost{};
+		int Currency2{};
 
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	int TimeCount{};
+		bool BoostPickup{};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	int TimeAdded{};
+		float MaxBoost{};
+
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	float DeltaTimeCount{};
+		int TimeCount{};
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		int TimeAdded{};
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		float DeltaTimeCount{};
 
 	bool Health_Display{true};
 	bool Boost_Display{true};
