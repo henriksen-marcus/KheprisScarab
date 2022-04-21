@@ -69,8 +69,8 @@ public:
 	/* BLUEPRINT VARIABLES */
 	
 	/** How long the dash lasts */
-	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float DashTimer{2.f};
+	//UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	//float DashTimer{2.f};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float MaxSpeedBoost{1.5f};
@@ -240,49 +240,49 @@ public:
 
 
 	//Upgradeable Variables by Adrian
-	public:
-	void TestHUDVariables();
-	void TimeAttackMode_Timer(float DeltaTime);
+public:
+	//void TestHUDVariables();
+	//void TimeAttackMode_Timer(float DeltaTime);
 
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		float CurrentHealth{};
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		float MaxHealth{};
+	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+	//	float CurrentHealth{};
+	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+	//	float MaxHealth{};
 
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		float MaxAmmo{};
+	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+	//	float MaxAmmo{};
 
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		float AmmoPrecentage{};
+	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+	//	float AmmoPrecentage{};
 
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		int Currency1{};
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		int Currency2{};
+	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+	//	int Currency1{};
+	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+	//	int Currency2{};
 
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		bool BoostPickup{};
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		float MaxBoost{};
+	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+	//	bool BoostPickup{};
+	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+	//	float MaxBoost{};
 
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		int TimeCount{};
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		int TimeAdded{};
-	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		float DeltaTimeCount{};
+	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+	//	int TimeCount{};
+	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+	//	int TimeAdded{};
+	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+	//	float DeltaTimeCount{};
 
-	bool Health_Display{true};
-	bool Boost_Display{true};
-	bool Ammo_Display{true};
-	bool Time_Display{true};
-	bool Currency1_Display{true};
-	bool Currency2_Display{true};
+	//bool Health_Display{true};
+	//bool Boost_Display{true};
+	//bool Ammo_Display{true};
+	//bool Time_Display{true};
+	//bool Currency1_Display{true};
+	//bool Currency2_Display{true};
 
-	bool Difficulty_Easy{false};
-	bool Difficulty_Normal{true};
-	bool Difficulty_Hard{false};
+	//bool Difficulty_Easy{false};
+	//bool Difficulty_Normal{true};
+	//bool Difficulty_Hard{false};
 
-	bool Sound{true};
+	//bool Sound{true};
 	
 };

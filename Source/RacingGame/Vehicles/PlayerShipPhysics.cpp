@@ -2,6 +2,7 @@
 
 
 #include "PlayerShipPhysics.h"
+#include "../Global_Variables.h"
 #include "../Other/Bullet.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -128,12 +129,12 @@ APlayerShipPhysics::APlayerShipPhysics()
 
 	/** Adrian */
 	//Variables
-	MaxHealth = 5.f;
-	CurrentHealth = MaxHealth;
-	MaxAmmo = 10; // Is now 50 - Marcus
-	CurrentAmmo = MaxAmmo;
-	TimeCount = 60;
-	TimeAdded = 15;
+	//MaxHealth = 5.f;
+	//CurrentHealth = MaxHealth;
+	//MaxAmmo = 10; // Is now 50 - Marcus
+	//CurrentAmmo = MaxAmmo;
+	//TimeCount = 60;
+	//TimeAdded = 15;
 }
 
 
@@ -322,24 +323,28 @@ void APlayerShipPhysics::Shoot(const float Value)
 	if (!Value || ShootTimer < 0.085f) { return; }
 
 	ShootTimer = 0.f;
-
-	if (CurrentAmmo > 0) {
-		--CurrentAmmo;
-		if (GetWorld())
-		{
-			// Spawn bullet
-			ABullet* BulletRef = GetWorld()->SpawnActor<ABullet>(BulletClassToSpawn, BulletSpawnPoint->GetComponentLocation(), GetActorRotation());
-			if (BulletRef)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		if (GameInstance->CurrentAmmo > 0) {
+			--GameInstance->CurrentAmmo;
+			if (GetWorld())
 			{
-				BulletRef->SetBulletOwner(this);
+				// Spawn bullet
+				ABullet* BulletRef = GetWorld()->SpawnActor<ABullet>(BulletClassToSpawn, BulletSpawnPoint->GetComponentLocation(), GetActorRotation());
+				if (BulletRef)
+				{
+					BulletRef->SetBulletOwner(this);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("BulletRef not valid!"))
+				}
+				Root->AddImpulse(-GetActorForwardVector() * 100000.f);
 			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("BulletRef not valid!"))
-			}
-			Root->AddImpulse(-GetActorForwardVector() * 100000.f);
 		}
 	}
+	
 	/*else if (GunClickSound) 
 	{
 		UGameplayStatics::PlaySound2D(GetWorld(), GunClickSound, 0.8f);
@@ -362,18 +367,27 @@ void APlayerShipPhysics::Reload()
 	// Lambda expression
 	TimerDelegate.BindLambda([&]
 		{
-			CurrentAmmo = MaxAmmo;
-			bIsReloading = false;
+			UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+			if (GameInstance)
+			{
+				GameInstance->CurrentAmmo = GameInstance->MaxAmmo;
+				bIsReloading = false;
+			}
 		});
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, DashTimer, false);
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, GameInstance->DashTimer, false);
+	}
 }
 
 void APlayerShipPhysics::Dash() 
 {
-	if (BoostPickup == true)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->BoostPickup == true)
 	{
-		BoostPickup = false;
+		GameInstance->BoostPickup = false;
 
 		if (bIsDashing)
 		{
@@ -408,7 +422,10 @@ void APlayerShipPhysics::Dash()
 				bIsDashing = false;
 			});
 
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, DashTimer, false);
+		if (GameInstance)
+		{
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, GameInstance->DashTimer, false);
+		}
 	}
 }
 

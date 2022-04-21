@@ -2,6 +2,7 @@
 
 
 #include "HUD_PlayerShip.h"
+#include "../Global_Variables.h"
 #include "../Vehicles/PlayerShipPhysics.h"
 #include <Components/ProgressBar.h>
 #include <Components/TextBlock.h>
@@ -35,30 +36,30 @@ void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 void UHUD_PlayerShip::SetHUDVisibility()
 {
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		if (PlayerShip->Health_Display == true)
+		if (GameInstance->Health_Display == true)
 			PlayerHealth_Bar->SetVisibility(ESlateVisibility::Visible);
 		else
 			PlayerHealth_Bar->SetVisibility(ESlateVisibility::Hidden);
 
-		if (PlayerShip->Ammo_Display == true)
+		if (GameInstance->Ammo_Display == true)
 			Ammo_Bar->SetVisibility(ESlateVisibility::Visible);
 		else
 			Ammo_Bar->SetVisibility(ESlateVisibility::Hidden);
 
-		if (PlayerShip->Boost_Display == true)
+		if (GameInstance->Boost_Display == true)
 			Boost_Image->SetVisibility(ESlateVisibility::Visible);
 		else
 			Boost_Image->SetVisibility(ESlateVisibility::Hidden);
 
-		if (PlayerShip->Time_Display == true)
+		if (GameInstance->Time_Display == true)
 			Time_Text->SetVisibility(ESlateVisibility::Visible);
 		else
 			Time_Text->SetVisibility(ESlateVisibility::Hidden);
 
-		if (PlayerShip->Currency1_Display == true)
+		if (GameInstance->Currency1_Display == true)
 		{
 			Currency1_Image->SetVisibility(ESlateVisibility::Visible);
 			Currency1_Text->SetVisibility(ESlateVisibility::Visible);
@@ -69,7 +70,7 @@ void UHUD_PlayerShip::SetHUDVisibility()
 			Currency1_Text->SetVisibility(ESlateVisibility::Hidden);
 		}
 
-		if (PlayerShip->Currency2_Display == true)
+		if (GameInstance->Currency2_Display == true)
 		{
 			Currency2_Image->SetVisibility(ESlateVisibility::Visible);
 			Currency2_Text->SetVisibility(ESlateVisibility::Visible);
@@ -79,50 +80,44 @@ void UHUD_PlayerShip::SetHUDVisibility()
 			Currency2_Image->SetVisibility(ESlateVisibility::Hidden);
 			Currency2_Text->SetVisibility(ESlateVisibility::Hidden);
 		}
-
-		
-
-		
-		
 	}
-	
 }
 
 void UHUD_PlayerShip::SetBarPercentage()
 {
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		Player_Precentage = PlayerShip->CurrentHealth / PlayerShip->MaxHealth;
+		Player_Precentage = GameInstance->CurrentHealth / GameInstance->MaxHealth;
 		PlayerHealth_Bar->SetPercent(Player_Precentage);
 	}
 }
 
 void UHUD_PlayerShip::SetCurrency1_Display()
 {
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		FString PlayerCurrency1 = UKismetStringLibrary::Conv_IntToString(PlayerShip->Currency1);
+		FString PlayerCurrency1 = UKismetStringLibrary::Conv_IntToString(GameInstance->Currency1);
 		Currency1_Text->SetText(FText::FromString(PlayerCurrency1));
 	}
 }
 void UHUD_PlayerShip::SetCurrency2_Display()
 {
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		FString PlayerCurrency2 = UKismetStringLibrary::Conv_IntToString(PlayerShip->Currency2);
+		FString PlayerCurrency2 = UKismetStringLibrary::Conv_IntToString(GameInstance->Currency2);
 		Currency2_Text->SetText(FText::FromString(PlayerCurrency2));
 	}
 }
 
 void UHUD_PlayerShip::Boost_Display()
 {
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		if (PlayerShip->BoostPickup == true)
+		if (GameInstance->BoostPickup == true)
 		{
 			Boost_Image->SetBrushFromTexture(Boost_Active);
 		}
@@ -135,20 +130,20 @@ void UHUD_PlayerShip::Boost_Display()
 
 void UHUD_PlayerShip::SetAmmoPrecentage()
 {
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		PlayerShip->AmmoPrecentage = PlayerShip->CurrentAmmo / PlayerShip->MaxAmmo;
-		Ammo_Bar->SetPercent(PlayerShip->AmmoPrecentage);
+		GameInstance->AmmoPrecentage = GameInstance->CurrentAmmo / GameInstance->MaxAmmo;
+		Ammo_Bar->SetPercent(GameInstance->AmmoPrecentage);
 	}
 }
 
 void UHUD_PlayerShip::SetTimer_Display()
 {
-	APlayerShipPhysics* PlayerShipPhysics = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShipPhysics)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		FString Timer = UKismetStringLibrary::Conv_IntToString(PlayerShipPhysics->TimeCount);
+		FString Timer = UKismetStringLibrary::Conv_IntToString(GameInstance->TimeCount);
 		Time_Text->SetText(FText::FromString(Timer));
 	}
 }

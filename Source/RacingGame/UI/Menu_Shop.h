@@ -59,7 +59,7 @@ public:
 		class UTextBlock* Currency2_Text;
 
 	#pragma region Health Upgrade
-	bool HealthActivate{};
+	//bool HealthActivate{};
 
 	void SetHealthUpgrade_Display();
 
@@ -76,8 +76,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* MaxHealth_Text;
 
-	int HealthUpgradeTier{};
-	int HealthUpgradeCost{};
+	//int HealthUpgradeTier{};
+	//int HealthUpgradeCost{2};
 
 	#pragma region Upgrade Health Texture
 	UPROPERTY(EditAnywhere, Category = "Upgrade Bar - Health")
@@ -104,7 +104,7 @@ public:
 	#pragma endregion
 
 	#pragma region Ammo Upgrade
-	bool AmmoActivate{};
+	//bool AmmoActivate{};
 
 	void SetAmmoUpgrade_Display();
 
@@ -121,8 +121,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* MaxAmmo_Text;
 
-	int AmmoUpgradeTier{};
-	float AmmoUpgradeCost{};
+	//int AmmoUpgradeTier{};
+	//float AmmoUpgradeCost{2};
 
 	#pragma region Upgrade Ammo Texture
 	UPROPERTY(EditAnywhere, Category = "Upgrade Bar - Ammo")
@@ -149,7 +149,7 @@ public:
 	#pragma endregion
 
 	#pragma region Boost
-	bool BoostActivate{};
+	//bool BoostActivate{};
 
 	void SetBoostUpgrade_Display();
 
@@ -166,8 +166,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* MaxBoost_Text;
 
-	int BoostUpgradeTier{};
-	float BoostUpgradeCost{};
+	//int BoostUpgradeTier{};
+	//float BoostUpgradeCost{2};
 
 	#pragma region Upgrade Boost Texture
 	UPROPERTY(EditAnywhere, Category = "Upgrade Bar - Boost")
@@ -194,7 +194,7 @@ public:
 	#pragma endregion
 
 	#pragma region Checkpoint Time
-	bool TimeActivate{};
+	//bool TimeActivate{};
 
 	void SetTimeUpgrade_Display();
 
@@ -211,8 +211,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* MaxTime_Text;
 
-	int TimeUpgradeTier{};
-	float TimeUpgradeCost{};
+	//int TimeUpgradeTier{};
+	//float TimeUpgradeCost{2};
 
 	#pragma region Upgrade Time Texture
 	UPROPERTY(EditAnywhere, Category = "Upgrade Bar - Time")

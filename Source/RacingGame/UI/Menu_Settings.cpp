@@ -2,6 +2,7 @@
 
 
 #include "Menu_Settings.h"
+#include "../Global_Variables.h"
 #include "../Vehicles/PlayerShipPhysics.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
@@ -48,55 +49,55 @@ void UMenu_Settings::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 void UMenu_Settings::SetBoxesSelected()
 {
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
 		#pragma region HUD Display
-		if (PlayerShip->Health_Display == true)
+		if (GameInstance->Health_Display == true)
 			HealthDisplay_Button_Image->SetBrushFromTexture(Box_Selected);
 		else
 			HealthDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
 
-		if (PlayerShip->Ammo_Display == true)
+		if (GameInstance->Ammo_Display == true)
 			AmmoDisplay_Button_Image->SetBrushFromTexture(Box_Selected);
 		else
 			AmmoDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
 
-		if (PlayerShip->Boost_Display == true)
+		if (GameInstance->Boost_Display == true)
 			BoostDisplay_Button_Image->SetBrushFromTexture(Box_Selected);
 		else
 			BoostDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
 
-		if (PlayerShip->Time_Display == true)
+		if (GameInstance->Time_Display == true)
 			TimeDisplay_Button_Image->SetBrushFromTexture(Box_Selected);
 		else
 			TimeDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
 
-		if (PlayerShip->Currency1_Display == true)
+		if (GameInstance->Currency1_Display == true)
 			Currency1Display_Button_Image->SetBrushFromTexture(Box_Selected);
 		else
 			Currency1Display_Button_Image->SetBrushFromTexture(Box_Unselected);
 
-		if (PlayerShip->Currency2_Display == true)
+		if (GameInstance->Currency2_Display == true)
 			Currency2Display_Button_Image->SetBrushFromTexture(Box_Selected);
 		else
 			Currency2Display_Button_Image->SetBrushFromTexture(Box_Unselected);
 		#pragma endregion
 
 		#pragma region Difficulty
-		if (PlayerShip->Difficulty_Easy == true)
+		if (GameInstance->Difficulty_Easy == true)
 		{
 			EasyDisplay_Button_Image->SetBrushFromTexture(Box_Selected);
 			NormalDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
 			HardDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
 		}
-		else if (PlayerShip->Difficulty_Normal == true)
+		else if (GameInstance->Difficulty_Normal == true)
 		{
 			EasyDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
 			NormalDisplay_Button_Image->SetBrushFromTexture(Box_Selected);
 			HardDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
 		}
-		else if (PlayerShip->Difficulty_Hard == true)
+		else if (GameInstance->Difficulty_Hard == true)
 		{
 			EasyDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
 			NormalDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
@@ -105,7 +106,7 @@ void UMenu_Settings::SetBoxesSelected()
 		#pragma endregion
 
 		#pragma region Sound
-		if (PlayerShip->Sound == true)
+		if (GameInstance->Sound == true)
 		{
 			Sound_Button_Image->SetBrushFromTexture(Box_Selected);
 			Sound_Text->SetText(FText::FromString("On"));
@@ -125,82 +126,83 @@ void UMenu_Settings::Back_Button_Clicked()
 	UGameplayStatics::PlaySound2D(GetWorld(), BackSound);
 }
 
+//Edited to global variable
 void UMenu_Settings::HealthDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		if (PlayerShip->Health_Display == true)
-			PlayerShip->Health_Display = false;
+		if (GameInstance->Health_Display == true)
+			GameInstance->Health_Display = false;
 		else
-			PlayerShip->Health_Display = true;
+			GameInstance->Health_Display = true;
 	}
 }
 void UMenu_Settings::AmmoDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		if (PlayerShip->Ammo_Display == true)
-			PlayerShip->Ammo_Display = false;
+		if (GameInstance->Ammo_Display == true)
+			GameInstance->Ammo_Display = false;
 		else
-			PlayerShip->Ammo_Display = true;
+			GameInstance->Ammo_Display = true;
 	}
 }
 void UMenu_Settings::BoostDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		if (PlayerShip->Boost_Display == true)
-			PlayerShip->Boost_Display = false;
+		if (GameInstance->Boost_Display == true)
+			GameInstance->Boost_Display = false;
 		else
-			PlayerShip->Boost_Display = true;
+			GameInstance->Boost_Display = true;
 	}
 }
 void UMenu_Settings::TimeDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		if (PlayerShip->Time_Display == true)
-			PlayerShip->Time_Display = false;
+		if (GameInstance->Time_Display == true)
+			GameInstance->Time_Display = false;
 		else
-			PlayerShip->Time_Display = true;
+			GameInstance->Time_Display = true;
 	}
 }
 void UMenu_Settings::Currency1Display_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		if (PlayerShip->Currency1_Display == true)
-			PlayerShip->Currency1_Display = false;
+		if (GameInstance->Currency1_Display == true)
+			GameInstance->Currency1_Display = false;
 		else
-			PlayerShip->Currency1_Display = true;
+			GameInstance->Currency1_Display = true;
 	}
 }
 void UMenu_Settings::Currency2Display_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		if (PlayerShip->Currency2_Display == true)
-			PlayerShip->Currency2_Display = false;
+		if (GameInstance->Currency2_Display == true)
+			GameInstance->Currency2_Display = false;
 		else
-			PlayerShip->Currency2_Display = true;
+			GameInstance->Currency2_Display = true;
 	}
 }
 
@@ -208,54 +210,54 @@ void UMenu_Settings::EasyDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		PlayerShip->Difficulty_Easy = true;
-		PlayerShip->Difficulty_Normal = false;
-		PlayerShip->Difficulty_Hard = false;
+		GameInstance->Difficulty_Easy = true;
+		GameInstance->Difficulty_Normal = false;
+		GameInstance->Difficulty_Hard = false;
 
-		PlayerShip->TimeCount = 75;
+		GameInstance->TimeCount = 75;
 	}
 }
 void UMenu_Settings::NormalDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		PlayerShip->Difficulty_Easy = false;
-		PlayerShip->Difficulty_Normal = true;
-		PlayerShip->Difficulty_Hard = false;
+		GameInstance->Difficulty_Easy = false;
+		GameInstance->Difficulty_Normal = true;
+		GameInstance->Difficulty_Hard = false;
 
-		PlayerShip->TimeCount = 60;
+		GameInstance->TimeCount = 60;
 	}
 }
 void UMenu_Settings::HardDisplay_Button_Clicked()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		PlayerShip->Difficulty_Easy = false;
-		PlayerShip->Difficulty_Normal = false;
-		PlayerShip->Difficulty_Hard = true;
+		GameInstance->Difficulty_Easy = false;
+		GameInstance->Difficulty_Normal = false;
+		GameInstance->Difficulty_Hard = true;
 
-		PlayerShip->TimeCount = 45;
+		GameInstance->TimeCount = 45;
 	}
 }
 
 void UMenu_Settings::Sound_Button_Clicked()
 {
-	APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (PlayerShip)
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
 	{
-		if (PlayerShip->Sound == true)
-			PlayerShip->Sound = false;
+		if (GameInstance->Sound == true)
+			GameInstance->Sound = false;
 		else
-			PlayerShip->Sound = true;
+			GameInstance->Sound = true;
 	}
 	
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);

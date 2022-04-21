@@ -2,6 +2,7 @@
 
 
 #include "Pack_Manager.h"
+#include "../Global_Variables.h"
 #include "../Vehicles/PlayerShipPhysics.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -62,66 +63,66 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 	//Collide with SpaceShip
 	if (OtherActor->IsA(APlayerShipPhysics::StaticClass()))
 	{
-		APlayerShipPhysics* PlayerShip = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 
 		if (HealthPack)
 		{
-			if (PlayerShip)
+			if (GameInstance)
 			{
 				UGameplayStatics::PlaySound2D(GetWorld(), HealthPack_Sound);
 
-				PlayerShip->CurrentHealth = PlayerShip->MaxHealth;
-				UE_LOG(LogTemp, Warning, TEXT("Pack_Health | Max Health: %i"), PlayerShip->MaxHealth);
+				GameInstance->CurrentHealth = GameInstance->MaxHealth;
+				UE_LOG(LogTemp, Warning, TEXT("Pack_Health | Max Health: %i"), GameInstance->MaxHealth);
 				UE_LOG(LogTemp, Warning, TEXT("HealthPack - SUCCESS"));
 			}
 		}
 		else if (AmmoPack)
 		{
-			if (PlayerShip)
+			if (GameInstance)
 			{
 				UGameplayStatics::PlaySound2D(GetWorld(), AmmoPack_Sound);
 
-				PlayerShip->CurrentAmmo = PlayerShip->MaxAmmo;
+				GameInstance->CurrentAmmo = GameInstance->MaxAmmo;
 				UE_LOG(LogTemp, Warning, TEXT("AmmoPack - SUCCESS"));
 			}
 		}
 		else if (BoostPack)
 		{
-			if (PlayerShip)
+			if (GameInstance)
 			{
 				UGameplayStatics::PlaySound2D(GetWorld(), BoostPack_Sound);
 
-				PlayerShip->BoostPickup = true;
+				GameInstance->BoostPickup = true;
 				UE_LOG(LogTemp, Warning, TEXT("BoostPack - SUCCESS"));
 			}
 		}
 		else if (Currency1)
 		{
-			if (PlayerShip)
+			if (GameInstance)
 			{
 				UGameplayStatics::PlaySound2D(GetWorld(), Currency1_Sound);
 
-				PlayerShip->Currency1 += 1;
-				UE_LOG(LogTemp, Warning, TEXT("Currency1 - SUCCESS | %dp."), PlayerShip->Currency1);
+				GameInstance->Currency1 += 1;
+				UE_LOG(LogTemp, Warning, TEXT("Currency1 - SUCCESS | %dp."), GameInstance->Currency1);
 			}
 		}
 		else if (Currency2)
 		{
-			if (PlayerShip)
+			if (GameInstance)
 			{
 				UGameplayStatics::PlaySound2D(GetWorld(), Currency2_Sound);
 
-				PlayerShip->Currency2 += 1;
-				UE_LOG(LogTemp, Warning, TEXT("Currency2 - SUCCESS | %dp."), PlayerShip->Currency2);
+				GameInstance->Currency2 += 1;
+				UE_LOG(LogTemp, Warning, TEXT("Currency2 - SUCCESS | %dp."), GameInstance->Currency2);
 			}
 		}
 		else if (TimePack)
 		{
-			if (PlayerShip)
+			if (GameInstance)
 			{
 				UGameplayStatics::PlaySound2D(GetWorld(), Time_Sound);
 
-				PlayerShip->TimeCount += PlayerShip->TimeAdded;
+				GameInstance->TimeCount += GameInstance->TimeAdded;
 				UE_LOG(LogTemp, Warning, TEXT("TimePack - SUCCESS"));
 			}
 		}
