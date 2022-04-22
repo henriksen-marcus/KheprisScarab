@@ -14,4 +14,47 @@ class RACINGGAME_API ARacingGameGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
+public:
+	ARacingGameGameModeBase();
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+
+	enum ESaveType : uint8
+	{
+		GameState,
+		GhostImage
+	};
+	
+	bool SaveGame(ESaveType SaveType);
+
+	bool LoadGame(ESaveType SaveType);
+	
+	UPROPERTY()
+	TArray<FVector> LocationArr;
+
+	UPROPERTY()
+	TArray<FRotator> RotationArr;
+
+	UPROPERTY()
+	TArray<uint64> TickNumbers;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsRecording{};
+
+	UFUNCTION(BlueprintCallable)
+	void StartRecording();
+
+	UFUNCTION(BlueprintCallable)
+	void StopRecording();
+
+	UFUNCTION(BlueprintCallable)
+	bool SpawnGhost();
+
+	UPROPERTY(EditAnywhere)
+	class AGhostImageShip* GhostShipRef;
+
+	UPROPERTY(EditAnywhere)
+	class APlayerShipPhysics* PlayerShipRef;
+
+	FVector EndLoc;
 };

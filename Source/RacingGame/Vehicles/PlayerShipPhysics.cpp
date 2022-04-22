@@ -182,7 +182,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	Root->AddForce(GetActorForwardVector() * Force.X);
 
 	MovementUpdate();
-
+	
 	// Limit speed
 	if (Root->GetPhysicsLinearVelocity().Size() > 20000.f && !bIsDashing)
 	{
