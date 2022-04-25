@@ -46,6 +46,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	USpringArmComponent* FrontSpringArm;
 
+	UPROPERTY()
+	USpringArmComponent* ActiveSpringArm;
+
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	TSubclassOf<UCameraShakeBase> CamShake;
 
@@ -169,12 +172,18 @@ public:
 	void Dash();
 	void Jump();
 	
-
 	void Crouch();
 	void CrouchEnd();
 
 	void CameraZoomIn();
 	void CameraZoomOut();
+
+	UFUNCTION(BlueprintCallable)
+	/** Set the world time dilation (how fast time goes by) for a specified duration.
+	 *	@param Amount		New time dilation, default is 1.
+	 *	@param Duration		How long the dilation should last.
+	 */
+	void SloMo(float Amount, float Duration);
 
 	/** Switch between front and back camera/look behind */
 	void CameraSwap();
@@ -185,11 +194,19 @@ public:
 	 *  Adds force at one of the 4 thrust locations.
 	 *  @param End			Hit location of the raycast.
 	 *  @param Num			Which of the four thrust locations to apply the thrust force.
+	 *  @param bHit			If the raycast returned a hit.
 	 */
-	void AddForce(FVector_NetQuantize End, int Num) const;
+	void AddForce(FVector_NetQuantize End, int Num, bool bHit) const;
+
+	void RaycastHover();
+
+	void CameraUpdate();
 
 	
 	// ---------- Variables ---------- //
+
+	FTimerHandle TimeDilationHandle;
+	
 	
 	bool bForwardHasInput{};
 	bool bRollHasInput{};
@@ -209,14 +226,15 @@ public:
 	float YawMove{};
 	
 	FRotator SpringArmRotTarget = FRotator::ZeroRotator;
+	FRotator SpringArmLocalChange = FRotator::ZeroRotator;
+	FRotator InitialBackSpringArmRotation = FRotator::ZeroRotator;
+	FRotator InitialFrontSpringArmRotation = FRotator::ZeroRotator;
 
 	/** Takes the time for how long the camera movement has been idle */
 	float CameraCenteringTimer{};
 	
 	/** Number that the engine sound pitch is multiplied with */
 	float PitchMultiplier{1.f};
-
-	float JumpTimer{};
 
 	/** The location the player spawns at, aka the position of the player start */
 	FVector InitialLocation;
@@ -233,10 +251,10 @@ public:
 
 	float InitialLinearDamping{};
 
-	float ForwardsSpeed{4500.f};
+	float ForwardsSpeed{5500.f};
 	float ActualSpeed{};
 	float ShootTimer{};
-	uint8 CurrentAmmo{50}; // This value can only go from 0-255
+	float JumpTimer{};
 
 
 	//Upgradeable Variables by Adrian
@@ -284,5 +302,8 @@ public:
 	//bool Difficulty_Hard{false};
 
 	//bool Sound{true};
+
+	UPROPERTY()
+	class UGlobal_Variables* GameInstance;
 	
 };

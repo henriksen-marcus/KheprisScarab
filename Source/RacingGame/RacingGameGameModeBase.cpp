@@ -112,7 +112,6 @@ void ARacingGameGameModeBase::StartRecording()
 
 	LocationArr.Empty();
 	RotationArr.Empty();
-	TickNumbers.Empty();
 }
 
 void ARacingGameGameModeBase::StopRecording()
@@ -166,7 +165,6 @@ bool ARacingGameGameModeBase::SpawnGhost()
 			GhostShipRef->RotationArr = RotationArr;
 			GhostShipRef->TickNumbers = TickNumbers;
 			GhostShipRef->bRaceStarted = true;
-			
 			return true;
 		} 
 	}
