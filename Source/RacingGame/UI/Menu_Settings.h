@@ -65,6 +65,10 @@ public:
 		class UButton* Currency2Display_Button;
 	UPROPERTY(meta = (BindWidget))
 		class UImage* Currency2Display_Button_Image;
+	UPROPERTY(meta = (BindWidget))
+		class UButton* SpeedDisplay_Button;
+	UPROPERTY(meta = (BindWidget))
+		class UImage* SpeedDisplay_Button_Image;
 
 	UFUNCTION()
 		void HealthDisplay_Button_Clicked();
@@ -78,6 +82,8 @@ public:
 		void Currency1Display_Button_Clicked();
 	UFUNCTION()
 		void Currency2Display_Button_Clicked();
+	UFUNCTION()
+		void SpeedDisplay_Button_Clicked();
 	#pragma endregion
 
 	#pragma region Difficulty

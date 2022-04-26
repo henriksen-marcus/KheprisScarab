@@ -39,7 +39,9 @@ void UMenu_ModeSelect::TimeAttack_Button_Clicked()
 
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
+	{
 		GameInstance->TimeAttackMode = true;
+	}
 
 	//Change Level
 	FName NewLevel = FName("TestMap_Adrian");
@@ -51,7 +53,9 @@ void UMenu_ModeSelect::Adventure_Button_Clicked()
 
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
+	{
 		GameInstance->TimeAttackMode = false;
+	}
 
 	//Change Level
 	FName NewLevel = FName("TestMap_Adrian");

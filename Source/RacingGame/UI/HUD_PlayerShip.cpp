@@ -28,16 +28,10 @@ void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 	Boost_Display();
 	SetAmmoPrecentage();
 
-	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
-	if (GameInstance)
-	{
-		if (GameInstance->TimeAttackMode == true)
-		{
-			SetTimer_Display();
+	SetTimer_Display();
+	SetTimer(DeltaTime);
 
-			SetTimer(DeltaTime);
-		}
-	}
+	SetSpeedDisplay();
 }
 
 
@@ -90,6 +84,11 @@ void UHUD_PlayerShip::SetHUDVisibility()
 			Currency2_Image->SetVisibility(ESlateVisibility::Hidden);
 			Currency2_Text->SetVisibility(ESlateVisibility::Hidden);
 		}
+
+		if (GameInstance->Speed_Display == true)
+			Speed_Text->SetVisibility(ESlateVisibility::Visible);
+		else
+			Speed_Text->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -153,27 +152,60 @@ void UHUD_PlayerShip::SetTimer_Display()
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
-		FString Timer = UKismetStringLibrary::Conv_IntToString(GameInstance->TimeCount);
-		Time_Text->SetText(FText::FromString(Timer));
+		if (GameInstance->TimeAttackMode == true)
+		{
+			FString Timer = UKismetStringLibrary::Conv_IntToString(GameInstance->TimeCount);
+			Time_Text->SetText(FText::FromString(Timer));
+
+			GameInstance->Time_Display = true;
+			Time_Text->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			GameInstance->Time_Display = false;
+			Time_Text->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 }
-
 void UHUD_PlayerShip::SetTimer(float DeltaTime)
 {
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 
 	if (GameInstance)
 	{
-		if (GameInstance->RaceStartOFF == false)
+		if (GameInstance->TimeAttackMode == true)
 		{
-			GameInstance->DeltaTimeCount += DeltaTime;
-
-			if (GameInstance->DeltaTimeCount >= 1)
+			if (GameInstance->RaceStartOFF == false)
 			{
-				GameInstance->DeltaTimeCount = 0;
+				GameInstance->DeltaTimeCount += DeltaTime;
 
-				GameInstance->TimeCount -= 1;
+				if (GameInstance->DeltaTimeCount >= 1)
+				{
+					GameInstance->DeltaTimeCount = 0;
+
+					GameInstance->TimeCount -= 1;
+				}
 			}
 		}
 	}
+}
+
+void UHUD_PlayerShip::SetSpeedDisplay()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		APlayerShipPhysics* PlayerShipPhysics = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		if (PlayerShipPhysics)
+		{
+			int TempSpeed = PlayerShipPhysics->Root->GetPhysicsLinearVelocity().Size() * 0.036f / 2;
+			FString Speed = UKismetStringLibrary::Conv_IntToString(TempSpeed);
+
+			if (GameInstance->RaceStartOFF == true)
+				Speed_Text->SetText(FText::FromString("0"));
+			else
+				Speed_Text->SetText(FText::FromString(Speed));
+		}
+	}
+	
 }

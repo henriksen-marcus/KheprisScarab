@@ -26,6 +26,7 @@ void UMenu_Settings::NativeOnInitialized()
 	TimeDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::TimeDisplay_Button_Clicked);
 	Currency1Display_Button->OnClicked.AddDynamic(this, &UMenu_Settings::Currency1Display_Button_Clicked);
 	Currency2Display_Button->OnClicked.AddDynamic(this, &UMenu_Settings::Currency2Display_Button_Clicked);
+	SpeedDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::SpeedDisplay_Button_Clicked);
 
 	EasyDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::EasyDisplay_Button_Clicked);
 	NormalDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::NormalDisplay_Button_Clicked);
@@ -82,6 +83,11 @@ void UMenu_Settings::SetBoxesSelected()
 			Currency2Display_Button_Image->SetBrushFromTexture(Box_Selected);
 		else
 			Currency2Display_Button_Image->SetBrushFromTexture(Box_Unselected);
+
+		if (GameInstance->Speed_Display == true)
+			SpeedDisplay_Button_Image->SetBrushFromTexture(Box_Selected);
+		else
+			SpeedDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
 		#pragma endregion
 
 		#pragma region Difficulty
@@ -203,6 +209,19 @@ void UMenu_Settings::Currency2Display_Button_Clicked()
 			GameInstance->Currency2_Display = false;
 		else
 			GameInstance->Currency2_Display = true;
+	}
+}
+void UMenu_Settings::SpeedDisplay_Button_Clicked()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
+
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		if (GameInstance->Speed_Display == true)
+			GameInstance->Speed_Display = false;
+		else
+			GameInstance->Speed_Display = true;
 	}
 }
 
