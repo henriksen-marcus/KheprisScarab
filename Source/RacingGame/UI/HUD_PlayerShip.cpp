@@ -27,7 +27,17 @@ void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 	SetCurrency2_Display();
 	Boost_Display();
 	SetAmmoPrecentage();
-	SetTimer_Display();
+
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		if (GameInstance->TimeAttackMode == true)
+		{
+			SetTimer_Display();
+
+			SetTimer(DeltaTime);
+		}
+	}
 }
 
 
@@ -145,5 +155,25 @@ void UHUD_PlayerShip::SetTimer_Display()
 	{
 		FString Timer = UKismetStringLibrary::Conv_IntToString(GameInstance->TimeCount);
 		Time_Text->SetText(FText::FromString(Timer));
+	}
+}
+
+void UHUD_PlayerShip::SetTimer(float DeltaTime)
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+
+	if (GameInstance)
+	{
+		if (GameInstance->RaceStartOFF == false)
+		{
+			GameInstance->DeltaTimeCount += DeltaTime;
+
+			if (GameInstance->DeltaTimeCount >= 1)
+			{
+				GameInstance->DeltaTimeCount = 0;
+
+				GameInstance->TimeCount -= 1;
+			}
+		}
 	}
 }

@@ -25,6 +25,8 @@ class RACINGGAME_API UHUD_PlayerShip : public UUserWidget
 	void Boost_Display();
 	void SetAmmoPrecentage();
 	void SetTimer_Display();
+
+	void SetTimer(float DeltaTime);
 public:
 	//Health Bar
 	UPROPERTY(meta = (BindWidget))

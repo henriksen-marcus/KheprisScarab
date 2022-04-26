@@ -6,7 +6,9 @@
 #include <ThirdParty/openexr/Deploy/OpenEXR-2.3.0/OpenEXR/include/ImathEuler.h>
 
 #include "../Global_Variables.h"
+#include "../Environment/CheckPoint.h"
 #include "../Other/Bullet.h"
+#include "../RacingGameGameModeBase.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
@@ -132,14 +134,6 @@ APlayerShipPhysics::APlayerShipPhysics()
 	//MovementComponent = CreateDefaultSubobject<UHoveringMovementComponent>(TEXT("CustomMovementComponent"));
 	//BulletClassToSpawn = ABullet::StaticClass();
 
-	/** Adrian */
-	//Variables
-	//MaxHealth = 5.f;
-	//CurrentHealth = MaxHealth;
-	//MaxAmmo = 10; // Is now 50 - Marcus
-	//CurrentAmmo = MaxAmmo;
-	//TimeCount = 60;
-	//TimeAdded = 15;
 }
 
 
@@ -180,7 +174,7 @@ void APlayerShipPhysics::BeginPlay()
 void APlayerShipPhysics::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+
 	// Local + Global gravity, added a little more force the the opposing (local) force
 	const FVector CombinedGravity = ( FVector::DownVector - (GetActorUpVector() * 1.08f) ).GetSafeNormal();
 	Root->AddForce(CombinedGravity * (Gravity));
@@ -262,6 +256,8 @@ void APlayerShipPhysics::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	PlayerInputComponent->BindAction("CameraSwap", EInputEvent::IE_Released, this, &APlayerShipPhysics::CameraSwap);
 
 	PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &APlayerShipPhysics::Reload);
+
+	PlayerInputComponent->BindAction("Respawn", EInputEvent::IE_Pressed, this, &APlayerShipPhysics::Respawn);
 }
 
 
@@ -270,289 +266,407 @@ void APlayerShipPhysics::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void APlayerShipPhysics::Forward(const float Value)
 {
-	// Determine if there is input
-	bForwardHasInput = !(Value == 0);
-	
-	// If there is input, set rotation target to -25/25 based on input value, else set target to 0
-	const float TargetPitch = bForwardHasInput ? Value > 0.f ? -10.0f : 10.0f : 0.f;
+	if (GameInstance)
+	{
+		if (GameInstance->RaceStartOFF == false)
+		{// Determine if there is input
+			bForwardHasInput = !(Value == 0);
 
-	// Interpolate rotation towards target
-	NextPitchPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 6.0f);
+			// If there is input, set rotation target to -25/25 based on input value, else set target to 0
+			const float TargetPitch = bForwardHasInput ? Value > 0.f ? -10.0f : 10.0f : 0.f;
 
-	Force.X = Value * 8.f * SpeedBoost * SpeedMultiplier * ForwardsSpeed;
-	/*Force.X = Value ?
-		FMath::FInterpTo(Force.X, (Value * 10.f * ShipWeight * SpeedBoost * SpeedMultiplier * ForwardsSpeed), GetWorld()->GetDeltaSeconds(), 2.5f) :
-		FMath::FInterpTo(Force.X, 0.f, GetWorld()->GetDeltaSeconds(), 1.5f);*/
-	
-	//ActualSpeed = Value > 0.f ? ForwardsSpeed : FMath::FInterpTo(ActualSpeed, 0.f, GetWorld()->GetDeltaSeconds(), 0.5f);
-	//UE_LOG(LogTemp, Warning, TEXT("AcutalSpeedX: %f"), ActualSpeed)
+			// Interpolate rotation towards target
+			NextPitchPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 6.0f);
+
+			Force.X = Value * 8.f * SpeedBoost * SpeedMultiplier * ForwardsSpeed;
+			/*Force.X = Value ?
+				FMath::FInterpTo(Force.X, (Value * 10.f * ShipWeight * SpeedBoost * SpeedMultiplier * ForwardsSpeed), GetWorld()->GetDeltaSeconds(), 2.5f) :
+				FMath::FInterpTo(Force.X, 0.f, GetWorld()->GetDeltaSeconds(), 1.5f);*/
+
+				//ActualSpeed = Value > 0.f ? ForwardsSpeed : FMath::FInterpTo(ActualSpeed, 0.f, GetWorld()->GetDeltaSeconds(), 0.5f);
+				//UE_LOG(LogTemp, Warning, TEXT("AcutalSpeedX: %f"), ActualSpeed)
+		}
+	}
 }
 
 void APlayerShipPhysics::Turn(const float Value)
 {
-	// Determine if there is input
-	bRollHasInput = !(Value == 0);
+	if (GameInstance)
+	{
+		if (GameInstance->RaceStartOFF == false)
+		{// Determine if there is input
+			bRollHasInput = !(Value == 0);
 
-	// Roll
-	float TargetRoll = bRollHasInput ? Value > 0 ? 15.0f : -15.0f : 0.f;
-	
-	// Interpolate rotation towards target
-	NextRollPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Roll, TargetRoll, GetWorld()->GetDeltaSeconds(), 3.f);
+			// Roll
+			float TargetRoll = bRollHasInput ? Value > 0 ? 15.0f : -15.0f : 0.f;
 
-	// Yaw
-	YawMove = FMath::FInterpTo(YawMove,  Value * GetWorld()->GetDeltaSeconds() * 150.f, GetWorld()->GetDeltaSeconds(), 8.f);
+			// Interpolate rotation towards target
+			NextRollPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Roll, TargetRoll, GetWorld()->GetDeltaSeconds(), 3.f);
+
+			// Yaw
+			YawMove = FMath::FInterpTo(YawMove, Value * GetWorld()->GetDeltaSeconds() * 150.f, GetWorld()->GetDeltaSeconds(), 8.f);
+		}
+	}
 }
 
 void APlayerShipPhysics::CameraYaw(const float Value)
 {
-	/*// Should reset the camera target if the camera timer is over x seconds
-	const bool bShouldReset = CameraCenteringTimer >= CameraResetTime;*/
+	if (GameInstance)
+	{
+		if (GameInstance->RaceStartOFF == false)
+		{/*// Should reset the camera target if the camera timer is over x seconds
+		const bool bShouldReset = CameraCenteringTimer >= CameraResetTime;*/
 	
-	if (Value) { CameraCenteringTimer = 0.f; }
+			if (Value) { CameraCenteringTimer = 0.f; }
 
-	// Target camera rotation should be 0 if bShouldReset is true
-	//SpringArmRotTarget.Yaw = bShouldReset ? 0.f : FMath::Clamp(BackSpringArm->GetRelativeRotation().Yaw + Value * 5.f, -80.f, 80.f);
-	//SpringArmRotTarget.Yaw = bShouldReset ? 0.f : (BackSpringArm->GetRelativeRotation().Yaw + Value * 5.f);
-	SpringArmLocalChange.Yaw = Value;
-	
+			// Target camera rotation should be 0 if bShouldReset is true
+			//SpringArmRotTarget.Yaw = bShouldReset ? 0.f : FMath::Clamp(BackSpringArm->GetRelativeRotation().Yaw + Value * 5.f, -80.f, 80.f);
+			//SpringArmRotTarget.Yaw = bShouldReset ? 0.f : (BackSpringArm->GetRelativeRotation().Yaw + Value * 5.f);
+			SpringArmLocalChange.Yaw = Value;
+		}
+	}
 }
 
 void APlayerShipPhysics::CameraPitch(const float Value)
 {
-	// Should reset the camera target if the camera timer is over x seconds
+	if (GameInstance)
+	{
+		if (GameInstance->RaceStartOFF == false)
+		{// Should reset the camera target if the camera timer is over x seconds
 	//const bool bShouldReset = CameraCenteringTimer >= CameraResetTime;
 
-	if (Value) { CameraCenteringTimer = 0.f; }
+			if (Value) { CameraCenteringTimer = 0.f; }
 
-	// Target camera rotation should be 0 if bShouldReset is true
-	//SpringArmRotTarget.Pitch = bShouldReset ? -20.f : FMath::Clamp(BackSpringArm->GetRelativeRotation().Pitch + Value * 10.f, -85.f, 20.f);
-	SpringArmLocalChange.Pitch = Value;
+			// Target camera rotation should be 0 if bShouldReset is true
+			//SpringArmRotTarget.Pitch = bShouldReset ? -20.f : FMath::Clamp(BackSpringArm->GetRelativeRotation().Pitch + Value * 10.f, -85.f, 20.f);
+			SpringArmLocalChange.Pitch = Value;
+		}
+	}
 }
 
 void APlayerShipPhysics::CameraUpdate()
 {
-	/** Springarm rotation */
-	if (CameraCenteringTimer >= CameraResetTime)
+	if (GameInstance)
 	{
-		ActiveSpringArm->SetRelativeRotation(FMath::RInterpTo(ActiveSpringArm->GetRelativeRotation(), InitialBackSpringArmRotation, GetWorld()->GetDeltaSeconds(), 5.f));
-	}
-	else
-	{
-		if(ActiveSpringArm->GetRelativeRotation().Pitch + SpringArmLocalChange.Pitch > 30)
-		{
-			SpringArmLocalChange.Pitch = 30 - ActiveSpringArm->GetRelativeRotation().Pitch;
-		}
-		else if (ActiveSpringArm->GetRelativeRotation().Pitch + SpringArmLocalChange.Pitch < -80)
-		{
-			SpringArmLocalChange.Pitch = -80 - ActiveSpringArm->GetRelativeRotation().Pitch;
-		}
-		ActiveSpringArm->AddRelativeRotation(SpringArmLocalChange);
-		//FRotator RelRot = ActiveSpringArm->GetRelativeRotation();
-		//RelRot.Pitch = FMath::Clamp(ActiveSpringArm->GetRelativeRotation().Pitch, -80.f, 30.f);
-		//ActiveSpringArm->SetRelativeRotation(RelRot);
-	}
+		if (GameInstance->RaceStartOFF == false)
+		{/** Springarm rotation */
+			if (CameraCenteringTimer >= CameraResetTime)
+			{
+				ActiveSpringArm->SetRelativeRotation(FMath::RInterpTo(ActiveSpringArm->GetRelativeRotation(), InitialBackSpringArmRotation, GetWorld()->GetDeltaSeconds(), 5.f));
+			}
+			else
+			{
+				if (ActiveSpringArm->GetRelativeRotation().Pitch + SpringArmLocalChange.Pitch > 30)
+				{
+					SpringArmLocalChange.Pitch = 30 - ActiveSpringArm->GetRelativeRotation().Pitch;
+				}
+				else if (ActiveSpringArm->GetRelativeRotation().Pitch + SpringArmLocalChange.Pitch < -80)
+				{
+					SpringArmLocalChange.Pitch = -80 - ActiveSpringArm->GetRelativeRotation().Pitch;
+				}
+				ActiveSpringArm->AddRelativeRotation(SpringArmLocalChange);
+				//FRotator RelRot = ActiveSpringArm->GetRelativeRotation();
+				//RelRot.Pitch = FMath::Clamp(ActiveSpringArm->GetRelativeRotation().Pitch, -80.f, 30.f);
+				//ActiveSpringArm->SetRelativeRotation(RelRot);
+			}
 
-	FRotator CurRot = ActiveSpringArm->GetRelativeRotation();
-	CurRot.Roll = 0;
-	ActiveSpringArm->SetRelativeRotation(CurRot);
+			FRotator CurRot = ActiveSpringArm->GetRelativeRotation();
+			CurRot.Roll = 0;
+			ActiveSpringArm->SetRelativeRotation(CurRot);
 
-	/** Camera effects */
-	BackCamera->SetFieldOfView(FMath::FInterpTo(BackCamera->FieldOfView, TargetCameraFOV, GetWorld()->GetDeltaSeconds(), 5.f));
-	BackSpringArm->TargetArmLength = FMath::FInterpTo(BackSpringArm->TargetArmLength, TargetSpringArmLength, GetWorld()->GetDeltaSeconds(), 10.f);
+			/** Camera effects */
+			BackCamera->SetFieldOfView(FMath::FInterpTo(BackCamera->FieldOfView, TargetCameraFOV, GetWorld()->GetDeltaSeconds(), 5.f));
+			BackSpringArm->TargetArmLength = FMath::FInterpTo(BackSpringArm->TargetArmLength, TargetSpringArmLength, GetWorld()->GetDeltaSeconds(), 10.f);
+
+		}
+	}
 }
 
 void APlayerShipPhysics::Shoot(const float Value)
 {
-	// Was 0.085f
-	if (!Value || ShootTimer < 0.1f) { return; }
-
-	ShootTimer = 0.f;
 	if (GameInstance)
 	{
-		if (GameInstance->CurrentAmmo > 0) {
-			--GameInstance->CurrentAmmo;
-			if (GetWorld())
+		if (GameInstance->RaceStartOFF == false)
+		{// Was 0.085f
+			if (!Value || ShootTimer < 0.1f) { return; }
+
+			ShootTimer = 0.f;
+			if (GameInstance)
 			{
-				// Spawn bullet
-				ABullet* BulletRef = GetWorld()->SpawnActor<ABullet>(BulletClassToSpawn, BulletSpawnPoint->GetComponentLocation(), GetActorRotation());
-				if (BulletRef)
-				{
-					BulletRef->SetBulletOwner(this);
+				if (GameInstance->CurrentAmmo > 0) {
+					--GameInstance->CurrentAmmo;
+					if (GetWorld())
+					{
+						// Spawn bullet
+						ABullet* BulletRef = GetWorld()->SpawnActor<ABullet>(BulletClassToSpawn, BulletSpawnPoint->GetComponentLocation(), GetActorRotation());
+						if (BulletRef)
+						{
+							BulletRef->SetBulletOwner(this);
+						}
+						else
+						{
+							UE_LOG(LogTemp, Warning, TEXT("BulletRef not valid!"))
+						}
+						//Root->AddImpulse(-GetActorForwardVector() * 100000.f);
+					}
 				}
-				else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("BulletRef not valid!"))
-				}
-				//Root->AddImpulse(-GetActorForwardVector() * 100000.f);
 			}
+			/*else if (GunClickSound)
+			{
+				UGameplayStatics::PlaySound2D(GetWorld(), GunClickSound, 0.8f);
+			}*/
 		}
 	}
-	/*else if (GunClickSound) 
-	{
-		UGameplayStatics::PlaySound2D(GetWorld(), GunClickSound, 0.8f);
-	}*/
 }
 
 void APlayerShipPhysics::Reload()
 {
-	if (bIsReloading) { return; }
-
-	bIsReloading = true;
-	
-	if (ReloadSound)
-	{
-		UGameplayStatics::PlaySound2D(GetWorld(), ReloadSound);
-	}
-	
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDelegate;
-	// Lambda expression
-	TimerDelegate.BindLambda([&]
-		{
-			UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
-			if (GameInstance)
-			{
-				GameInstance->CurrentAmmo = GameInstance->MaxAmmo;
-				bIsReloading = false;
-			}
-		});
-	
 	if (GameInstance)
 	{
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, GameInstance->DashTimer, false);
+		if (GameInstance->RaceStartOFF == false)
+		{
+			if (bIsReloading) { return; }
+
+			bIsReloading = true;
+
+			if (ReloadSound)
+			{
+				UGameplayStatics::PlaySound2D(GetWorld(), ReloadSound);
+			}
+
+			FTimerHandle TimerHandle;
+			FTimerDelegate TimerDelegate;
+			// Lambda expression
+			TimerDelegate.BindLambda([&]
+				{
+					UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+					if (GameInstance)
+					{
+						GameInstance->CurrentAmmo = GameInstance->MaxAmmo;
+						bIsReloading = false;
+					}
+				});
+
+			if (GameInstance)
+			{
+				GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, GameInstance->DashTimer, false);
+			}
+		}
 	}
 }
 
 void APlayerShipPhysics::Dash() 
 {
-	if (GameInstance->BoostPickup)
+	if (GameInstance)
 	{
-		GameInstance->BoostPickup = false;
-
-		if (bIsDashing)
+		if (GameInstance->RaceStartOFF == false)
 		{
-			return;
-		}
-
-		static float CamFovChange = 15.f;
-		static float SpringArmChange = 400.f;
-
-		TargetCameraFOV += CamFovChange;
-		TargetSpringArmLength -= SpringArmChange;
-		BackSpringArm->CameraLagSpeed = 35.f;
-		BackSpringArm->CameraRotationLagSpeed = 20.f;
-		SpeedBoost = MaxSpeedBoost;
-		bIsDashing = true;
-
-		if (BoostSound)
-		{
-			UGameplayStatics::PlaySound2D(GetWorld(), BoostSound, 0.5f);
-		}
-
-		FTimerHandle TimerHandle;
-		FTimerDelegate TimerDelegate;
-		// Lambda expression
-		TimerDelegate.BindLambda([&]
+			if (GameInstance->BoostPickup)
 			{
-				TargetCameraFOV -= CamFovChange;
-				TargetSpringArmLength += SpringArmChange;
-				BackSpringArm->CameraLagSpeed = 30.f;
-				BackSpringArm->CameraRotationLagSpeed = 15.f;
-				SpeedBoost = 1.f;
-				bIsDashing = false;
-			});
+				GameInstance->BoostPickup = false;
 
-		if (GameInstance)
-		{
-			GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, GameInstance->DashTimer, false);
+				if (bIsDashing)
+				{
+					return;
+				}
+
+				static float CamFovChange = 15.f;
+				static float SpringArmChange = 400.f;
+
+				TargetCameraFOV += CamFovChange;
+				TargetSpringArmLength -= SpringArmChange;
+				BackSpringArm->CameraLagSpeed = 35.f;
+				BackSpringArm->CameraRotationLagSpeed = 20.f;
+				SpeedBoost = MaxSpeedBoost;
+				bIsDashing = true;
+
+				if (BoostSound)
+				{
+					UGameplayStatics::PlaySound2D(GetWorld(), BoostSound, 0.5f);
+				}
+
+				FTimerHandle TimerHandle;
+				FTimerDelegate TimerDelegate;
+				// Lambda expression
+				TimerDelegate.BindLambda([&]
+					{
+						TargetCameraFOV -= CamFovChange;
+						TargetSpringArmLength += SpringArmChange;
+						BackSpringArm->CameraLagSpeed = 30.f;
+						BackSpringArm->CameraRotationLagSpeed = 15.f;
+						SpeedBoost = 1.f;
+						bIsDashing = false;
+					});
+
+				if (GameInstance)
+				{
+					GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, GameInstance->DashTimer, false);
+				}
+			}
 		}
 	}
 }
 
 void APlayerShipPhysics::Jump()
 {
-	if (bIsJumping || JumpTimer < 2.f)
+	if (GameInstance)
 	{
-		return;
-	}
-	
-	bIsJumping = true;
-	JumpTimer = 0.f;
-
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDelegate;
-	
-	// Lambda expression
-	TimerDelegate.BindLambda([&]
+		if (GameInstance->RaceStartOFF == false)
 		{
-			bIsJumping = false;
-		});
+			if (bIsJumping || JumpTimer < 2.f)
+			{
+				return;
+			}
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, 0.07f, false);
+			bIsJumping = true;
+			JumpTimer = 0.f;
+
+			FTimerHandle TimerHandle;
+			FTimerDelegate TimerDelegate;
+
+			// Lambda expression
+			TimerDelegate.BindLambda([&]
+				{
+					bIsJumping = false;
+				});
+
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, 0.07f, false);
+		}
+	}
+}
+
+void APlayerShipPhysics::Respawn()
+{
+	if (GameInstance)
+	{
+		if (GameInstance->RaceStartOFF == false)
+		{
+			ARacingGameGameModeBase* GamemodeBase = Cast<ARacingGameGameModeBase>(GetWorld()->GetAuthGameMode());
+			if (GamemodeBase)
+			{
+				if (GameInstance->PlayerCheckpointNumber == 1)
+				{
+					SetActorLocation(GamemodeBase->Checkpoints[0]->SpawnPointArrow->GetRelativeLocation());
+
+					UE_LOG(LogTemp, Warning, TEXT("Respawn 1 - Success"));
+				}
+
+				if (GameInstance->PlayerCheckpointNumber == 2)
+				{
+					SetActorLocation(GamemodeBase->Checkpoints[1]->SpawnPointArrow->GetRelativeLocation());
+
+					UE_LOG(LogTemp, Warning, TEXT("Respawn 2 - Success"));
+				}
+
+				if (GameInstance->PlayerCheckpointNumber == 3)
+				{
+					SetActorLocation(GamemodeBase->Checkpoints[2]->SpawnPointArrow->GetRelativeLocation());
+
+					UE_LOG(LogTemp, Warning, TEXT("Respawn 3 - Success"));
+				}
+			}
+		}
+	}
 }
 
 void APlayerShipPhysics::Crouch()
 {
-	TargetHeight /= 2.f;
+	if (GameInstance)
+	{
+		if (GameInstance->RaceStartOFF == false)
+		{
+			TargetHeight /= 2.f;
+		}
+	}
 }
 
 void APlayerShipPhysics::CrouchEnd()
 {
-	TargetHeight *= 2.f;
+	if (GameInstance)
+	{
+		if (GameInstance->RaceStartOFF == false)
+		{
+			TargetHeight *= 2.f;
+		}
+	}
 }
 
 void APlayerShipPhysics::CameraZoomIn()
 {
-	if (bIsDashing) { return; }
-	TargetSpringArmLength = FMath::Clamp(TargetSpringArmLength - 200.f, 200.f, 5000.f);
+	if (GameInstance)
+	{
+		if (GameInstance->RaceStartOFF == false)
+		{
+			if (bIsDashing) { return; }
+			TargetSpringArmLength = FMath::Clamp(TargetSpringArmLength - 200.f, 200.f, 5000.f);
+		}
+	}
 }
 
 void APlayerShipPhysics::CameraZoomOut()
 {
-	if (bIsDashing) { return; }
-	TargetSpringArmLength = FMath::Clamp(TargetSpringArmLength + 200.f, 200.f, 5000.f);
+	if (GameInstance)
+	{
+		if (GameInstance->RaceStartOFF == false)
+		{
+			if (bIsDashing) { return; }
+			TargetSpringArmLength = FMath::Clamp(TargetSpringArmLength + 200.f, 200.f, 5000.f);
+		}
+	}
 }
 
 void APlayerShipPhysics::SloMo(float Amount, float Duration)
 {
-	FTimerHandle Handle;
-	FTimerDelegate TimerDelegate1, TimerDelegate2;
-	
-	// This lambda function will loop to ensure the interpolation works
-	TimerDelegate1.BindLambda([&]
+	if (GameInstance)
+	{
+		if (GameInstance->RaceStartOFF == false)
 		{
-			float CurrentDilation = UGameplayStatics::GetGlobalTimeDilation(GetWorld());
-			float NewDilation = FMath::FInterpTo(CurrentDilation, Amount, GetWorld()->GetDeltaSeconds(), 5.f);
-			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), NewDilation);
-		});
-	
-	GetWorld()->GetTimerManager().SetTimer(TimeDilationHandle, TimerDelegate1, GetWorld()->GetDeltaSeconds(), true);
+			FTimerHandle Handle;
+			FTimerDelegate TimerDelegate1, TimerDelegate2;
 
-	// This lambda function will stop the loop after the given duration
-	TimerDelegate2.BindLambda([&]
-		{
-			GetWorld()->GetTimerManager().ClearTimer(TimeDilationHandle);
-			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.f);
-		});
+			// This lambda function will loop to ensure the interpolation works
+			TimerDelegate1.BindLambda([&]
+				{
+					float CurrentDilation = UGameplayStatics::GetGlobalTimeDilation(GetWorld());
+					float NewDilation = FMath::FInterpTo(CurrentDilation, Amount, GetWorld()->GetDeltaSeconds(), 5.f);
+					UGameplayStatics::SetGlobalTimeDilation(GetWorld(), NewDilation);
+				});
 
-	GetWorld()->GetTimerManager().SetTimer(Handle, TimerDelegate2, 1.f, false);
+			GetWorld()->GetTimerManager().SetTimer(TimeDilationHandle, TimerDelegate1, GetWorld()->GetDeltaSeconds(), true);
+
+			// This lambda function will stop the loop after the given duration
+			TimerDelegate2.BindLambda([&]
+				{
+					GetWorld()->GetTimerManager().ClearTimer(TimeDilationHandle);
+					UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.f);
+				});
+
+			GetWorld()->GetTimerManager().SetTimer(Handle, TimerDelegate2, 1.f, false);
+		}
+	}
 }
 
 void APlayerShipPhysics::CameraSwap()
 {
-	if (BackCamera->IsActive())
+	if (GameInstance)
 	{
-		BackCamera->SetActive(false);
-		FrontCamera->SetActive(true);
-		ActiveSpringArm = FrontSpringArm;
-		BackSpringArm->SetRelativeRotation(InitialBackSpringArmRotation);
-	}
-	else
-	{
-		FrontCamera->SetActive(false);
-		BackCamera->SetActive(true);
-		ActiveSpringArm = BackSpringArm;
-		FrontSpringArm->SetRelativeRotation(InitialFrontSpringArmRotation);
+		if (GameInstance->RaceStartOFF == false)
+		{
+			if (BackCamera->IsActive())
+			{
+				BackCamera->SetActive(false);
+				FrontCamera->SetActive(true);
+				ActiveSpringArm = FrontSpringArm;
+				BackSpringArm->SetRelativeRotation(InitialBackSpringArmRotation);
+			}
+			else
+			{
+				FrontCamera->SetActive(false);
+				BackCamera->SetActive(true);
+				ActiveSpringArm = BackSpringArm;
+				FrontSpringArm->SetRelativeRotation(InitialFrontSpringArmRotation);
+			}
+		}
 	}
 }
 
@@ -771,7 +885,7 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num, bool bHit) c
 	static float HoverDampingFactor = 6.f; // K
 	float MaxClamp = 80000.f;
 	
-	// Get distance from thrust point to ground - Equation credit: Anders Åsbø
+	// Get distance from thrust point to ground - Equation credit: Anders �sb�
 	const float Distance = UKismetMathLibrary::Vector_Distance(Start, End);
 	const float ScaleHeight = (TargetHeight - Distance) / HoverForceReduction;
 	const FVector HeightVelocity = FVector::DotProduct(Root->GetPhysicsLinearVelocity(),UpVector) * UpVector;
