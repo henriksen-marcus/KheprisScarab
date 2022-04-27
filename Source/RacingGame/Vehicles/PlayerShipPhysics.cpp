@@ -283,7 +283,7 @@ void APlayerShipPhysics::Forward(const float Value)
 {
 	if (GameInstance)
 	{
-		if (!GameInstance->RaceStartOFF == false)
+		if (GameInstance->RaceStartOFF == false)
 		{
 			// Determine if there is input
 			bForwardHasInput = !(Value == 0);
