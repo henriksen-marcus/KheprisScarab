@@ -285,29 +285,27 @@ void APlayerShipPhysics::Forward(const float Value)
 	{
 		if (!GameInstance->RaceStartOFF)
 		{
-			return;
+			// Determine if there is input
+			bForwardHasInput = !(Value == 0);
+
+			// If there is input, set rotation target to based on input value, else set target to 0
+			const float TargetPitch = bForwardHasInput ? Value > 0.f ? -10.0f : 10.0f : 0.f;
+
+			// Interpolate rotation towards target
+			NextPitchPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 6.0f);
+
+			if (Value)
+			{
+				Force.X = FMath::FInterpTo(Force.X, (Value * 12.f * SpeedBoost * SpeedMultiplier * ForwardsSpeed * LinearDampingReduction), GetWorld()->GetDeltaSeconds(), 1.5f);
+			}
+			else
+			{
+				FVector LinearVel = Root->GetPhysicsLinearVelocity();
+				LinearVel.Z *= 0.2f;
+				Root->AddForce(LinearVel * 0.98f * LinearDampingReduction, FName(), true);
+				Force.X = 0.f;
+			}
 		}
-	}
-
-	// Determine if there is input
-	bForwardHasInput = !(Value == 0);
-
-	// If there is input, set rotation target to based on input value, else set target to 0
-	const float TargetPitch = bForwardHasInput ? Value > 0.f ? -10.0f : 10.0f : 0.f;
-
-	// Interpolate rotation towards target
-	NextPitchPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 6.0f);
-
-	if (Value)
-	{
-		Force.X = FMath::FInterpTo(Force.X, (Value * 12.f * SpeedBoost * SpeedMultiplier * ForwardsSpeed * LinearDampingReduction), GetWorld()->GetDeltaSeconds(), 1.5f);
-	}
-	else
-	{
-		FVector LinearVel = Root->GetPhysicsLinearVelocity();
-		LinearVel.Z *= 0.2f;
-		Root->AddForce(LinearVel * 0.98f * LinearDampingReduction, FName(), true);
-		Force.X = 0.f;
 	}
 }
 
