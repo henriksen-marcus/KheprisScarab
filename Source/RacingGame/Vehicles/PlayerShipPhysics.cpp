@@ -233,7 +233,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	ShootTimer += DeltaTime;
 	JumpTimer += DeltaTime;
 
-	FHitResult HitRes;
+	/*FHitResult HitRes;
 	FCollisionQueryParams Params;
 
 	if (GetWorld()->LineTraceSingleByChannel(HitRes, GetActorLocation(), GetActorLocation() + FVector::DownVector * 1000, ECC_Visibility, Params))
@@ -242,7 +242,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Found sand physical material."))
 		}
-	}
+	}*/
 }
 
 
