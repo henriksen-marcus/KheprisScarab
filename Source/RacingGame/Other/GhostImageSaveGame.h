@@ -17,21 +17,16 @@ class RACINGGAME_API UGhostImageSaveGame : public USaveGame
 public:
 	UGhostImageSaveGame();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY() // All these variables need to be UPROPERTY!
 	FString SaveName;
-	
-	UPROPERTY(EditAnywhere)
+
+	UPROPERTY()
 	FString DateTime;
 
-	UPROPERTY(EditAnywhere)
-	FVector EndLocation;
-	
-	UPROPERTY(EditAnywhere)
+	// Information is stored at 10Hz/10 FPS.
+	UPROPERTY()
 	TArray<FVector> LocationArr;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	TArray<FRotator> RotationArr;
-
-	UPROPERTY(EditAnywhere)
-	TArray<uint64> TickNumbers;
 };

@@ -9,5 +9,6 @@
 
 UGhostImageSaveGame::UGhostImageSaveGame()
 {
-	DateTime = "21/04/2022 Test.";
+	SaveName = "Unnamed Ghost";
+	DateTime = *FDateTime::Now().ToString();
 }

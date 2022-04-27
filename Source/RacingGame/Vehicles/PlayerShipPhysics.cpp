@@ -2,12 +2,10 @@
 
 
 #include "PlayerShipPhysics.h"
-
-#include <ThirdParty/openexr/Deploy/OpenEXR-2.3.0/OpenEXR/include/ImathEuler.h>
-
 #include "../Global_Variables.h"
 #include "../Other/Bullet.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 APlayerShipPhysics::APlayerShipPhysics()
@@ -41,7 +39,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 		//SpringArm->SetUsingAbsoluteRotation(false);
 		//SpringArm->bUsePawnControlRotation = true;
 		BackSpringArm->TargetArmLength = TargetSpringArmLength;
-		BackSpringArm->bEnableCameraLag = true;
+		BackSpringArm->bEnableCameraLag = false;
 		BackSpringArm->CameraLagSpeed = 30.f; // Lower = More delay
 		BackSpringArm->bEnableCameraRotationLag = true;
 		BackSpringArm->CameraLagMaxDistance = 2000.f;
@@ -51,11 +49,11 @@ APlayerShipPhysics::APlayerShipPhysics()
 
 		FrontSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("FrontSpringArm"));
 		FrontSpringArm->SetRelativeRotation(FRotator(-10.f, 180.f, 0.f));
-		FrontSpringArm->TargetArmLength = 1000.f;
+		FrontSpringArm->TargetArmLength = 1500.f;
 		FrontSpringArm->bEnableCameraLag = true;
-		FrontSpringArm->CameraLagSpeed = 40.f; // Lower = More delay
-		FrontSpringArm->bEnableCameraRotationLag = true;
-		FrontSpringArm->CameraRotationLagSpeed = 20.f;
+		//FrontSpringArm->CameraLagSpeed = 100.f; // Lower = More delay
+		FrontSpringArm->bEnableCameraRotationLag = false;
+		//FrontSpringArm->CameraRotationLagSpeed = 30.f;
 		FrontSpringArm->bDoCollisionTest = true;
 		FrontSpringArm->SetupAttachment(GetRootComponent());
 
@@ -147,11 +145,15 @@ void APlayerShipPhysics::BeginPlay()
 {
 	Super::BeginPlay();
 	Root->OnComponentBeginOverlap.AddDynamic(this, &APlayerShipPhysics::OnOverlapBegin);
+	Root->OnComponentHit.AddDynamic(this, &APlayerShipPhysics::OnHitBegin);
 	InitialLocation = GetActorLocation();
 	InitialTargetHeight = TargetHeight;
 	InitialBackSpringArmRotation = BackSpringArm->GetRelativeRotation();
 	InitialFrontSpringArmRotation = FrontSpringArm->GetRelativeRotation();
 	AudioComp->Deactivate();
+
+
+	//UE_LOG(LogTemp, Warning, TEXT("Date: %s"), *FDateTime::Now().ToString())
 	
 	if (StartSound)
 	{
@@ -192,17 +194,19 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	//RaycastHover();
 	
 	// Limit speed
-	if (Root->GetPhysicsLinearVelocity().Size() > 20000.f && !bIsDashing)
+	if (Root->GetPhysicsLinearVelocity().Size() > 30000.f && !bIsDashing)
 	{
 		Root->SetPhysicsLinearVelocity(Root->GetPhysicsLinearVelocity().GetSafeNormal() * 20000.f);
 	}
 
 	// Drag
-	/*FVector LinearVelocity = Root->GetPhysicsLinearVelocity();
-	LinearVelocity.Z = 0.f;
-	Root->AddForce(-LinearVelocity * ShipWeight * 0.5f);*/
-
-	UE_LOG(LogTemp, Warning, TEXT("LinVel: %s"), *Root->GetPhysicsLinearVelocity().ToString())
+	if (bEnableDrag)
+	{
+		FVector LinearVelocity = Root->GetPhysicsLinearVelocity();
+		LinearVelocity.Z = 0.f;
+		//Root->AddForce(-LinearVelocity * 0.8f, FName(), true);
+	}
+	
 
 	if (bIsJumping)
 	{
@@ -210,7 +214,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	}
 	
 	// Engine dynamic audio
-	const float Speed = Root->GetComponentVelocity().Size();
+	const float Speed = Root->GetPhysicsLinearVelocity().Size();
 
 	if (bLogSpeed)
 	{
@@ -234,6 +238,17 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	CameraCenteringTimer += DeltaTime;
 	ShootTimer += DeltaTime;
 	JumpTimer += DeltaTime;
+
+	FHitResult HitRes;
+	FCollisionQueryParams Params;
+	
+	if (GetWorld()->LineTraceSingleByChannel(HitRes, GetActorLocation(), GetActorLocation() + FVector::DownVector * 1000, ECC_Visibility, Params))
+	{
+		if (HitRes.PhysMaterial == MyMat->PhysMaterial)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Found sand physical material."))
+		}
+	}
 }
 
 
@@ -278,14 +293,18 @@ void APlayerShipPhysics::Forward(const float Value)
 
 	// Interpolate rotation towards target
 	NextPitchPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 6.0f);
-
-	Force.X = Value * 8.f * SpeedBoost * SpeedMultiplier * ForwardsSpeed;
-	/*Force.X = Value ?
-		FMath::FInterpTo(Force.X, (Value * 10.f * ShipWeight * SpeedBoost * SpeedMultiplier * ForwardsSpeed), GetWorld()->GetDeltaSeconds(), 2.5f) :
-		FMath::FInterpTo(Force.X, 0.f, GetWorld()->GetDeltaSeconds(), 1.5f);*/
 	
-	//ActualSpeed = Value > 0.f ? ForwardsSpeed : FMath::FInterpTo(ActualSpeed, 0.f, GetWorld()->GetDeltaSeconds(), 0.5f);
-	//UE_LOG(LogTemp, Warning, TEXT("AcutalSpeedX: %f"), ActualSpeed)
+	if (Value)
+	{
+		Force.X = FMath::FInterpTo(Force.X, (Value * 12.f * SpeedBoost * SpeedMultiplier * ForwardsSpeed * LinearDampingReduction), GetWorld()->GetDeltaSeconds(), 1.5f);
+	}
+	else
+	{
+		FVector LinearVel = Root->GetPhysicsLinearVelocity();
+		LinearVel.Z *= 0.2f;
+		Root->AddForce(LinearVel * 0.98f * LinearDampingReduction, FName(), true);
+		Force.X = 0.f;
+	}
 }
 
 void APlayerShipPhysics::Turn(const float Value)
@@ -305,27 +324,13 @@ void APlayerShipPhysics::Turn(const float Value)
 
 void APlayerShipPhysics::CameraYaw(const float Value)
 {
-	/*// Should reset the camera target if the camera timer is over x seconds
-	const bool bShouldReset = CameraCenteringTimer >= CameraResetTime;*/
-	
 	if (Value) { CameraCenteringTimer = 0.f; }
-
-	// Target camera rotation should be 0 if bShouldReset is true
-	//SpringArmRotTarget.Yaw = bShouldReset ? 0.f : FMath::Clamp(BackSpringArm->GetRelativeRotation().Yaw + Value * 5.f, -80.f, 80.f);
-	//SpringArmRotTarget.Yaw = bShouldReset ? 0.f : (BackSpringArm->GetRelativeRotation().Yaw + Value * 5.f);
-	SpringArmLocalChange.Yaw = Value;
-	
+	SpringArmLocalChange.Yaw = Value/2;
 }
 
 void APlayerShipPhysics::CameraPitch(const float Value)
 {
-	// Should reset the camera target if the camera timer is over x seconds
-	//const bool bShouldReset = CameraCenteringTimer >= CameraResetTime;
-
 	if (Value) { CameraCenteringTimer = 0.f; }
-
-	// Target camera rotation should be 0 if bShouldReset is true
-	//SpringArmRotTarget.Pitch = bShouldReset ? -20.f : FMath::Clamp(BackSpringArm->GetRelativeRotation().Pitch + Value * 10.f, -85.f, 20.f);
 	SpringArmLocalChange.Pitch = Value;
 }
 
@@ -334,18 +339,34 @@ void APlayerShipPhysics::CameraUpdate()
 	/** Springarm rotation */
 	if (CameraCenteringTimer >= CameraResetTime)
 	{
-		ActiveSpringArm->SetRelativeRotation(FMath::RInterpTo(ActiveSpringArm->GetRelativeRotation(), InitialBackSpringArmRotation, GetWorld()->GetDeltaSeconds(), 5.f));
+		// Reset rotation
+		if (ActiveSpringArm == BackSpringArm)
+		{
+			ActiveSpringArm->SetRelativeRotation(FMath::RInterpTo(ActiveSpringArm->GetRelativeRotation(), InitialBackSpringArmRotation, GetWorld()->GetDeltaSeconds(), 6.f));
+		}
+		else
+		{
+			ActiveSpringArm->SetRelativeRotation(FMath::RInterpTo(ActiveSpringArm->GetRelativeRotation(), InitialFrontSpringArmRotation, GetWorld()->GetDeltaSeconds(), 6.f));
+		}
 	}
 	else
 	{
-		if(ActiveSpringArm->GetRelativeRotation().Pitch + SpringArmLocalChange.Pitch > 30)
+		float NewPitch = ActiveSpringArm->GetRelativeRotation().Pitch + SpringArmLocalChange.Pitch;
+		SpringArmLocalChange.Pitch = NewPitch > 30	?	 30 - ActiveSpringArm->GetRelativeRotation().Pitch : SpringArmLocalChange.Pitch; // MAX
+		SpringArmLocalChange.Pitch = NewPitch < -80	?	-80 - ActiveSpringArm->GetRelativeRotation().Pitch : SpringArmLocalChange.Pitch; // MIN
+
+		float NewYaw = ActiveSpringArm->GetRelativeRotation().Yaw + SpringArmLocalChange.Yaw;
+		SpringArmLocalChange.Yaw = NewYaw > 180		?	 180 - ActiveSpringArm->GetRelativeRotation().Yaw : SpringArmLocalChange.Yaw; // MAX
+		SpringArmLocalChange.Yaw = NewYaw < -180	?	-180 - ActiveSpringArm->GetRelativeRotation().Yaw : SpringArmLocalChange.Yaw; // MIN
+		
+		/*if(NewPitch > 30)
 		{
 			SpringArmLocalChange.Pitch = 30 - ActiveSpringArm->GetRelativeRotation().Pitch;
 		}
-		else if (ActiveSpringArm->GetRelativeRotation().Pitch + SpringArmLocalChange.Pitch < -80)
+		else if (NewPitch < -80)
 		{
 			SpringArmLocalChange.Pitch = -80 - ActiveSpringArm->GetRelativeRotation().Pitch;
-		}
+		}*/
 		ActiveSpringArm->AddRelativeRotation(SpringArmLocalChange);
 		//FRotator RelRot = ActiveSpringArm->GetRelativeRotation();
 		//RelRot.Pitch = FMath::Clamp(ActiveSpringArm->GetRelativeRotation().Pitch, -80.f, 30.f);
@@ -650,12 +671,14 @@ void APlayerShipPhysics::MovementUpdate()
 		SetActorRotation(CurrentRotation);
 		Root->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
 		Root->SetLinearDamping(0.4f);
-		ForwardsSpeed = 500.f;
+		LinearDampingReduction = 0.1f;
+		bEnableDrag = true;
 	}
 	else
 	{
 		Root->SetLinearDamping(InitialLinearDamping);	
-		ForwardsSpeed = 5500.f;
+		LinearDampingReduction = 1.f;
+		bEnableDrag = false;
 	}
 }
 
@@ -807,4 +830,12 @@ void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 {
     UE_LOG(LogTemp, Warning, TEXT("Ship Overlapped with something."))
 	if (!OtherActor || OtherActor == this || !OtherComponent) { return; }
+}
+
+
+void APlayerShipPhysics::OnHitBegin(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (!OtherActor || OtherActor == this) { return; }
+	
 }

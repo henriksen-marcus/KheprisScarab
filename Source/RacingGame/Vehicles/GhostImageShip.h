@@ -26,26 +26,35 @@ public:
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
 	UStaticMeshComponent* BaseMesh;
 	
-	/** Root replacement */
+	/** Root replacement, using this for potential overlap events */
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
 	UBoxComponent* Root;
 	
-
 	UPROPERTY()
 	TArray<FVector> LocationArr;
 
 	UPROPERTY()
 	TArray<FRotator> RotationArr;
 
-	UPROPERTY()
-	TArray<uint64> TickNumbers;
+	/** When the ghost image has finished it's playback, how long should it idle before despawning? */
+	UPROPERTY(EditAnywhere)
+	float DespawnTime{3.f};
 
-	bool bRaceStarted{};
-
-	uint64 CurrentTick{};
-
-	float IdleTimer{};
+	uint32 CurrentTick{};
 
 	void MovementUpdate();
+
+	void TargetPositionUpdate();
+
+	void StartPlayback();
+
+	void StopPlayback();
+
+	FVector CurrentLocTarget;
+	FRotator CurrentRotTarget;
+
+	bool bPlayback{};
+	
+	FTimerHandle PlayBackTimerHandle;
 
 };

@@ -35,9 +35,6 @@ public:
 	UPROPERTY()
 	TArray<FRotator> RotationArr;
 
-	UPROPERTY()
-	TArray<uint64> TickNumbers;
-
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsRecording{};
 
@@ -47,8 +44,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopRecording();
 
+	UFUNCTION()
+	void RecordTick();
+
 	UFUNCTION(BlueprintCallable)
 	bool SpawnGhost();
+
+	UFUNCTION(BlueprintCallable)
+	void UnloadCompleted();
 
 	UPROPERTY(EditAnywhere)
 	class AGhostImageShip* GhostShipRef;
@@ -56,5 +59,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	class APlayerShipPhysics* PlayerShipRef;
 
-	FVector EndLoc;
+	FTimerHandle RecordingTimerHandle;
+
+	float TimeStart{};
+
+	UPROPERTY()
+	class UGlobal_Variables* GlobalVariables;
 };

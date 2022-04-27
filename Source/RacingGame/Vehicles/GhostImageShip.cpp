@@ -46,41 +46,52 @@ void AGhostImageShip::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bRaceStarted)
-	{
-		MovementUpdate();
-		CurrentTick++;
-	}
-	else
-	{
-		IdleTimer += DeltaTime;
-	}
-
-	if (IdleTimer > 5.f)
-	{
-		this->Destroy();
-	}
+	//if (bPlayback) { MovementUpdate(); }
 }
 
 void AGhostImageShip::MovementUpdate()
 {
-	if (LocationArr.IsValidIndex(CurrentTick))
-	{
-		SetActorLocation(LocationArr[CurrentTick]);
-	}
-	else
-	{
-		bRaceStarted = false;
-	}
+	// This was an attempt to get the ship to playback in >60fps when the recording was only in 60fps.
+	//SetActorLocation(FMath::VInterpConstantTo(GetActorLocation(), CurrentLocTarget, GetWorld()->GetDeltaSeconds(), 500.f) );
+	SetActorLocation(CurrentLocTarget);
 	
-	if (RotationArr.IsValidIndex(CurrentTick))
+	//SetActorRotation( FMath::RInterpConstantTo(GetActorRotation(), CurrentRotTarget, GetWorld()->GetDeltaSeconds(), 100.f));
+	SetActorRotation(CurrentRotTarget);
+}
+
+void AGhostImageShip::TargetPositionUpdate()
+{
+	if (LocationArr.IsValidIndex(CurrentTick) && RotationArr.IsValidIndex(CurrentTick))
 	{
-		SetActorRotation(RotationArr[CurrentTick]);
+		CurrentLocTarget = LocationArr[CurrentTick];
+		CurrentRotTarget = RotationArr[CurrentTick];
+		CurrentTick++;
+		MovementUpdate();
 	}
 	else
 	{
-		bRaceStarted = false;
+		StopPlayback();
 	}
+}
+
+void AGhostImageShip::StartPlayback()
+{
+	// Start a looping timer that continuously runs MovementUpdate(), via the PlayBackTimerHandle
+	GetWorld()->GetTimerManager().SetTimer(PlayBackTimerHandle, this, &AGhostImageShip::TargetPositionUpdate, 0.0166666667f, true);
+	bPlayback = true;
+}
+
+void AGhostImageShip::StopPlayback()
+{
+	GetWorld()->GetTimerManager().ClearTimer(PlayBackTimerHandle);
+	
+	FTimerHandle Handle;
+	FTimerDelegate TimerDelegate;
+	TimerDelegate.BindLambda([&]{ this->Destroy(); });
+
+	GetWorld()->GetTimerManager().SetTimer(Handle, TimerDelegate, DespawnTime, false);
+
+	bPlayback = false;
 	
 }
 

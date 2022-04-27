@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "HoveringMovementComponent.h"
+#include "RacingGame/Other/Bullet.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "PlayerShipPhysics.generated.h"
 
 UCLASS()
@@ -147,12 +149,22 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	UHoveringMovementComponent* MovementComponent;
+
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* SandSystem;
+
+	UPROPERTY(EditAnywhere)
+	UMaterial* MyMat;
 	
 
 	// ---------- Functions ---------- //
 	
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnHitBegin(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	
 	
 	/** Controls the forward movement of the root and cosmetic mesh rotation effect */
 	void Forward(float Value);
@@ -255,6 +267,8 @@ public:
 	float ActualSpeed{};
 	float ShootTimer{};
 	float JumpTimer{};
+	float LinearDampingReduction{1.f};
+	bool bEnableDrag{};
 
 
 	//Upgradeable Variables by Adrian
