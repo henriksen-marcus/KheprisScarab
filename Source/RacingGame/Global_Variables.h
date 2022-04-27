@@ -28,6 +28,11 @@ public:
 	
 public:
 	#pragma region Modes
+	UPROPERTY(BlueprintReadWrite, Category = "Variable")
+	bool Racing{};
+	#pragma endregion
+
+	#pragma region Modes
 	bool TimeAttackMode{};
 	#pragma endregion
 

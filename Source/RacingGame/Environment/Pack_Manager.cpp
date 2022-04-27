@@ -137,13 +137,13 @@ void APack_Manager::Movement(float DeltaTime)
 {
 	//Location - Z-axis
 	FVector NewLocation = GetActorLocation();
-	NewLocation.Z = NewLocation.Z + (FMath::Sin(RunningTime * BounceSpeed) * BounceHight);
+	NewLocation.Z = NewLocation.Z + (FMath::Sin(RunningTime * BounceSpeed) * BounceHight) * DeltaTime * 150;
 	SetActorLocation(NewLocation);
 	RunningTime += DeltaTime;
 
 
 	//Rotation
 	FRotator NewRotation = GetActorRotation();
-	FRotator Rotate{ 0.f, RotationSpeed, 0.f };
+	FRotator Rotate{ 0.f, RotationSpeed * DeltaTime * 200, 0.f };
 	SetActorRotation(NewRotation + Rotate);
 }

@@ -2,6 +2,7 @@
 
 
 #include "Menu_Start.h"
+#include "../Global_Variables.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Kismet/KismetStringLibrary.h"
@@ -14,6 +15,13 @@ void UMenu_Start::NativeConstruct()
 void UMenu_Start::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		GameInstance->Racing = false;
+		GameInstance->RaceStartOFF = false;
+	}
 
 	//Buttons
 	Start_Button->OnClicked.AddDynamic(this, &UMenu_Start::Start_Button_Clickd);

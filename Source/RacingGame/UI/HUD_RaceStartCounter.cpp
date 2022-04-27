@@ -35,6 +35,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 		if (TimeCounter <= TimeInterval * 2 && Repetitions == 0)
 		{
 			GameInstance->RaceStartOFF = true;
+			GameInstance->Racing = true;
 		}
 		if (TimeCounter >= TimeInterval * 2 && Repetitions == 0)
 		{
