@@ -283,9 +283,17 @@ void APlayerShipPhysics::Forward(const float Value)
 {
 	if (GameInstance)
 	{
-		if (GameInstance->RaceStartOFF == false)
-		{// Determine if there is input
-			bForwardHasInput = !(Value == 0);
+		if (!GameInstance->RaceStartOFF)
+		{
+			return;
+		}
+	}
+
+	// Determine if there is input
+	bForwardHasInput = !(Value == 0);
+
+	// If there is input, set rotation target to based on input value, else set target to 0
+	const float TargetPitch = bForwardHasInput ? Value > 0.f ? -10.0f : 10.0f : 0.f;
 
 	// Interpolate rotation towards target
 	NextPitchPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 6.0f);
@@ -337,7 +345,8 @@ void APlayerShipPhysics::CameraPitch(const float Value)
 
 void APlayerShipPhysics::CameraUpdate()
 {
-	if (GameInstance)
+	/** Springarm rotation */
+	if (CameraCenteringTimer >= CameraResetTime)
 	{
 		// Reset rotation
 		if (ActiveSpringArm == BackSpringArm)
@@ -358,7 +367,7 @@ void APlayerShipPhysics::CameraUpdate()
 		float NewYaw = ActiveSpringArm->GetRelativeRotation().Yaw + SpringArmLocalChange.Yaw;
 		SpringArmLocalChange.Yaw = NewYaw > 180		?	 180 - ActiveSpringArm->GetRelativeRotation().Yaw : SpringArmLocalChange.Yaw; // MAX
 		SpringArmLocalChange.Yaw = NewYaw < -180	?	-180 - ActiveSpringArm->GetRelativeRotation().Yaw : SpringArmLocalChange.Yaw; // MIN
-
+		
 		/*if(NewPitch > 30)
 		{
 			SpringArmLocalChange.Pitch = 30 - ActiveSpringArm->GetRelativeRotation().Pitch;
@@ -373,16 +382,13 @@ void APlayerShipPhysics::CameraUpdate()
 		//ActiveSpringArm->SetRelativeRotation(RelRot);
 	}
 
-			FRotator CurRot = ActiveSpringArm->GetRelativeRotation();
-			CurRot.Roll = 0;
-			ActiveSpringArm->SetRelativeRotation(CurRot);
+	FRotator CurRot = ActiveSpringArm->GetRelativeRotation();
+	CurRot.Roll = 0;
+	ActiveSpringArm->SetRelativeRotation(CurRot);
 
-			/** Camera effects */
-			BackCamera->SetFieldOfView(FMath::FInterpTo(BackCamera->FieldOfView, TargetCameraFOV, GetWorld()->GetDeltaSeconds(), 5.f));
-			BackSpringArm->TargetArmLength = FMath::FInterpTo(BackSpringArm->TargetArmLength, TargetSpringArmLength, GetWorld()->GetDeltaSeconds(), 10.f);
-
-		}
-	}
+	/** Camera effects */
+	BackCamera->SetFieldOfView(FMath::FInterpTo(BackCamera->FieldOfView, TargetCameraFOV, GetWorld()->GetDeltaSeconds(), 5.f));
+	BackSpringArm->TargetArmLength = FMath::FInterpTo(BackSpringArm->TargetArmLength, TargetSpringArmLength, GetWorld()->GetDeltaSeconds(), 10.f);
 }
 
 void APlayerShipPhysics::Shoot(const float Value)
