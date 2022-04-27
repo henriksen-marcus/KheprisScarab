@@ -27,6 +27,11 @@ public:
 	virtual void Tick(float DeltaTime);
 	
 public:
+	#pragma region Modes
+	bool TimeAttackMode{};
+	#pragma endregion
+
+
 	#pragma region Shop_Menu
 	float DashTimer{2.f};
 
@@ -84,12 +89,21 @@ public:
 	bool Time_Display{true};
 	bool Currency1_Display{true};
 	bool Currency2_Display{true};
+	bool Speed_Display{ true };
 
 	bool Difficulty_Easy{false};
 	bool Difficulty_Normal{true};
 	bool Difficulty_Hard{false};
 
 	bool Sound{true};
+	#pragma endregion
+
+	#pragma region CheckPoints
+	int PlayerCheckpointNumber{};
+	#pragma endregion
+
+	#pragma region StartRace
+	bool RaceStartOFF{};
 	#pragma endregion
 
 };

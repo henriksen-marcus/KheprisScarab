@@ -29,6 +29,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
 	UStaticMeshComponent* BaseMesh;
 	
@@ -184,6 +185,8 @@ public:
 	void Dash();
 	void Jump();
 	
+	void Respawn();
+
 	void Crouch();
 	void CrouchEnd();
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Environment/CheckPoint.h"
 #include "GameFramework/GameModeBase.h"
 #include "RacingGameGameModeBase.generated.h"
 
@@ -18,6 +19,9 @@ public:
 	ARacingGameGameModeBase();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY()
+		TArray<ACheckPoint*> Checkpoints;
 
 	enum ESaveType : uint8
 	{

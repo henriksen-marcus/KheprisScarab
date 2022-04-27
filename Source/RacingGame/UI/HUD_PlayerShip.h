@@ -25,6 +25,9 @@ class RACINGGAME_API UHUD_PlayerShip : public UUserWidget
 	void Boost_Display();
 	void SetAmmoPrecentage();
 	void SetTimer_Display();
+	void SetSpeedDisplay();
+
+	void SetTimer(float DeltaTime);
 public:
 	//Health Bar
 	UPROPERTY(meta = (BindWidget))
@@ -61,5 +64,9 @@ public:
 	//Time Attack
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Time_Text;
+
+	//Speed
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* Speed_Text;
 
 };
