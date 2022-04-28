@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "HoveringMovementComponent.h"
 #include "RacingGame/Other/Bullet.h"
+#include "NiagaraSystem.h"
+#include "NiagaraComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "PlayerShipPhysics.generated.h"
 
@@ -152,10 +154,12 @@ public:
 	UHoveringMovementComponent* MovementComponent;
 
 	UPROPERTY(EditAnywhere)
-	class UNiagaraSystem* SandSystem;
+	UNiagaraSystem* NS_SandSystem;
 
 	UPROPERTY(EditAnywhere)
 	UMaterial* MyMat;
+
+	UNiagaraComponent* SandSystemPtr;
 	
 
 	// ---------- Functions ---------- //
@@ -217,6 +221,12 @@ public:
 
 	void CameraUpdate();
 
+	/**	Returns the name of the physics material on the ground beneath the ship. */
+	FString CheckSurface(FVector &HitLocation);
+
+	/** Spawns a niagara sand system effect at the surface location under the ship, if the physical material is right. */
+	void SpawnSandEffect();
+
 	
 	// ---------- Variables ---------- //
 
@@ -272,53 +282,6 @@ public:
 	float JumpTimer{};
 	float LinearDampingReduction{1.f};
 	bool bEnableDrag{};
-
-
-	//Upgradeable Variables by Adrian
-public:
-	//void TestHUDVariables();
-	//void TimeAttackMode_Timer(float DeltaTime);
-
-	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	//	float CurrentHealth{};
-	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	//	float MaxHealth{};
-
-	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	//	float MaxAmmo{};
-
-	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	//	float AmmoPrecentage{};
-
-	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	//	int Currency1{};
-	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	//	int Currency2{};
-
-	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	//	bool BoostPickup{};
-	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	//	float MaxBoost{};
-
-	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	//	int TimeCount{};
-	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	//	int TimeAdded{};
-	//UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-	//	float DeltaTimeCount{};
-
-	//bool Health_Display{true};
-	//bool Boost_Display{true};
-	//bool Ammo_Display{true};
-	//bool Time_Display{true};
-	//bool Currency1_Display{true};
-	//bool Currency2_Display{true};
-
-	//bool Difficulty_Easy{false};
-	//bool Difficulty_Normal{true};
-	//bool Difficulty_Hard{false};
-
-	//bool Sound{true};
 
 	UPROPERTY()
 	class UGlobal_Variables* GameInstance;

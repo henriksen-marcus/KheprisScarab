@@ -8,6 +8,9 @@
 #include "../RacingGameGameModeBase.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "NiagaraFunctionLibrary.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
+#include "../../Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraCommon.h"
+#include "RacingGame/Other/Bullet.h"
 
 // Sets default values
 APlayerShipPhysics::APlayerShipPhysics()
@@ -229,20 +232,33 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 
 	CameraUpdate();
 
+	FVector HitLoc;
+	if (CheckSurface(HitLoc) == FString("PM_Sand"))
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("We got Sand!"))
+		if (!SandSystemPtr)
+		{
+			if (NS_SandSystem)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Spawning Sand System."))
+				FVector RelativeLocation = FVector(0.f, 0.f, HitLoc.Z - GetActorLocation().Z);
+				SandSystemPtr = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_SandSystem, HitLoc, FRotator::ZeroRotator);
+			}
+		}
+		else
+		{
+			SandSystemPtr->SetWorldLocation(HitLoc);
+		}
+	}
+	else if (SandSystemPtr)
+	{
+		SandSystemPtr->DestroyInstance();
+		SandSystemPtr = nullptr;
+	}
+
 	CameraCenteringTimer += DeltaTime;
 	ShootTimer += DeltaTime;
 	JumpTimer += DeltaTime;
-
-	/*FHitResult HitRes;
-	FCollisionQueryParams Params;
-
-	if (GetWorld()->LineTraceSingleByChannel(HitRes, GetActorLocation(), GetActorLocation() + FVector::DownVector * 1000, ECC_Visibility, Params))
-	{
-		if (HitRes.PhysMaterial == MyMat->PhysMaterial)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Found sand physical material."))
-		}
-	}*/
 }
 
 
@@ -387,6 +403,40 @@ void APlayerShipPhysics::CameraUpdate()
 	/** Camera effects */
 	BackCamera->SetFieldOfView(FMath::FInterpTo(BackCamera->FieldOfView, TargetCameraFOV, GetWorld()->GetDeltaSeconds(), 5.f));
 	BackSpringArm->TargetArmLength = FMath::FInterpTo(BackSpringArm->TargetArmLength, TargetSpringArmLength, GetWorld()->GetDeltaSeconds(), 10.f);
+}
+
+FString APlayerShipPhysics::CheckSurface(FVector &HitLocation)
+{
+	/** How far to check for underlying surface */
+	static float CheckDistance = 1000.f;
+	
+	FHitResult HitRes;
+	FVector Start = GetActorLocation();
+	FVector End = GetActorLocation() + FVector::DownVector * CheckDistance;
+
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red);
+	
+	if (GetWorld()->LineTraceSingleByChannel(HitRes, Start, End, ECC_Visibility))
+	{
+		if (HitRes.bBlockingHit)
+		{
+			if (IsValid(HitRes.Component.Get()))
+			{
+				UPhysicalMaterial* PhysMat = HitRes.Component.Get()->GetMaterial(0)->GetPhysicalMaterial();
+				if (PhysMat)
+				{
+					HitLocation = HitRes.Location;
+					return PhysMat->GetName();
+				}
+			}
+		}
+	}
+	return FString();
+}
+
+void APlayerShipPhysics::SpawnSandEffect()
+{
+	
 }
 
 void APlayerShipPhysics::Shoot(const float Value)
