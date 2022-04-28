@@ -98,10 +98,10 @@ APlayerShipPhysics::APlayerShipPhysics()
 		Thrust3->SetupAttachment(GetRootComponent());
 		Thrust4->SetupAttachment(GetRootComponent());
 
-		Thrust1->SetRelativeLocationAndRotation(FVector(200.f, -200.f, 0.f), FRotator(-60.f, -45.f, 0.f));
-		Thrust2->SetRelativeLocationAndRotation(FVector(200.f, 200.f, 0.f), FRotator(-60.f, 45.f, 0.f));
-		Thrust3->SetRelativeLocationAndRotation(FVector(-200.f, -200.f, 0.f), FRotator(-120.f, 45.f, 0.f));
-		Thrust4->SetRelativeLocationAndRotation(FVector(-200.f, 200.f, 0.f), FRotator(-120.f, -45.f, 0.f));
+		Thrust1->SetRelativeLocationAndRotation(FVector(300.f, -100.f, 0.f), FRotator(-90.f, 90.f, 0.f));
+		Thrust2->SetRelativeLocationAndRotation(FVector(300.f, 100.f, 0.f), FRotator(-90.f, -90.f, 0.f));
+		Thrust3->SetRelativeLocationAndRotation(FVector(-300.f, -100.f, 0.f), FRotator(-90.f, 90.f, 0.f));
+		Thrust4->SetRelativeLocationAndRotation(FVector(-300.f, 100.f, 0.f), FRotator(-90.f, -90.f, 0.f));
 
 		BulletSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("BulletSpawnPoint"));
 		BulletSpawnPoint->SetupAttachment(GetRootComponent());
@@ -414,7 +414,7 @@ FString APlayerShipPhysics::CheckSurface(FVector &HitLocation)
 	FVector Start = GetActorLocation();
 	FVector End = GetActorLocation() + FVector::DownVector * CheckDistance;
 
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Red);
 	
 	if (GetWorld()->LineTraceSingleByChannel(HitRes, Start, End, ECC_Visibility))
 	{
@@ -422,11 +422,17 @@ FString APlayerShipPhysics::CheckSurface(FVector &HitLocation)
 		{
 			if (IsValid(HitRes.Component.Get()))
 			{
-				UPhysicalMaterial* PhysMat = HitRes.Component.Get()->GetMaterial(0)->GetPhysicalMaterial();
-				if (PhysMat)
+				if (IsValid(HitRes.Component.Get()->GetMaterial(0)))
 				{
-					HitLocation = HitRes.Location;
-					return PhysMat->GetName();
+					if (IsValid(HitRes.Component.Get()->GetMaterial(0)->GetPhysicalMaterial()))
+					{
+						UPhysicalMaterial* PhysMat = HitRes.Component.Get()->GetMaterial(0)->GetPhysicalMaterial();
+						if (PhysMat)
+						{
+							HitLocation = HitRes.Location;
+							return PhysMat->GetName();
+						}
+					}
 				}
 			}
 		}
@@ -871,7 +877,7 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num, bool bHit) c
 	}
 
 	FVector ThrustForce, Start, CompLocation, UpVector = GetActorUpVector();
-	float Constant = Gravity/4.f;//50000.f;
+	float Constant = Gravity/3.f;//50000.f;
 	float Distance;
 
 	switch (Num)
