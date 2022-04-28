@@ -106,19 +106,18 @@ void ABullet::OnOverlapBegin (
 	{
 		if (FMath::RandBool())
 		{
-			UGameplayStatics::PlaySound2D(GetWorld(), BulletHitSound1, 0.6f, 1.6f);
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), BulletHitSound1, SweepResult.ImpactPoint, 2.f);
+			//UGameplayStatics::PlaySound2D(GetWorld(), BulletHitSound1, 0.6f, 1.6f);
 		}
 		else {
-			UGameplayStatics::PlaySound2D(GetWorld(), BulletHitSound2, 0.6f, 1.6f);
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), BulletHitSound2, SweepResult.ImpactPoint, 2.f);
+			//UGameplayStatics::PlaySound2D(GetWorld(), BulletHitSound2, 0.6f, 1.6f);
 		}
 	}
 
 	if (NS_BulletHitFX)
 	{
-
-		
-		FRotator Rot = ((GetActorLocation() + FVector(SweepResult.Normal)) - GetActorLocation()).Rotation();
-		Rot = FMath::GetReflectionVector(GetActorRotation().Vector(), SweepResult.ImpactNormal).Rotation();
+		FRotator Rot = FMath::GetReflectionVector(GetActorRotation().Vector(), SweepResult.ImpactNormal).Rotation();
 		//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + FVector(SweepResult.Normal)*1000, FColor::Red, false, 5.f);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_BulletHitFX, SweepResult.ImpactPoint, Rot, FVector(5.f));
 	}

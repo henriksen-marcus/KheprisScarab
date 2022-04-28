@@ -92,7 +92,7 @@ public:
 
 	/** Target spring arm length, constantly interpolated towards */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float TargetSpringArmLength{1000.f};
+	float TargetSpringArmLength{600.f};
 
 	/** The ship's target height above the ground */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
@@ -129,10 +129,19 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* BoostSound;
 
+	// Reload functionality is discontinued due to pickups.
+	/*UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* ReloadSound;*/
+
 	UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundBase* ReloadSound;
+	USoundBase* HitSound1;
 
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* HitSound2;
 
+	/*UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* HitSound3;*/
+	
 	/* LOCATION PLACEHOLDERS */
 
 	UPROPERTY(EditAnywhere, Category = "Arrows")
@@ -159,6 +168,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	UMaterial* MyMat;
 
+	UPROPERTY()
 	UNiagaraComponent* SandSystemPtr;
 	
 
@@ -168,7 +178,7 @@ public:
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-	void OnHitBegin(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	
 	
 	/** Controls the forward movement of the root and cosmetic mesh rotation effect */
@@ -185,7 +195,7 @@ public:
 
 	void Shoot(float Value);
 
-	void Reload();
+	//void Reload();
 	void Dash();
 	void Jump();
 	
@@ -280,8 +290,9 @@ public:
 	float ActualSpeed{};
 	float ShootTimer{};
 	float JumpTimer{};
+	float HitSoundCooldown{};
 	float LinearDampingReduction{1.f};
-	bool bEnableDrag{};
+	bool bEnableDrag{true};
 
 	UPROPERTY()
 	class UGlobal_Variables* GameInstance;

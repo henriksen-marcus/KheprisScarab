@@ -90,7 +90,7 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (GameInstance)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), BoostPack_Sound);
+				UGameplayStatics::PlaySound2D(GetWorld(), BoostPack_Sound, 0.2f);
 
 				GameInstance->BoostPickup = true;
 				UE_LOG(LogTemp, Warning, TEXT("BoostPack - SUCCESS"));

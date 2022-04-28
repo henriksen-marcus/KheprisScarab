@@ -26,7 +26,7 @@ ACheckPoint::ACheckPoint()
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->SetupAttachment(RootComponent);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshComponentAsset(TEXT("StaticMesh'/Game/3DAssets/Environment/AdrianCube.AdrianCube'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshComponentAsset(TEXT("StaticMesh'/Game/3DAssets/Environment/SM_Ring.SM_Ring'"));
 	if (MeshComponentAsset.Succeeded())
 	{
 		MeshComponent->SetStaticMesh(MeshComponentAsset.Object);

@@ -25,7 +25,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 	Root->SetEnableGravity(false);
 	Root->SetLinearDamping(3.f);
 	Root->SetAngularDamping(20.f);
-	Root->SetPhysicsMaxAngularVelocityInDegrees(250.f);
+	Root->SetPhysicsMaxAngularVelocityInDegrees(300.f);
 	TEnumAsByte<ECanBeCharacterBase> temp;
 	temp = ECanBeCharacterBase::ECB_No;
 	Root->CanCharacterStepUpOn = temp;
@@ -79,12 +79,18 @@ APlayerShipPhysics::APlayerShipPhysics()
 		FrontCamera->SetActive(false);
 	}
 
-	AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
-	AudioComp->SetSound(ConstructorHelpers::FObjectFinder<USoundCue>(TEXT("SoundCue'/Game/SoundEffects/EngineSounds/Running/EngineRunning2.EngineRunning2'")).Object);
-	AudioComp->SetupAttachment(GetRootComponent());
+	// Audio
+	{
+		AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+		AudioComp->SetSound(ConstructorHelpers::FObjectFinder<USoundCue>(TEXT("SoundCue'/Game/SoundEffects/EngineSounds/Running/EngineRunning2.EngineRunning2'")).Object);
+		AudioComp->SetupAttachment(GetRootComponent());
 
-	StartSound = ConstructorHelpers::FObjectFinder<USoundWave>(TEXT("SoundWave'/Game/SoundEffects/EngineSounds/starting-car.starting-car'")).Object;
-	BoostSound = ConstructorHelpers::FObjectFinder<USoundWave>(TEXT("SoundWave'/Game/SoundEffects/Bang/firework-boom.firework-boom'")).Object;
+		StartSound = ConstructorHelpers::FObjectFinder<USoundWave>(TEXT("SoundWave'/Game/SoundEffects/EngineSounds/starting-car.starting-car'")).Object;
+		BoostSound = ConstructorHelpers::FObjectFinder<USoundWave>(TEXT("SoundWave'/Game/SoundEffects/Bang/firework-boom.firework-boom'")).Object;
+		HitSound1 = ConstructorHelpers::FObjectFinder<USoundWave>(TEXT("SoundWave'/Game/SoundEffects/Hit/impactPlate_heavy_001.impactPlate_heavy_001'")).Object;
+		HitSound2 = ConstructorHelpers::FObjectFinder<USoundWave>(TEXT("SoundWave'/Game/SoundEffects/Hit/impactPlate_heavy_004.impactPlate_heavy_004'")).Object;
+	}
+	
 
 	// Location placeholders
 	{
@@ -134,7 +140,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 
 	//MovementComponent = CreateDefaultSubobject<UHoveringMovementComponent>(TEXT("CustomMovementComponent"));
 	//BulletClassToSpawn = ABullet::StaticClass();
-
+	Root->OnComponentHit.AddDynamic(this, &APlayerShipPhysics::OnHit);
 }
 
 
@@ -142,7 +148,7 @@ void APlayerShipPhysics::BeginPlay()
 {
 	Super::BeginPlay();
 	Root->OnComponentBeginOverlap.AddDynamic(this, &APlayerShipPhysics::OnOverlapBegin);
-	Root->OnComponentHit.AddDynamic(this, &APlayerShipPhysics::OnHitBegin);
+	
 	InitialLocation = GetActorLocation();
 	InitialTargetHeight = TargetHeight;
 	InitialBackSpringArmRotation = BackSpringArm->GetRelativeRotation();
@@ -181,7 +187,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// Local + Global gravity, added a little more force the the opposing (local) force
-	const FVector CombinedGravity = ( FVector::DownVector - (GetActorUpVector() * 1.08f) ).GetSafeNormal();
+	const FVector CombinedGravity = ( FVector::DownVector - (GetActorUpVector() * 1.1f) ).GetSafeNormal();
 	Root->AddForce(CombinedGravity * (Gravity));
 
 	// Local forwards force
@@ -201,7 +207,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	{
 		FVector LinearVelocity = Root->GetPhysicsLinearVelocity();
 		LinearVelocity.Z = 0.f;
-		//Root->AddForce(-LinearVelocity * 0.8f, FName(), true);
+		Root->AddForce(-LinearVelocity * 0.8f, FName(), true);
 	}
 
 
@@ -235,12 +241,10 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	FVector HitLoc;
 	if (CheckSurface(HitLoc) == FString("PM_Sand"))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("We got Sand!"))
 		if (!SandSystemPtr)
 		{
 			if (NS_SandSystem)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Spawning Sand System."))
 				FVector RelativeLocation = FVector(0.f, 0.f, HitLoc.Z - GetActorLocation().Z);
 				SandSystemPtr = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_SandSystem, HitLoc, FRotator::ZeroRotator);
 			}
@@ -259,6 +263,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	CameraCenteringTimer += DeltaTime;
 	ShootTimer += DeltaTime;
 	JumpTimer += DeltaTime;
+	HitSoundCooldown += DeltaTime;
 }
 
 
@@ -286,7 +291,7 @@ void APlayerShipPhysics::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	PlayerInputComponent->BindAction("CameraSwap", EInputEvent::IE_Pressed, this, &APlayerShipPhysics::CameraSwap);
 	PlayerInputComponent->BindAction("CameraSwap", EInputEvent::IE_Released, this, &APlayerShipPhysics::CameraSwap);
 
-	PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &APlayerShipPhysics::Reload);
+	//PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &APlayerShipPhysics::Reload);
 
 	PlayerInputComponent->BindAction("Respawn", EInputEvent::IE_Pressed, this, &APlayerShipPhysics::Respawn);
 }
@@ -312,6 +317,7 @@ void APlayerShipPhysics::Forward(const float Value)
 
 			if (Value)
 			{
+				//Force.X = Value * 6.f * SpeedBoost * SpeedMultiplier * ForwardsSpeed;
 				Force.X = FMath::FInterpTo(Force.X, (Value * 12.f * SpeedBoost * SpeedMultiplier * ForwardsSpeed * LinearDampingReduction), GetWorld()->GetDeltaSeconds(), 1.5f);
 			}
 			else
@@ -482,6 +488,7 @@ void APlayerShipPhysics::Shoot(const float Value)
 	}
 }
 
+/*
 void APlayerShipPhysics::Reload()
 {
 	if (GameInstance)
@@ -517,6 +524,7 @@ void APlayerShipPhysics::Reload()
 		}
 	}
 }
+*/
 
 void APlayerShipPhysics::Dash()
 {
@@ -661,7 +669,7 @@ void APlayerShipPhysics::CameraZoomIn()
 		if (GameInstance->RaceStartOFF == false)
 		{
 			if (bIsDashing) { return; }
-			TargetSpringArmLength = FMath::Clamp(TargetSpringArmLength - 200.f, 200.f, 5000.f);
+			TargetSpringArmLength = FMath::Clamp(TargetSpringArmLength - 200.f, 500.f, 1500.f);
 		}
 	}
 }
@@ -673,7 +681,7 @@ void APlayerShipPhysics::CameraZoomOut()
 		if (GameInstance->RaceStartOFF == false)
 		{
 			if (bIsDashing) { return; }
-			TargetSpringArmLength = FMath::Clamp(TargetSpringArmLength + 200.f, 200.f, 5000.f);
+			TargetSpringArmLength = FMath::Clamp(TargetSpringArmLength + 200.f, 500.f, 1500.f);
 		}
 	}
 }
@@ -877,7 +885,7 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num, bool bHit) c
 	}
 
 	FVector ThrustForce, Start, CompLocation, UpVector = GetActorUpVector();
-	float Constant = Gravity/3.f;//50000.f;
+	float Constant = Gravity;//50000.f;
 	float Distance;
 
 	switch (Num)
@@ -914,6 +922,9 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num, bool bHit) c
 
 	// Add the force at the specified location
 	Root->AddForceAtLocation(ThrustForce, CompLocation);
+	// Dempningsledd
+	//FVector Damping = FVector::DotProduct(Root->GetPhysicsLinearVelocity(), GetActorUpVector()) * (-(ThrustForce.GetSafeNormal())) * 1100;
+	//Root->AddForceAtLocation(Damping, CompLocation);
 }
 
 
@@ -989,9 +1000,26 @@ void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 }
 
 
-void APlayerShipPhysics::OnHitBegin(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+void APlayerShipPhysics::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (!OtherActor || OtherActor == this) { return; }
-
+	if (HitSound1 && HitSound2 && HitSoundCooldown > 0.5f)
+	{
+		USoundBase* Sound;
+		switch (FMath::RandRange(0,1))
+		{
+		case 0:
+			Sound = HitSound1;
+			break;
+		case 1:
+			Sound = HitSound2;
+			break;
+		default:
+			Sound = HitSound1;
+			break;
+		}
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound, Hit.ImpactPoint, 0.6f);
+		HitSoundCooldown = 0.f;
+	}
 }
