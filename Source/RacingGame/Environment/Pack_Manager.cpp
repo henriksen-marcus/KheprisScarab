@@ -14,7 +14,7 @@ APack_Manager::APack_Manager()
 
 	//--------- VARIABLES ---------//
 	BounceSpeed = 1.f;
-	BounceHight = 1.5f;
+	BounceHight = 0.7f;
 	RotationSpeed = 0.3f;
 
 
