@@ -22,15 +22,42 @@ void UMenu_Shop::NativeOnInitialized()
 	//------------------------------
 
 
-	//Text on Buttons
-	Back_Button_Text->SetText(FText::FromString("Back"));
-
 	//Buttons Clicked
 	HealthShop_Button->OnClicked.AddDynamic(this, &UMenu_Shop::HealthShop_Button_Clicked);
 	AmmoShop_Button->OnClicked.AddDynamic(this, &UMenu_Shop::AmmoShop_Button_Clicked);
 	BoostShop_Button->OnClicked.AddDynamic(this, &UMenu_Shop::BoostShop_Button_Clicked);
 	TimeShop_Button->OnClicked.AddDynamic(this, &UMenu_Shop::TimeShop_Button_Clicked);
 	Back_Button->OnClicked.AddDynamic(this, &UMenu_Shop::Back_Button_Clicked);
+
+	/*Health_Img->SetBrushFromTexture(HealthShop_Upgrade_Image_Active);
+	Ammo_Img->SetBrushFromTexture(AmmoShop_Upgrade_Image_Active);
+	Boost_Img->SetBrushFromTexture(BoostShop_Upgrade_Image_Active);
+	Time_Img->SetBrushFromTexture(TimeShop_Upgrade_Image_Active);*/
+
+	////Button Images
+	//UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	//if (GameInstance)
+	//{
+	//	if (GameInstance->HealthActivate == true)
+	//		HealthShop_Uprade_Image->SetBrushFromTexture(HealthShop_Uprade_Image_Active);
+	//	else
+	//		HealthShop_Uprade_Image->SetBrushFromTexture(HealthShop_Uprade_Image_Inactive);
+
+	//	if (GameInstance->AmmoActivate == true)
+	//		AmmoShop_Uprade_Image->SetBrushFromTexture(AmmoShop_Uprade_Image_Active);
+	//	else
+	//		AmmoShop_Uprade_Image->SetBrushFromTexture(AmmoShop_Uprade_Image_Inactive);
+
+	//	if (GameInstance->BoostActivate == true)
+	//		BoostShop_Uprade_Image->SetBrushFromTexture(BoostShop_Uprade_Image_Active);
+	//	else
+	//		BoostShop_Uprade_Image->SetBrushFromTexture(BoostShop_Uprade_Image_Inactive);
+
+	//	if (GameInstance->TimeActivate == true)
+	//		TimeShop_Uprade_Image->SetBrushFromTexture(TimeShop_Uprade_Image_Active);
+	//	else
+	//		TimeShop_Uprade_Image->SetBrushFromTexture(TimeShop_Uprade_Image_Inactive);
+	//}
 }
 void UMenu_Shop::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {
@@ -94,6 +121,7 @@ void UMenu_Shop::SetHealthUpgrade_Display()
 	if (GameInstance->HealthUpgradeTier >= 10)
 	{
 		HealthShop_Button->SetVisibility(ESlateVisibility::Hidden);
+		HealthShop_Button_Text->SetVisibility(ESlateVisibility::Hidden);
 		Health_Info_Text->SetText(FText::FromString("Your Health has reached its max"));
 	}
 
@@ -102,7 +130,12 @@ void UMenu_Shop::SetHealthUpgrade_Display()
 		if (GameInstance->HealthActivate == true)
 			HealthShop_Button_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->HealthUpgradeCost)));
 		else
-			HealthShop_Button_Text->SetText(FText::FromString("Locked"));
+			HealthShop_Button_Text->SetText(FText::FromString(""));
+
+		if (GameInstance->HealthActivate == true)
+			Health_Img->SetBrushFromTexture(HealthShop_Upgrade_Image_Active);
+		else
+			Health_Img->SetBrushFromTexture(HealthShop_Upgrade_Image_Inactive);
 		
 		MaxHealth_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->MaxHealth)));
 	}
@@ -184,6 +217,7 @@ void UMenu_Shop::SetAmmoUpgrade_Display()
 	if (GameInstance->AmmoUpgradeTier >= 10)
 	{
 		AmmoShop_Button->SetVisibility(ESlateVisibility::Hidden);
+		AmmoShop_Button_Text->SetVisibility(ESlateVisibility::Hidden);
 		Ammo_Info_Text->SetText(FText::FromString("Your Ammo has reached its max"));
 	}
 
@@ -192,7 +226,12 @@ void UMenu_Shop::SetAmmoUpgrade_Display()
 		if (GameInstance->AmmoActivate == true)
 			AmmoShop_Button_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->AmmoUpgradeCost)));
 		else
-			AmmoShop_Button_Text->SetText(FText::FromString("Locked"));
+			AmmoShop_Button_Text->SetText(FText::FromString(""));
+
+		if (GameInstance->AmmoActivate == true)
+			Ammo_Img->SetBrushFromTexture(AmmoShop_Upgrade_Image_Active);
+		else
+			Ammo_Img->SetBrushFromTexture(AmmoShop_Upgrade_Image_Inactive);
 
 		MaxAmmo_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->MaxAmmo)));
 	}
@@ -274,6 +313,7 @@ void UMenu_Shop::SetBoostUpgrade_Display()
 	if (GameInstance->BoostUpgradeTier >= 10)
 	{
 		BoostShop_Button->SetVisibility(ESlateVisibility::Hidden);
+		BoostShop_Button_Text->SetVisibility(ESlateVisibility::Hidden);
 		Boost_Info_Text->SetText(FText::FromString("Your Boost has reached its max"));
 	}
 
@@ -282,7 +322,12 @@ void UMenu_Shop::SetBoostUpgrade_Display()
 		if (GameInstance->BoostActivate == true)
 			BoostShop_Button_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->BoostUpgradeCost)));
 		else
-			BoostShop_Button_Text->SetText(FText::FromString("Locked"));
+			BoostShop_Button_Text->SetText(FText::FromString(""));
+
+		if (GameInstance->BoostActivate == true)
+			Boost_Img->SetBrushFromTexture(BoostShop_Upgrade_Image_Active);
+		else
+			Boost_Img->SetBrushFromTexture(BoostShop_Upgrade_Image_Inactive);
 
 		MaxBoost_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_FloatToString(GameInstance->DashTimer)));
 	}
@@ -364,6 +409,7 @@ void UMenu_Shop::SetTimeUpgrade_Display()
 	if (GameInstance->TimeUpgradeTier >= 10)
 	{
 		TimeShop_Button->SetVisibility(ESlateVisibility::Hidden);
+		TimeShop_Button_Text->SetVisibility(ESlateVisibility::Hidden);
 		Time_Info_Text->SetText(FText::FromString("Your Extra Time has reached its max"));
 	}
 
@@ -372,7 +418,12 @@ void UMenu_Shop::SetTimeUpgrade_Display()
 		if (GameInstance->TimeActivate == true)
 			TimeShop_Button_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->TimeUpgradeCost)));
 		else
-			TimeShop_Button_Text->SetText(FText::FromString("Locked"));
+			TimeShop_Button_Text->SetText(FText::FromString(""));
+
+		if (GameInstance->TimeActivate == true)
+			Time_Img->SetBrushFromTexture(TimeShop_Upgrade_Image_Active);
+		else
+			Time_Img->SetBrushFromTexture(TimeShop_Upgrade_Image_Inactive);
 
 		MaxTime_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->TimeAdded)));
 	}
