@@ -28,8 +28,6 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 		class UButton* Back_Button;
-	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* Back_Button_Text;
 
 	UPROPERTY(EditAnywhere, Category = "Sound Effect")
 		USoundBase* ErrorSound;
@@ -57,6 +55,34 @@ public:
 		class UImage* Currency2_Image;
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Currency2_Text;
+
+	//Upgade Textures
+	UPROPERTY(meta = (BindWidget))
+		class UImage* Health_Img;
+	UPROPERTY(meta = (BindWidget))
+		class UImage* Ammo_Img;
+	UPROPERTY(meta = (BindWidget))
+		class UImage* Boost_Img;
+	UPROPERTY(meta = (BindWidget))
+		class UImage* Time_Img;
+
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* HealthShop_Upgrade_Image_Inactive;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* HealthShop_Upgrade_Image_Active;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* AmmoShop_Upgrade_Image_Inactive;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* AmmoShop_Upgrade_Image_Active;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* BoostShop_Upgrade_Image_Inactive;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* BoostShop_Upgrade_Image_Active;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* TimeShop_Upgrade_Image_Inactive;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* TimeShop_Upgrade_Image_Active;
+
 
 	#pragma region Health Upgrade
 	//bool HealthActivate{};

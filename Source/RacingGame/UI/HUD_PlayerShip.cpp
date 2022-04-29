@@ -183,7 +183,10 @@ void UHUD_PlayerShip::SetTimer(float DeltaTime)
 				{
 					GameInstance->DeltaTimeCount = 0;
 
-					GameInstance->TimeCount -= 1;
+					if (GameInstance->TimeCount <= 0)
+						GameInstance->TimeCount = 0;
+					else
+						GameInstance->TimeCount -= 1;
 				}
 			}
 		}
@@ -198,7 +201,7 @@ void UHUD_PlayerShip::SetSpeedDisplay()
 		APlayerShipPhysics* PlayerShipPhysics = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 		if (PlayerShipPhysics)
 		{
-			int TempSpeed = PlayerShipPhysics->Root->GetPhysicsLinearVelocity().Size() * 0.036f / 2;
+			int TempSpeed = PlayerShipPhysics->Root->GetPhysicsLinearVelocity().Size() * 0.036f;
 			FString Speed = UKismetStringLibrary::Conv_IntToString(TempSpeed);
 
 			if (GameInstance->RaceStartOFF == true)
