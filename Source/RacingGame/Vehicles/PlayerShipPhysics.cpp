@@ -251,7 +251,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 		}
 		else
 		{
-			SandSystemPtr->SetWorldLocation(HitLoc);
+			SandSystemPtr->SetWorldLocation(HitLoc + GetActorForwardVector() * 400.f);
 		}
 	}
 	else if (SandSystemPtr)
@@ -541,7 +541,7 @@ void APlayerShipPhysics::Dash()
 					return;
 				}
 
-				static float CamFovChange = 15.f;
+				static float CamFovChange = 25.f;
 				static float SpringArmChange = 400.f;
 
 				TargetCameraFOV += CamFovChange;
@@ -885,7 +885,7 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num, bool bHit) c
 	}
 
 	FVector ThrustForce, Start, CompLocation, UpVector = GetActorUpVector();
-	float Constant = Gravity;//50000.f;
+	float Constant = Gravity/4;//50000.f;
 	float Distance;
 
 	switch (Num)
