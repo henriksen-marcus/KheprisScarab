@@ -5,10 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "HoveringMovementComponent.h"
-#include "RacingGame/Other/Bullet.h"
 #include "NiagaraSystem.h"
 #include "NiagaraComponent.h"
-#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "PlayerShipPhysics.generated.h"
 
 UCLASS()
@@ -33,7 +31,7 @@ public:
 
 
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
-	UStaticMeshComponent* BaseMesh;
+	USkeletalMeshComponent* BaseMesh;
 	
 	/** Root replacement */
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
@@ -43,13 +41,19 @@ public:
 	UCameraComponent* BackCamera;
 
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
+	UCameraComponent* BehindCamera;
+
+	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	UCameraComponent* FrontCamera;
+
+	UPROPERTY()
+	UCameraComponent* ActiveCamera;
 
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	USpringArmComponent* BackSpringArm;
 
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
-	USpringArmComponent* FrontSpringArm;
+	USpringArmComponent* BehindSpringArm;
 
 	UPROPERTY()
 	USpringArmComponent* ActiveSpringArm;
@@ -81,26 +85,26 @@ public:
 	//float DashTimer{2.f};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float MaxSpeedBoost{1.5f};
+	float MaxSpeedBoost{1.6f};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float SpeedMultiplier{1.f};
 
 	/** What field of view the camera should interpolate towards */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float TargetCameraFOV{90.f};
+	float TargetCameraFOV{105.f};
 
 	/** Target spring arm length, constantly interpolated towards */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float TargetSpringArmLength{600.f};
+	float TargetSpringArmLength{700.f};
 
 	/** The ship's target height above the ground */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float TargetHeight{800.f};
+	float TargetHeight{300.f};
 
 	/** Seconds of inactivity needed for the spring arm to reset its rotation */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float CameraResetTime{1.2f};
+	float CameraResetTime{1.5f};
 
 	/** Changes how powerful the gravity affecting the ship is */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
@@ -128,10 +132,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* BoostSound;
-
-	// Reload functionality is discontinued due to pickups.
-	/*UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundBase* ReloadSound;*/
+	
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* GunClickSound;
 
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* HitSound1;
@@ -204,8 +207,7 @@ public:
 	void Crouch();
 	void CrouchEnd();
 
-	void CameraZoomIn();
-	void CameraZoomOut();
+	void ChangeCameraAngle();
 
 	UFUNCTION(BlueprintCallable)
 	/** Set the world time dilation (how fast time goes by) for a specified duration.
@@ -215,7 +217,7 @@ public:
 	void SloMo(float Amount, float Duration);
 
 	/** Switch between front and back camera/look behind */
-	void CameraSwap();
+	void LookBehind();
 
 	void MovementUpdate();
 
@@ -225,7 +227,7 @@ public:
 	 *  @param Num			Which of the four thrust locations to apply the thrust force.
 	 *  @param bHit			If the raycast returned a hit.
 	 */
-	void AddForce(FVector_NetQuantize End, int Num, bool bHit) const;
+	void AddForce(FVector_NetQuantize End, int Num) const;
 
 	void RaycastHover();
 
@@ -235,13 +237,22 @@ public:
 	FString CheckSurface(FVector &HitLocation);
 
 	/** Spawns a niagara sand system effect at the surface location under the ship, if the physical material is right. */
-	void SpawnSandEffect();
+	void SpawnSandEffect(FVector HitLoc);
 
 	
 	// ---------- Variables ---------- //
 
+	enum ECameraAngle : uint8
+	{
+		Close,
+		Far,
+		Front,
+		END_ENUM
+	};
+
+	int8 CurrentCameraAngle{};
+
 	FTimerHandle TimeDilationHandle;
-	
 	
 	bool bForwardHasInput{};
 	bool bRollHasInput{};
@@ -263,7 +274,7 @@ public:
 	FRotator SpringArmRotTarget = FRotator::ZeroRotator;
 	FRotator SpringArmLocalChange = FRotator::ZeroRotator;
 	FRotator InitialBackSpringArmRotation = FRotator::ZeroRotator;
-	FRotator InitialFrontSpringArmRotation = FRotator::ZeroRotator;
+	FRotator InitialBehindSpringArmRotation = FRotator::ZeroRotator;
 
 	/** Takes the time for how long the camera movement has been idle */
 	float CameraCenteringTimer{};
@@ -291,10 +302,13 @@ public:
 	float ShootTimer{};
 	float JumpTimer{};
 	float HitSoundCooldown{};
-	float LinearDampingReduction{1.f};
 	bool bEnableDrag{true};
+	bool bIsInSloMo{};
 
 	UPROPERTY()
 	class UGlobal_Variables* GameInstance;
+
+	UPROPERTY()
+	class ARacingGameGameModeBase* GamemodeBase;
 	
 };

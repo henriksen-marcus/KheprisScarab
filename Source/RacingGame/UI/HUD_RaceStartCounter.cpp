@@ -34,7 +34,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 
 		if (TimeCounter <= TimeInterval * 2 && Repetitions == 0)
 		{
-			GameInstance->RaceStartOFF = true;
+			GameInstance->bRaceNotStarted = true;
 			GameInstance->Racing = true;
 		}
 		if (TimeCounter >= TimeInterval * 2 && Repetitions == 0)
@@ -42,7 +42,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			TimeCounter = 0;
 			Repetitions += 1;
 
-			UGameplayStatics::PlaySound2D(GetWorld(), Wait_Sound);
+			UGameplayStatics::PlaySound2D(GetWorld(), Wait_Sound, 0.2);
 
 			Image_1->SetBrushFromTexture(Red);
 		}
@@ -51,7 +51,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			TimeCounter = 0;
 			Repetitions += 1;
 
-			UGameplayStatics::PlaySound2D(GetWorld(), Wait_Sound);
+			UGameplayStatics::PlaySound2D(GetWorld(), Wait_Sound, 0.2);
 
 			Image_1->SetBrushFromTexture(Red);
 			Image_2->SetBrushFromTexture(Red);
@@ -61,7 +61,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			TimeCounter = 0;
 			Repetitions += 1;
 
-			UGameplayStatics::PlaySound2D(GetWorld(), Wait_Sound);
+			UGameplayStatics::PlaySound2D(GetWorld(), Wait_Sound, 0.2);
 			
 			Image_1->SetBrushFromTexture(Yellow);
 			Image_2->SetBrushFromTexture(Yellow);
@@ -72,13 +72,13 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			TimeCounter = 0;
 			Repetitions += 1;
 
-			UGameplayStatics::PlaySound2D(GetWorld(), GO_Sound);
+			UGameplayStatics::PlaySound2D(GetWorld(), GO_Sound, 0.2);
 			
 			Image_1->SetBrushFromTexture(Green);
 			Image_2->SetBrushFromTexture(Green);
 			Image_3->SetBrushFromTexture(Green);
 
-			GameInstance->RaceStartOFF = false;
+			GameInstance->bRaceNotStarted = false;
 		}
 		if (TimeCounter >= TimeInterval * 1.3f && Repetitions == 4)
 		{

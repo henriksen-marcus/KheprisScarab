@@ -20,7 +20,7 @@ void UMenu_Start::NativeOnInitialized()
 	if (GameInstance)
 	{
 		GameInstance->Racing = false;
-		GameInstance->RaceStartOFF = false;
+		GameInstance->bRaceNotStarted = false;
 	}
 
 	//Buttons
