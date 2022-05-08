@@ -33,10 +33,6 @@ void UMenu_Settings::NativeOnInitialized()
 	HardDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::HardDisplay_Button_Clicked);
 
 	Sound_Button->OnClicked.AddDynamic(this, &UMenu_Settings::Sound_Button_Clicked);
-	
-
-	//Text on Buttons
-	Back_Button_Text->SetText(FText::FromString("Back"));
 
 }
 void UMenu_Settings::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
@@ -274,9 +270,14 @@ void UMenu_Settings::Sound_Button_Clicked()
 	if (GameInstance)
 	{
 		if (GameInstance->Sound == true)
+		{
 			GameInstance->Sound = false;
+
+		}
 		else
+		{
 			GameInstance->Sound = true;
+		}
 	}
 	
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);

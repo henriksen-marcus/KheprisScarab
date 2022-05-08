@@ -66,23 +66,63 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UImage* Time_Img;
 
+	#pragma region Textures to upgrade buttons
+	//Health Image
 	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
-		UTexture2D* HealthShop_Upgrade_Image_Inactive;
+		UTexture2D* Health_Image_Locked_Idle;
 	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
-		UTexture2D* HealthShop_Upgrade_Image_Active;
+		UTexture2D* Health_Image_Locked_Hover;
 	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
-		UTexture2D* AmmoShop_Upgrade_Image_Inactive;
+		UTexture2D* Health_Image_Locked_Pressed;
 	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
-		UTexture2D* AmmoShop_Upgrade_Image_Active;
+		UTexture2D* Health_Image_Open_Idle;
 	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
-		UTexture2D* BoostShop_Upgrade_Image_Inactive;
+		UTexture2D* Health_Image_Open_Hover;
 	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
-		UTexture2D* BoostShop_Upgrade_Image_Active;
-	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
-		UTexture2D* TimeShop_Upgrade_Image_Inactive;
-	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
-		UTexture2D* TimeShop_Upgrade_Image_Active;
+		UTexture2D* Health_Image_Open_Pressed;
 
+	//Ammo Image
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Ammo_Image_Locked_Idle;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Ammo_Image_Locked_Hover;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Ammo_Image_Locked_Pressed;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Ammo_Image_Open_Idle;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Ammo_Image_Open_Hover;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Ammo_Image_Open_Pressed;
+
+	//Boost Image
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Boost_Image_Locked_Idle;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Boost_Image_Locked_Hover;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Boost_Image_Locked_Pressed;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Boost_Image_Open_Idle;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Boost_Image_Open_Hover;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Boost_Image_Open_Pressed;
+
+	//Time Image
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Time_Image_Locked_Idle;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Time_Image_Locked_Hover;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Time_Image_Locked_Pressed;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Time_Image_Open_Idle;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Time_Image_Open_Hover;
+	UPROPERTY(EditAnywhere, Category = "Upgrade Icon")
+		UTexture2D* Time_Image_Open_Pressed;
+	#pragma endregion
 
 	#pragma region Health Upgrade
 	//bool HealthActivate{};
@@ -91,6 +131,14 @@ public:
 
 	UFUNCTION()
 		void HealthShop_Button_Clicked();
+	UFUNCTION()
+		void HealthShop_Button_Hovered();
+	UFUNCTION()
+		void HealthShop_Button_Unhovered();
+	UFUNCTION()
+		void HealthShop_Button_Pressed();
+	UFUNCTION()
+		void HealthShop_Button_Realised();
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Health_Info_Text;
 	UPROPERTY(meta = (BindWidget))
@@ -136,6 +184,14 @@ public:
 
 	UFUNCTION()
 		void AmmoShop_Button_Clicked();
+	UFUNCTION()
+		void AmmoShop_Button_Hovered();
+	UFUNCTION()
+		void AmmoShop_Button_Unhovered();
+	UFUNCTION()
+		void AmmoShop_Button_Pressed();
+	UFUNCTION()
+		void AmmoShop_Button_Realised();
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Ammo_Info_Text;
 	UPROPERTY(meta = (BindWidget))
@@ -181,6 +237,14 @@ public:
 
 	UFUNCTION()
 		void BoostShop_Button_Clicked();
+	UFUNCTION()
+		void BoostShop_Button_Hovered();
+	UFUNCTION()
+		void BoostShop_Button_Unhovered();
+	UFUNCTION()
+		void BoostShop_Button_Pressed();
+	UFUNCTION()
+		void BoostShop_Button_Realised();
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Boost_Info_Text;
 	UPROPERTY(meta = (BindWidget))
@@ -226,6 +290,14 @@ public:
 
 	UFUNCTION()
 		void TimeShop_Button_Clicked();
+	UFUNCTION()
+		void TimeShop_Button_Hovered();
+	UFUNCTION()
+		void TimeShop_Button_Unhovered();
+	UFUNCTION()
+		void TimeShop_Button_Pressed();
+	UFUNCTION()
+		void TimeShop_Button_Realised();
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Time_Info_Text;
 	UPROPERTY(meta = (BindWidget))

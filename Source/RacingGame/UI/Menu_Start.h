@@ -22,6 +22,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Sound Effect")
 		USoundBase* SelectSound;
 
+	UPROPERTY(EditAnywhere, Category = "Music")
+		USoundBase* Menu_Music_SB;
+	UPROPERTY(EditAnywhere, Category = "Music")
+		UAudioComponent* Menu_Music;
+	
+
 	UFUNCTION()
 		void Start_Button_Clickd();
 	UFUNCTION()
@@ -33,17 +39,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UButton* Start_Button;
 	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* Start_Button_Text;
-	UPROPERTY(meta = (BindWidget))
 		class UButton* Shop_Button;
-	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* Shop_Button_Text;
 	UPROPERTY(meta = (BindWidget))
 		class UButton* Settings_Button;
 	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* Settings_Button_Text;
-	UPROPERTY(meta = (BindWidget))
 		class UButton* Quit_Button;
-	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* Quit_Button_Text;
 };

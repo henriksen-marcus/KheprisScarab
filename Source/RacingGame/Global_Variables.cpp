@@ -22,4 +22,8 @@ void UGlobal_Variables::BeginPlay()
 
 void UGlobal_Variables::Tick(float DeltaTime)
 {
+	if (Sound == true)
+		Music_Volum = 1;
+	else
+		Music_Volum = 0;
 }

@@ -111,4 +111,10 @@ public:
 	bool RaceStartOFF{};
 	#pragma endregion
 
+#pragma region Music
+	bool MainMenu_Music{};
+
+	float Music_Volum{};
+#pragma endregion	
+
 };

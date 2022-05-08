@@ -29,14 +29,11 @@ void UMenu_Start::NativeOnInitialized()
 	Settings_Button->OnClicked.AddDynamic(this, &UMenu_Start::Settings_Button_Clickd);
 	Quit_Button->OnClicked.AddDynamic(this, &UMenu_Start::Quit_Button_Clickd);
 
-	//Text on Buttons
-	Start_Button_Text->SetText(FText::FromString("Start"));
-	Shop_Button_Text->SetText(FText::FromString("Shop"));
-	Settings_Button_Text->SetText(FText::FromString("Settings"));
-	Quit_Button_Text->SetText(FText::FromString("Quit"));
+	//Music
+
 }
 void UMenu_Start::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
-{
+{	
 }
 
 
@@ -46,6 +43,7 @@ void UMenu_Start::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 void UMenu_Start::Start_Button_Clickd()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), SelectSound);
+	/*Menu_Music_AudioComponent->SetActive(false);*/
 }
 void UMenu_Start::Shop_Button_Clickd()
 {

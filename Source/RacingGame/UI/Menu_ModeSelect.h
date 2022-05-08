@@ -34,11 +34,12 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 		class UButton* Back_Button;
-	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* Back_Button_Text;
 
 	UPROPERTY(EditAnywhere, Category = "Sound Effect")
 		USoundBase* Select_Sound;
 	UPROPERTY(EditAnywhere, Category = "Sound Effect")
 		USoundBase* BackSound;
+
+	UPROPERTY(EditAnywhere, Category = "Music")
+		USoundBase* Menu_Music;
 };

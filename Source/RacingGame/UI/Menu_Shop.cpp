@@ -22,12 +22,54 @@ void UMenu_Shop::NativeOnInitialized()
 	//------------------------------
 
 
-	//Buttons Clicked
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+
+	#pragma region Button functionality
+	//Health Button functionality
+	if (GameInstance->HealthActivate == true)
+		Health_Img->SetBrushFromTexture(Health_Image_Open_Idle);
+	else
+		Health_Img->SetBrushFromTexture(Health_Image_Locked_Idle);
 	HealthShop_Button->OnClicked.AddDynamic(this, &UMenu_Shop::HealthShop_Button_Clicked);
+	HealthShop_Button->OnHovered.AddDynamic(this, &UMenu_Shop::HealthShop_Button_Hovered);
+	HealthShop_Button->OnUnhovered.AddDynamic(this, &UMenu_Shop::HealthShop_Button_Unhovered);
+	HealthShop_Button->OnPressed.AddDynamic(this, &UMenu_Shop::HealthShop_Button_Pressed);
+	HealthShop_Button->OnReleased.AddDynamic(this, &UMenu_Shop::HealthShop_Button_Realised);
+
+	//Ammo Button functionality
+	if (GameInstance->HealthActivate == true)
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Open_Idle);
+	else
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Locked_Idle);
 	AmmoShop_Button->OnClicked.AddDynamic(this, &UMenu_Shop::AmmoShop_Button_Clicked);
+	AmmoShop_Button->OnHovered.AddDynamic(this, &UMenu_Shop::AmmoShop_Button_Hovered);
+	AmmoShop_Button->OnUnhovered.AddDynamic(this, &UMenu_Shop::AmmoShop_Button_Unhovered);
+	AmmoShop_Button->OnPressed.AddDynamic(this, &UMenu_Shop::AmmoShop_Button_Pressed);
+	AmmoShop_Button->OnReleased.AddDynamic(this, &UMenu_Shop::AmmoShop_Button_Realised);
+
+	//Boost Button functionality
+	if (GameInstance->HealthActivate == true)
+		Boost_Img->SetBrushFromTexture(Boost_Image_Open_Idle);
+	else
+		Boost_Img->SetBrushFromTexture(Boost_Image_Locked_Idle);
 	BoostShop_Button->OnClicked.AddDynamic(this, &UMenu_Shop::BoostShop_Button_Clicked);
+	BoostShop_Button->OnHovered.AddDynamic(this, &UMenu_Shop::BoostShop_Button_Hovered);
+	BoostShop_Button->OnUnhovered.AddDynamic(this, &UMenu_Shop::BoostShop_Button_Unhovered);
+	BoostShop_Button->OnPressed.AddDynamic(this, &UMenu_Shop::BoostShop_Button_Pressed);
+	BoostShop_Button->OnReleased.AddDynamic(this, &UMenu_Shop::BoostShop_Button_Realised);
+
+	//Time Button functionality
+	if (GameInstance->HealthActivate == true)
+		Time_Img->SetBrushFromTexture(Time_Image_Open_Idle);
+	else
+		Time_Img->SetBrushFromTexture(Time_Image_Locked_Idle);
 	TimeShop_Button->OnClicked.AddDynamic(this, &UMenu_Shop::TimeShop_Button_Clicked);
-	Back_Button->OnClicked.AddDynamic(this, &UMenu_Shop::Back_Button_Clicked);
+	TimeShop_Button->OnHovered.AddDynamic(this, &UMenu_Shop::TimeShop_Button_Hovered);
+	TimeShop_Button->OnUnhovered.AddDynamic(this, &UMenu_Shop::TimeShop_Button_Unhovered);
+	TimeShop_Button->OnPressed.AddDynamic(this, &UMenu_Shop::TimeShop_Button_Pressed);
+	TimeShop_Button->OnReleased.AddDynamic(this, &UMenu_Shop::TimeShop_Button_Realised);
+
+	#pragma endregion
 
 	/*Health_Img->SetBrushFromTexture(HealthShop_Upgrade_Image_Active);
 	Ammo_Img->SetBrushFromTexture(AmmoShop_Upgrade_Image_Active);
@@ -132,10 +174,10 @@ void UMenu_Shop::SetHealthUpgrade_Display()
 		else
 			HealthShop_Button_Text->SetText(FText::FromString(""));
 
-		if (GameInstance->HealthActivate == true)
-			Health_Img->SetBrushFromTexture(HealthShop_Upgrade_Image_Active);
+		/*if (GameInstance->HealthActivate == true)
+			Health_Img->SetBrushFromTexture(Health_Image_Open_Idle);
 		else
-			Health_Img->SetBrushFromTexture(HealthShop_Upgrade_Image_Inactive);
+			Health_Img->SetBrushFromTexture(Health_Image_Locked_Idle);*/
 		
 		MaxHealth_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->MaxHealth)));
 	}
@@ -181,6 +223,43 @@ void UMenu_Shop::HealthShop_Button_Clicked()
 			}
 		}
 	}
+
+	if (GameInstance->HealthActivate == true)
+		Health_Img->SetBrushFromTexture(Health_Image_Open_Hover);
+	else
+		Health_Img->SetBrushFromTexture(Health_Image_Open_Hover);
+}
+void UMenu_Shop::HealthShop_Button_Hovered()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->HealthActivate == true)
+		Health_Img->SetBrushFromTexture(Health_Image_Open_Hover);
+	else
+		Health_Img->SetBrushFromTexture(Health_Image_Locked_Hover);
+}
+void UMenu_Shop::HealthShop_Button_Unhovered()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->HealthActivate == true)
+		Health_Img->SetBrushFromTexture(Health_Image_Open_Idle);
+	else
+		Health_Img->SetBrushFromTexture(Health_Image_Locked_Idle);
+}
+void UMenu_Shop::HealthShop_Button_Pressed()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->HealthActivate == true)
+		Health_Img->SetBrushFromTexture(Health_Image_Open_Pressed);
+	else
+		Health_Img->SetBrushFromTexture(Health_Image_Locked_Pressed);
+}
+void UMenu_Shop::HealthShop_Button_Realised()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->HealthActivate == true)
+		Health_Img->SetBrushFromTexture(Health_Image_Open_Idle);
+	else
+		Health_Img->SetBrushFromTexture(Health_Image_Locked_Idle);
 }
 
 void UMenu_Shop::SetAmmoUpgrade_Display()
@@ -228,11 +307,6 @@ void UMenu_Shop::SetAmmoUpgrade_Display()
 		else
 			AmmoShop_Button_Text->SetText(FText::FromString(""));
 
-		if (GameInstance->AmmoActivate == true)
-			Ammo_Img->SetBrushFromTexture(AmmoShop_Upgrade_Image_Active);
-		else
-			Ammo_Img->SetBrushFromTexture(AmmoShop_Upgrade_Image_Inactive);
-
 		MaxAmmo_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->MaxAmmo)));
 	}
 }
@@ -277,7 +351,45 @@ void UMenu_Shop::AmmoShop_Button_Clicked()
 			}
 		}
 	}
+	
+	if (GameInstance->AmmoActivate == true)
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Open_Hover);
+	else
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Open_Hover);
 }
+void UMenu_Shop::AmmoShop_Button_Hovered()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->AmmoActivate == true)
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Open_Hover);
+	else
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Locked_Hover);
+}
+void UMenu_Shop::AmmoShop_Button_Unhovered()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->AmmoActivate == true)
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Open_Idle);
+	else
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Locked_Idle);
+}
+void UMenu_Shop::AmmoShop_Button_Pressed()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->AmmoActivate == true)
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Open_Pressed);
+	else
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Locked_Pressed);
+}
+void UMenu_Shop::AmmoShop_Button_Realised()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->AmmoActivate == true)
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Open_Idle);
+	else
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Locked_Idle);
+}
+
 
 void UMenu_Shop::SetBoostUpgrade_Display()
 {
@@ -324,11 +436,6 @@ void UMenu_Shop::SetBoostUpgrade_Display()
 		else
 			BoostShop_Button_Text->SetText(FText::FromString(""));
 
-		if (GameInstance->BoostActivate == true)
-			Boost_Img->SetBrushFromTexture(BoostShop_Upgrade_Image_Active);
-		else
-			Boost_Img->SetBrushFromTexture(BoostShop_Upgrade_Image_Inactive);
-
 		MaxBoost_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_FloatToString(GameInstance->DashTimer)));
 	}
 }
@@ -373,7 +480,45 @@ void UMenu_Shop::BoostShop_Button_Clicked()
 			}
 		}
 	}
+
+	if (GameInstance->BoostActivate == true)
+		Boost_Img->SetBrushFromTexture(Boost_Image_Open_Hover);
+	else
+		Boost_Img->SetBrushFromTexture(Boost_Image_Open_Hover);
 }
+void UMenu_Shop::BoostShop_Button_Hovered()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->BoostActivate == true)
+		Boost_Img->SetBrushFromTexture(Boost_Image_Open_Hover);
+	else
+		Boost_Img->SetBrushFromTexture(Boost_Image_Locked_Hover);
+}
+void UMenu_Shop::BoostShop_Button_Unhovered()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->BoostActivate == true)
+		Boost_Img->SetBrushFromTexture(Boost_Image_Open_Idle);
+	else
+		Boost_Img->SetBrushFromTexture(Boost_Image_Locked_Idle);
+}
+void UMenu_Shop::BoostShop_Button_Pressed()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->BoostActivate == true)
+		Boost_Img->SetBrushFromTexture(Boost_Image_Open_Pressed);
+	else
+		Boost_Img->SetBrushFromTexture(Boost_Image_Locked_Pressed);
+}
+void UMenu_Shop::BoostShop_Button_Realised()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->BoostActivate == true)
+		Boost_Img->SetBrushFromTexture(Boost_Image_Open_Idle);
+	else
+		Boost_Img->SetBrushFromTexture(Boost_Image_Locked_Idle);
+}
+
 
 void UMenu_Shop::SetTimeUpgrade_Display()
 {
@@ -420,11 +565,6 @@ void UMenu_Shop::SetTimeUpgrade_Display()
 		else
 			TimeShop_Button_Text->SetText(FText::FromString(""));
 
-		if (GameInstance->TimeActivate == true)
-			Time_Img->SetBrushFromTexture(TimeShop_Upgrade_Image_Active);
-		else
-			Time_Img->SetBrushFromTexture(TimeShop_Upgrade_Image_Inactive);
-
 		MaxTime_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->TimeAdded)));
 	}
 }
@@ -469,4 +609,41 @@ void UMenu_Shop::TimeShop_Button_Clicked()
 			}
 		}
 	}
+
+	if (GameInstance->TimeActivate == true)
+		Time_Img->SetBrushFromTexture(Time_Image_Open_Hover);
+	else
+		Time_Img->SetBrushFromTexture(Time_Image_Open_Hover);
+}
+void UMenu_Shop::TimeShop_Button_Hovered()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->TimeActivate == true)
+		Time_Img->SetBrushFromTexture(Time_Image_Open_Hover);
+	else
+		Time_Img->SetBrushFromTexture(Time_Image_Locked_Hover);
+}
+void UMenu_Shop::TimeShop_Button_Unhovered()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->TimeActivate == true)
+		Time_Img->SetBrushFromTexture(Time_Image_Open_Idle);
+	else
+		Time_Img->SetBrushFromTexture(Time_Image_Locked_Idle);
+}
+void UMenu_Shop::TimeShop_Button_Pressed()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->TimeActivate == true)
+		Time_Img->SetBrushFromTexture(Time_Image_Open_Pressed);
+	else
+		Time_Img->SetBrushFromTexture(Time_Image_Locked_Pressed);
+}
+void UMenu_Shop::TimeShop_Button_Realised()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance->TimeActivate == true)
+		Time_Img->SetBrushFromTexture(Time_Image_Open_Idle);
+	else
+		Time_Img->SetBrushFromTexture(Time_Image_Locked_Idle);
 }

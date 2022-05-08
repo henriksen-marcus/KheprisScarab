@@ -42,4 +42,11 @@ public:
 		USoundBase* Wait_Sound;
 	UPROPERTY(EditAnywhere, Category = "Sound Effect")
 		USoundBase* GO_Sound;
+
+	UPROPERTY(EditAnywhere, Category = "Music")
+		USoundBase* Silence;
+	UPROPERTY(EditAnywhere, Category = "Music")
+		USoundBase* Track_Start;
+	UPROPERTY(EditAnywhere, Category = "Music")
+		USoundBase* Track_Music;
 };

@@ -15,6 +15,9 @@ void UHUD_RaceStartCounter::NativeConstruct()
 void UHUD_RaceStartCounter::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+
+	UGameplayStatics::PlaySound2D(GetWorld(), Silence);
+	UGameplayStatics::PlaySound2D(GetWorld(), Track_Start);
 }
 void UHUD_RaceStartCounter::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {
@@ -36,8 +39,9 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 		{
 			GameInstance->RaceStartOFF = true;
 			GameInstance->Racing = true;
+
 		}
-		if (TimeCounter >= TimeInterval * 2 && Repetitions == 0)
+		if (TimeCounter >= TimeInterval * 6.5f && Repetitions == 0)
 		{
 			TimeCounter = 0;
 			Repetitions += 1;
@@ -79,6 +83,14 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			Image_3->SetBrushFromTexture(Green);
 
 			GameInstance->RaceStartOFF = false;
+
+			bool Hello = true;
+			if (Hello == true)
+			{
+				Hello = false;
+				UGameplayStatics::PlaySound2D(GetWorld(), Track_Music);
+			}
+			
 		}
 		if (TimeCounter >= TimeInterval * 1.3f && Repetitions == 4)
 		{
