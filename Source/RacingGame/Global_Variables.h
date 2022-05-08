@@ -51,7 +51,7 @@ public:
 		float CurrentAmmo{};
 
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		float AmmoPrecentage{};
+		float AmmoPercentage{};
 
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		int Currency1{};
@@ -108,7 +108,7 @@ public:
 	#pragma endregion
 
 	#pragma region StartRace
-	bool RaceStartOFF{};
+	bool bRaceNotStarted{};
 	#pragma endregion
 
 #pragma region Music

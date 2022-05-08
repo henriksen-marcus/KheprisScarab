@@ -142,8 +142,8 @@ void UHUD_PlayerShip::SetAmmoPrecentage()
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
-		GameInstance->AmmoPrecentage = GameInstance->CurrentAmmo / GameInstance->MaxAmmo;
-		Ammo_Bar->SetPercent(GameInstance->AmmoPrecentage);
+		GameInstance->AmmoPercentage = GameInstance->CurrentAmmo / GameInstance->MaxAmmo;
+		Ammo_Bar->SetPercent(GameInstance->AmmoPercentage);
 	}
 }
 
@@ -175,7 +175,7 @@ void UHUD_PlayerShip::SetTimer(float DeltaTime)
 	{
 		if (GameInstance->TimeAttackMode == true)
 		{
-			if (GameInstance->RaceStartOFF == false)
+			if (GameInstance->bRaceNotStarted == false)
 			{
 				GameInstance->DeltaTimeCount += DeltaTime;
 
@@ -204,7 +204,7 @@ void UHUD_PlayerShip::SetSpeedDisplay()
 			int TempSpeed = PlayerShipPhysics->Root->GetPhysicsLinearVelocity().Size() * 0.036f;
 			FString Speed = UKismetStringLibrary::Conv_IntToString(TempSpeed);
 
-			if (GameInstance->RaceStartOFF == true)
+			if (GameInstance->bRaceNotStarted == true)
 				Speed_Text->SetText(FText::FromString("0"));
 			else
 				Speed_Text->SetText(FText::FromString(Speed));
