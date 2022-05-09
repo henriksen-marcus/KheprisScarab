@@ -37,7 +37,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 
 		if (TimeCounter <= TimeInterval * 2 && Repetitions == 0)
 		{
-			GameInstance->RaceStartOFF = true;
+			GameInstance->bRaceNotStarted = true;
 			GameInstance->Racing = true;
 
 		}
@@ -82,7 +82,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			Image_2->SetBrushFromTexture(Green);
 			Image_3->SetBrushFromTexture(Green);
 
-			GameInstance->RaceStartOFF = false;
+			GameInstance->bRaceNotStarted = false;
 
 			bool Hello = true;
 			if (Hello == true)
