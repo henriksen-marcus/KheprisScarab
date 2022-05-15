@@ -7,6 +7,7 @@
 #include "HoveringMovementComponent.h"
 #include "NiagaraSystem.h"
 #include "NiagaraComponent.h"
+#include "Engine/AutoDestroySubsystem.h"
 #include "PlayerShipPhysics.generated.h"
 
 UCLASS()
@@ -37,6 +38,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
 	UBoxComponent* Root;
 
+	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
+	UCapsuleComponent* Collision;
+
+	
+	/** CAMERA */
+
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	UCameraComponent* BackCamera;
 
@@ -45,6 +52,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	UCameraComponent* FrontCamera;
+
+	UPROPERTY(EditAnywhere, Category = "CameraVariables")
+	USceneCaptureComponent2D* BirdCam;
+
+	UPROPERTY(EditAnywhere)
+	UTextureRenderTarget2D* RenderTarget;
 
 	UPROPERTY()
 	UCameraComponent* ActiveCamera;
@@ -79,13 +92,9 @@ public:
 
 	
 	/* BLUEPRINT VARIABLES */
-	
-	/** How long the dash lasts */
-	//UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	//float DashTimer{2.f};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float MaxSpeedBoost{1.6f};
+	float MaxSpeedBoost{1.4f};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float SpeedMultiplier{1.f};
@@ -112,10 +121,16 @@ public:
 
 	/** Whether debug vector math lines should be drawn */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	bool bEnableDebugLines{true};
+	bool bEnableDebugLines{false};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	bool bLogSpeed{false};
+	
+	UPROPERTY(EditAnywhere, Category = "EditableVariables")
+	float MinimapDistance{100000.f};
+
+	UPROPERTY(BlueprintReadOnly, Category = "EditableVariables")
+	float Speed{};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	TSubclassOf<class ABullet> BulletClassToSpawn;
@@ -126,10 +141,12 @@ public:
 	/** This controls the engine running sound */
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	UAudioComponent* AudioComp;
-	
+
+	/** Engine start sound */
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* StartSound;
-	
+
+	/** Speed boost sound */
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* BoostSound;
 	
@@ -141,9 +158,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* HitSound2;
-
-	/*UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundBase* HitSound3;*/
+	
 	
 	/* LOCATION PLACEHOLDERS */
 
@@ -162,20 +177,34 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Arrows")
 	UArrowComponent* BulletSpawnPoint;
 
-	UPROPERTY(EditAnywhere, Category = "Movement")
-	UHoveringMovementComponent* MovementComponent;
+
+	/** OTHER */
 
 	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* NS_SandSystem;
 
 	UPROPERTY(EditAnywhere)
-	UMaterial* MyMat;
+	UNiagaraSystem* NS_SandSystem_End;
 
 	UPROPERTY()
 	UNiagaraComponent* SandSystemPtr;
+
+	UPROPERTY()
+	UNiagaraComponent* SandSystemEndPtr;
+
+	/** The widget blueprint that will pop up when the player drives off road. */
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> OffTrackScreenClass;
+
+	UPROPERTY()
+	UUserWidget* OffTrackScreen;
+
+	/** Whether the player is on the road or not. */
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsOnRoad{};
 	
 
-	// ---------- Functions ---------- //
+	// ---------- FUNCTIONS ---------- //
 	
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -196,9 +225,8 @@ public:
 	/** Uses the MouseX input to change the relative yaw rotation of the spring arm */
 	void CameraYaw(float Value);
 
-	void Shoot(float Value);
-
-	//void Reload();
+	void Shoot();
+	
 	void Dash();
 	void Jump();
 	
@@ -207,25 +235,19 @@ public:
 	void Crouch();
 	void CrouchEnd();
 
+	/** Cycles between 3 camera angles */
 	void ChangeCameraAngle();
-
-	UFUNCTION(BlueprintCallable)
-	/** Set the world time dilation (how fast time goes by) for a specified duration.
-	 *	@param Amount		New time dilation, default is 1.
-	 *	@param Duration		How long the dilation should last.
-	 */
-	void SloMo(float Amount, float Duration);
 
 	/** Switch between front and back camera/look behind */
 	void LookBehind();
 
 	void MovementUpdate();
+	void HoverRaycast();
 
 	/**
 	 *  Adds force at one of the 4 thrust locations.
 	 *  @param End			Hit location of the raycast.
 	 *  @param Num			Which of the four thrust locations to apply the thrust force.
-	 *  @param bHit			If the raycast returned a hit.
 	 */
 	void AddForce(FVector_NetQuantize End, int Num) const;
 
@@ -236,8 +258,11 @@ public:
 	/**	Returns the name of the physics material on the ground beneath the ship. */
 	FString CheckSurface(FVector &HitLocation);
 
-	/** Spawns a niagara sand system effect at the surface location under the ship, if the physical material is right. */
+	/** Spawns a niagara sand system effect at the specified location. If a system already exists, update position. */
 	void SpawnSandEffect(FVector HitLoc);
+
+	/** Spawns a niagara sand system vanishing effect at the specified location. If a system already exists, update position. */
+	void SpawnSandEffectEnd(FVector HitLoc);
 
 	
 	// ---------- Variables ---------- //
@@ -295,15 +320,12 @@ public:
 	/** Well, it's... the ships weight. */
 	float ShipWeight{};
 
-	float InitialLinearDamping{};
-
 	float ForwardsSpeed{5500.f};
-	float ActualSpeed{};
-	float ShootTimer{};
-	float JumpTimer{};
+	
 	float HitSoundCooldown{};
 	bool bEnableDrag{true};
-	bool bIsInSloMo{};
+
+	FString CurrentSurface{};
 
 	UPROPERTY()
 	class UGlobal_Variables* GameInstance;
@@ -311,4 +333,11 @@ public:
 	UPROPERTY()
 	class ARacingGameGameModeBase* GamemodeBase;
 	
+	/** Timers */
+	float ShootTimer{};
+	float JumpTimer{};
+	float OffTrackTimer{};
+	float SandEndSystemTimer{};
+
+	/** Bools */
 };

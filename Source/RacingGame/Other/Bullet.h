@@ -21,8 +21,6 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	void SetBulletOwner(AActor* NewOwner);
-
 private:
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	UStaticMeshComponent* BaseMesh;
@@ -35,7 +33,7 @@ private:
 
 	/** How fast the bullet travels, measured in km/h. Values are automatically converted. */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float BulletSpeed{50.f};
+	float BulletSpeed{500.f};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	USoundBase* BulletShootSound;
@@ -51,14 +49,8 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	UNiagaraSystem* NS_BulletHitFX;
-
 	
-	UFUNCTION()
-	void Kill();
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UObject* BulletOwner;
-	
 };

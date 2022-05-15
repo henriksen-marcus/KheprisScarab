@@ -2,7 +2,6 @@
 
 
 #include "Bullet.h"
-#include "Bullet.h"
 #include "../Vehicles/PlayerShipPhysics.h"
 #include "NiagaraFunctionLibrary.h"
 
@@ -63,23 +62,6 @@ void ABullet::Tick(const float DeltaTime)
 	TimeLived += DeltaTime;
 }
 
-void ABullet::SetBulletOwner(AActor* NewOwner)
-{
-	if (NewOwner)
-	{
-		BulletOwner = NewOwner;
-	}
-}
-
-
-// ------------------------------ CUSTOM FUNCTIONS --------------------------- //
-
-void ABullet::Kill()
-{
-	this->Destroy();
-}
-
-
 void ABullet::OnOverlapBegin (
 	UPrimitiveComponent* OverlappedComponent, // Which self-owned component overlapped? (capsule component)
 	AActor* OtherActor, // The other actor itself
@@ -94,13 +76,6 @@ void ABullet::OnOverlapBegin (
 	 - Other instances of this class
 	*/
 	if (!OtherActor || OtherActor == this || !OtherComponent  || this->GetClass() == OtherActor->GetClass() || OtherActor->IsA(APlayerShipPhysics::StaticClass())) { return; }
-	// Uncomment to see overlap information
-	/*FString TACS = this->GetClass()->GetName();
-	FString OACS = OtherActor->GetClass()->GetName();
-	UE_LOG(LogTemp, Warning, TEXT("\n%s overlapped with %s\nThis class: %s\nOther Class: %s"), *this->GetName(), *OtherActor->GetName(), *TACS, *OACS);
-	UE_LOG(LogTemp, Warning, TEXT("Class of other actor: %s\nClass of PlayShipPhysics %s"), *OACS, *APlayerShipPhysics::StaticClass()->GetName())*/
-	UE_LOG(LogTemp, Warning, TEXT("Bullet Overlapped!"))
-
 	// Play bullet hit sound & effect then begone
 	if (BulletHitSound1 && BulletHitSound2)
 	{
@@ -121,6 +96,7 @@ void ABullet::OnOverlapBegin (
 		//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + FVector(SweepResult.Normal)*1000, FColor::Red, false, 5.f);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_BulletHitFX, SweepResult.ImpactPoint, Rot, FVector(5.f));
 	}
+	
 	this->Destroy();
 }
 
