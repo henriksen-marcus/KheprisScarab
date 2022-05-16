@@ -350,4 +350,6 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Sound")
 		USoundBase* NewLap_Sound;
+	UPROPERTY(EditAnywhere, Category = "Sound")
+		USoundBase* RaceWon_Sound;
 };

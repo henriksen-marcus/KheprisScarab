@@ -304,7 +304,6 @@ void UHUD_PlayerShip::SetTimeDisplay_Timer(float DeltaTime)
 			GameInstance->NewCheckPoint = false;
 			CheckpointTimerDisplay_Timer = 0;
 		}
-		
 
 		#pragma region Timer Text
 		if (Minutes_Temp < 10)

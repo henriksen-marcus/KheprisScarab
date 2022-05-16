@@ -1048,7 +1048,15 @@ void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 					GameInstance->PlayerCheckpointNumber = 0;
 
 					GameInstance->CurrentLap_Counter += 1;
-					UGameplayStatics::PlaySound2D(GetWorld(), NewLap_Sound, 1.f);
+					
+					if (GameInstance->CurrentLap_Counter <= 3)
+					{
+						UGameplayStatics::PlaySound2D(GetWorld(), NewLap_Sound, 1.f);
+					}
+					else
+					{
+						UGameplayStatics::PlaySound2D(GetWorld(), RaceWon_Sound, 1.f);
+					}
 				}
 				else
 				{
