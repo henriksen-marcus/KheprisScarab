@@ -26,16 +26,7 @@ ACheckPoint::ACheckPoint()
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 	MeshComponent->SetupAttachment(RootComponent);
-	
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshComponentAsset(TEXT("StaticMesh'/Game/3DAssets/Environment/AdrianCube'"));
-	if (MeshComponentAsset.Succeeded())
-	{
-		MeshComponent->SetStaticMesh(MeshComponentAsset.Object);
-	}
 	#pragma endregion
-
-
 }
 
 // Called when the game starts or when spawned
