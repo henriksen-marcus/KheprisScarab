@@ -6,8 +6,8 @@
 
 UGlobal_Variables::UGlobal_Variables()
 {
-	Currency1 = 99;
-	Currency2 = 3;
+	Currency1 = 0;
+	Currency2 = 0;
 
 	MaxHealth = 200.f;
 	CurrentHealth = MaxHealth;

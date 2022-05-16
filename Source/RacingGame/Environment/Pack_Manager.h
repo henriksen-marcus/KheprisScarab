@@ -29,6 +29,8 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 		class UStaticMeshComponent* MeshComponent;
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+		class UStaticMesh* EmptyMeshComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Material")
 		class UMaterialInterface* BaseMaterial;

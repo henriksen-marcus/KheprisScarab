@@ -17,7 +17,6 @@ APack_Manager::APack_Manager()
 	BounceHight = 0.7f;
 	RotationSpeed = 0.3f;
 
-
 	#pragma region BUILD PACK
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	SetRootComponent(BoxComponent);
@@ -32,10 +31,7 @@ APack_Manager::APack_Manager()
 	}
 	#pragma endregion
 
-	#pragma region SETUP COLLISION
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &APack_Manager::OnOverlapBegin);
-	#pragma endregion
-
 }
 
 // Called when the game starts or when spawned
@@ -44,6 +40,14 @@ void APack_Manager::BeginPlay()
 	Super::BeginPlay();
 
 	UGameplayStatics::PlaySound2D(GetWorld(), PackSound_Default); // Play Default Sound
+
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (!GameInstance) { return; }
+
+	if (GameInstance->TimeAttackMode)
+	{
+		MeshComponent->SetStaticMesh(EmptyMeshComponent);
+	}
 }
 
 // Called every frame
@@ -64,72 +68,76 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 	if (OtherActor->IsA(APlayerShipPhysics::StaticClass()))
 	{
 		UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+		if (!GameInstance) { return; }
 
-		if (HealthPack)
+		if (!GameInstance->TimeAttackMode)
 		{
-			if (GameInstance)
+			if (HealthPack)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), HealthPack_Sound);
+				if (GameInstance)
+				{
+					UGameplayStatics::PlaySound2D(GetWorld(), HealthPack_Sound);
 
-				GameInstance->CurrentHealth = GameInstance->MaxHealth;
-				UE_LOG(LogTemp, Warning, TEXT("Pack_Health | Max Health: %i"), GameInstance->MaxHealth);
-				UE_LOG(LogTemp, Warning, TEXT("HealthPack - SUCCESS"));
+					GameInstance->CurrentHealth = GameInstance->MaxHealth;
+					UE_LOG(LogTemp, Warning, TEXT("Pack_Health | Max Health: %i"), GameInstance->MaxHealth);
+					UE_LOG(LogTemp, Warning, TEXT("HealthPack - SUCCESS"));
+				}
 			}
-		}
-		else if (AmmoPack)
-		{
-			if (GameInstance)
+			else if (AmmoPack)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), AmmoPack_Sound);
+				if (GameInstance)
+				{
+					UGameplayStatics::PlaySound2D(GetWorld(), AmmoPack_Sound);
 
-				GameInstance->CurrentAmmo = GameInstance->MaxAmmo;
-				UE_LOG(LogTemp, Warning, TEXT("AmmoPack - SUCCESS"));
+					GameInstance->CurrentAmmo = GameInstance->MaxAmmo;
+					UE_LOG(LogTemp, Warning, TEXT("AmmoPack - SUCCESS"));
+				}
 			}
-		}
-		else if (BoostPack)
-		{
-			if (GameInstance)
+			else if (BoostPack)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), BoostPack_Sound, 0.2f);
+				if (GameInstance)
+				{
+					UGameplayStatics::PlaySound2D(GetWorld(), BoostPack_Sound, 0.2f);
 
-				GameInstance->BoostPickup = true;
-				UE_LOG(LogTemp, Warning, TEXT("BoostPack - SUCCESS"));
+					GameInstance->BoostPickup = true;
+					UE_LOG(LogTemp, Warning, TEXT("BoostPack - SUCCESS"));
+				}
 			}
-		}
-		else if (Currency1)
-		{
-			if (GameInstance)
+			else if (Currency1)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), Currency1_Sound);
+				if (GameInstance)
+				{
+					UGameplayStatics::PlaySound2D(GetWorld(), Currency1_Sound);
 
-				GameInstance->Currency1 += 1;
-				UE_LOG(LogTemp, Warning, TEXT("Currency1 - SUCCESS | %dp."), GameInstance->Currency1);
+					GameInstance->Currency1 += 1;
+					UE_LOG(LogTemp, Warning, TEXT("Currency1 - SUCCESS | %dp."), GameInstance->Currency1);
+				}
 			}
-		}
-		else if (Currency2)
-		{
-			if (GameInstance)
+			else if (Currency2)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), Currency2_Sound);
+				if (GameInstance)
+				{
+					UGameplayStatics::PlaySound2D(GetWorld(), Currency2_Sound);
 
-				GameInstance->Currency2 += 1;
-				UE_LOG(LogTemp, Warning, TEXT("Currency2 - SUCCESS | %dp."), GameInstance->Currency2);
+					GameInstance->Currency2 += 1;
+					UE_LOG(LogTemp, Warning, TEXT("Currency2 - SUCCESS | %dp."), GameInstance->Currency2);
+				}
 			}
-		}
-		else if (TimePack)
-		{
-			if (GameInstance)
+			else if (TimePack)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), Time_Sound);
+				if (GameInstance)
+				{
+					UGameplayStatics::PlaySound2D(GetWorld(), Time_Sound);
 
-				GameInstance->TimeCount += GameInstance->TimeAdded;
-				UE_LOG(LogTemp, Warning, TEXT("TimePack - SUCCESS"));
+					GameInstance->TimeCount += GameInstance->TimeAdded;
+					UE_LOG(LogTemp, Warning, TEXT("TimePack - SUCCESS"));
+				}
 			}
+
+			UGameplayStatics::PlaySound2D(GetWorld(), PackSound_OnPlayerHit); // Play Sound
+
+			this->Destroy();
 		}
-
-		UGameplayStatics::PlaySound2D(GetWorld(), PackSound_OnPlayerHit); // Play Sound
-
-		this->Destroy();
 	}
 }
 
@@ -140,7 +148,6 @@ void APack_Manager::Movement(float DeltaTime)
 	NewLocation.Z = NewLocation.Z + (FMath::Sin(RunningTime * BounceSpeed) * BounceHight) * DeltaTime * 150;
 	SetActorLocation(NewLocation);
 	RunningTime += DeltaTime;
-
 
 	//Rotation
 	FRotator NewRotation = GetActorRotation();

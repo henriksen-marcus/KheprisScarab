@@ -46,7 +46,7 @@ void UMenu_ModeSelect::TimeAttack_Button_Clicked()
 	}
 
 	//Change Level
-	FName NewLevel = FName("Master_Map");
+	FName NewLevel = FName("TestMap_Adrian");
 	UGameplayStatics::OpenLevel(GetWorld(), NewLevel);
 }
 void UMenu_ModeSelect::Adventure_Button_Clicked()
@@ -60,7 +60,7 @@ void UMenu_ModeSelect::Adventure_Button_Clicked()
 	}
 
 	//Change Level
-	FName NewLevel = FName("Master_Map");
+	FName NewLevel = FName("TestMap_Adrian");
 	UGameplayStatics::OpenLevel(GetWorld(), NewLevel);
 }
 void UMenu_ModeSelect::Back_Button_Clicked()
