@@ -17,6 +17,15 @@ void UHUD_PlayerShip::NativeConstruct()
 }
 void UHUD_PlayerShip::NativeOnInitialized()
 {
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (!GameInstance) { return; }
+
+	GameInstance->CheckPoint_Connected = false;
+	GameInstance->CurrentLap_Counter = 1;
+
+	//Set Start Round Counter text
+	Current_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->CurrentLap_Counter)));
+	Max_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->MaxLap_Counter)));
 }
 void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {
@@ -32,6 +41,14 @@ void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 	SetTimer(DeltaTime);
 
 	SetSpeedDisplay();
+
+	SetTrackTimer(DeltaTime);
+	SetTimeDisplay_Timer(DeltaTime);
+	SetRealTimeDisplay();
+
+	SetlapCounter();
+
+	RaceFinished();
 }
 
 
@@ -211,4 +228,197 @@ void UHUD_PlayerShip::SetSpeedDisplay()
 		}
 	}
 	
+}
+
+//Remove the "!" when the countdown are inplementet
+void UHUD_PlayerShip::SetTrackTimer(float DeltaTime)
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (!GameInstance) { return; }
+
+	//Makes in-game timer counter
+	if (!GameInstance->bRaceNotStarted) 
+	{
+		TrackTimer_Temp += DeltaTime;
+		TrackTimer_Accurate += DeltaTime;
+
+		if (TrackTimer_Temp >= 1)
+		{
+			TrackTimer_Temp = 0;
+			TrackTimer += 1;
+		}
+	}
+	else
+	{
+		TrackTimer_Temp = 0;
+		TrackTimer = 0;
+	}
+}
+void UHUD_PlayerShip::CalculateTimeDisplay()
+{
+	int TrackTimer_TempInt = TrackTimer;
+	float TrackTimer_TempAccurate = TrackTimer_Accurate;
+	Minutes = 0;
+	Secounds = 0;
+
+	/*while (TrackTimer_TempInt >= 60)
+	{
+		TrackTimer_TempInt -= 60;
+		Minutes += 1;
+	}
+
+	Secounds = TrackTimer_TempInt;*/
+
+	while (TrackTimer_TempAccurate >= 60)
+	{
+		TrackTimer_TempAccurate -= 60;
+		Minutes += 1;
+	}
+
+	while (TrackTimer_TempAccurate >= 1)
+	{
+		TrackTimer_TempAccurate -= 1;
+		Secounds += 1;
+	}
+
+	Hundrets = TrackTimer_TempAccurate;
+	
+}
+void UHUD_PlayerShip::SetTimeDisplay_Timer(float DeltaTime)
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (!GameInstance) { return; }
+
+	if (GameInstance->CheckPoint_Connected)
+	{
+		CalculateTimeDisplay();
+
+		if (GameInstance->NewCheckPoint == true)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), CheckPointSound, 1.f);
+
+			Minutes_Temp = Minutes;
+			Secounds_Temp = Secounds;
+			Hundrets_Temp = Hundrets * 100;
+
+			GameInstance->NewCheckPoint = false;
+			CheckpointTimerDisplay_Timer = 0;
+		}
+		
+
+		#pragma region Timer Text
+		if (Minutes_Temp < 10)
+			TimeDisplay_Minutes_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Minutes_Temp)));
+		else
+			TimeDisplay_Minutes_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Minutes_Temp)));
+
+		if (Secounds_Temp < 10)
+			TimeDisplay_Seconds_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Secounds_Temp)));
+		else
+			TimeDisplay_Seconds_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Secounds_Temp)));
+
+		if (Hundrets_Temp < 10)
+			TimeDisplay_Hundrets_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Hundrets_Temp)));
+		else
+			TimeDisplay_Hundrets_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Hundrets_Temp)));
+		#pragma endregion
+
+		#pragma region Timer text - Visible
+		TimeDisplay_Minutes_Text->SetVisibility(ESlateVisibility::Visible);
+		TimeDisplay_Seconds_Text->SetVisibility(ESlateVisibility::Visible);
+		TimeDisplay_Hundrets_Text->SetVisibility(ESlateVisibility::Visible);
+		_One->SetVisibility(ESlateVisibility::Visible);
+		_Two->SetVisibility(ESlateVisibility::Visible);
+		#pragma endregion
+
+
+		CheckpointTimerDisplay_Timer += DeltaTime;
+
+		if (CheckpointTimerDisplay_Timer >= TrackTime_DisplayTime)
+		{
+			CheckpointTimerDisplay_Timer = 0;
+			GameInstance->CheckPoint_Connected = false;
+		}
+		
+	}
+	else
+	{
+		TimeDisplay_Minutes_Text->SetVisibility(ESlateVisibility::Hidden);
+		TimeDisplay_Seconds_Text->SetVisibility(ESlateVisibility::Hidden);
+		TimeDisplay_Hundrets_Text->SetVisibility(ESlateVisibility::Hidden);
+		_One->SetVisibility(ESlateVisibility::Hidden);
+		_Two->SetVisibility(ESlateVisibility::Hidden);
+
+		//Timer_SnapShot = false;
+		CheckpointTimerDisplay_Timer = 0;
+	}
+}
+
+void UHUD_PlayerShip::SetRealTimeDisplay()
+{
+	float Real_TrackTimer_TempAccurate = TrackTimer_Accurate;
+	Real_Minutes = 0;
+	Real_Secounds = 0;
+
+	while (Real_TrackTimer_TempAccurate >= 60)
+	{
+		Real_TrackTimer_TempAccurate -= 60;
+		Real_Minutes += 1;
+	}
+
+	while (Real_TrackTimer_TempAccurate >= 1)
+	{
+		Real_TrackTimer_TempAccurate -= 1;
+		Real_Secounds += 1;
+	}
+
+	Real_Hundrets = Real_TrackTimer_TempAccurate;
+	Real_Hundrets *= 100;
+
+	#pragma region Timer Text
+	if (Real_Minutes < 10)
+		RealTimeDisplay_Minutes_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Real_Minutes)));
+	else
+		RealTimeDisplay_Minutes_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Real_Minutes)));
+
+	if (Real_Secounds < 10)
+		RealTimeDisplay_Seconds_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Real_Secounds)));
+	else
+		RealTimeDisplay_Seconds_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Real_Secounds)));
+
+	if (Real_Hundrets < 10)
+		RealTimeDisplay_Hundrets_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Real_Hundrets)));
+	else
+		RealTimeDisplay_Hundrets_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Real_Hundrets)));
+	#pragma endregion
+}
+
+void UHUD_PlayerShip::SetlapCounter()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (!GameInstance) { return; }
+
+	if (GameInstance->CurrentLap_Counter > 3)
+		Current_Round_Text->SetText(FText::FromString("3"));
+	else
+		Current_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->CurrentLap_Counter)));
+
+	Max_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->MaxLap_Counter)));
+}
+
+void UHUD_PlayerShip::RaceFinished()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (!GameInstance) { return; }
+
+	if (GameInstance->CurrentLap_Counter > 3)
+	{
+		GameInstance->CurrentLap_Counter = 0;
+		GameInstance->Racing = false;
+		GameInstance->bRaceNotStarted = true;
+
+		//Change Level
+		FName NewLevel = FName("Start_Screen");
+		UGameplayStatics::OpenLevel(GetWorld(), NewLevel);
+	}
 }

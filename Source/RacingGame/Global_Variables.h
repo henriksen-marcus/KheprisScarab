@@ -29,13 +29,10 @@ public:
 public:
 	#pragma region Modes
 	UPROPERTY(BlueprintReadWrite, Category = "Variable")
-	bool Racing{};
-	#pragma endregion
+		bool Racing{};
 
-	#pragma region Modes
 	bool TimeAttackMode{};
 	#pragma endregion
-
 
 	#pragma region Shop_Menu
 	float DashTimer{2.f};
@@ -104,17 +101,21 @@ public:
 	#pragma endregion
 
 	#pragma region CheckPoints
+	bool CheckPoint_Connected{false};
+	bool NewCheckPoint{false};
 	int PlayerCheckpointNumber{};
+	int CurrentLap_Counter{1};
+	int MaxLap_Counter{3};
 	#pragma endregion
 
 	#pragma region StartRace
 	bool bRaceNotStarted{};
 	#pragma endregion
 
-#pragma region Music
+	#pragma region Music
 	bool MainMenu_Music{};
 
 	float Music_Volum{};
-#pragma endregion	
+	#pragma endregion	
 
 };
