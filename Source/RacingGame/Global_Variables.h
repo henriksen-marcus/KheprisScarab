@@ -115,6 +115,12 @@ public:
 	bool MainMenu_Music{};
 
 	float Music_Volum{};
-#pragma endregion	
+#pragma endregion
+
+	UPROPERTY()
+	class APlayerShipPhysics* PlayerRef;
+	
+	/** Change the health of the player by a certain delta. Clamps values and checks for zero. */
+	void AddHealth(const float Amount);
 
 };

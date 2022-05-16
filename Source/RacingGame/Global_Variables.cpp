@@ -2,6 +2,7 @@
 
 
 #include "Global_Variables.h"
+#include "Vehicles/PlayerShipPhysics.h"
 
 UGlobal_Variables::UGlobal_Variables()
 {
@@ -18,6 +19,7 @@ UGlobal_Variables::UGlobal_Variables()
 
 void UGlobal_Variables::BeginPlay()
 {
+	PlayerRef = Cast<APlayerShipPhysics>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 }
 
 void UGlobal_Variables::Tick(float DeltaTime)
@@ -26,4 +28,20 @@ void UGlobal_Variables::Tick(float DeltaTime)
 		Music_Volum = 1;
 	else
 		Music_Volum = 0;
+}
+
+
+void UGlobal_Variables::AddHealth(const float Amount)
+{
+	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.f, MaxHealth);
+
+	if (!CurrentHealth)
+	{
+		if (PlayerRef)
+		{
+			PlayerRef->Respawn();
+			// Handle respawn screens and effects here, or do it in playershipphysics
+			CurrentHealth = MaxHealth;
+		}
+	}
 }

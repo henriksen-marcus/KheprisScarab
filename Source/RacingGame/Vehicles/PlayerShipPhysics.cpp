@@ -53,7 +53,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 	// SpringArm
 	{
 		BackSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("BackSpringArm"));
-		BackSpringArm->SetRelativeRotation(FRotator(-15.f, 0.f, 0.f));
+		BackSpringArm->SetRelativeRotation(FRotator(-22.f, 0.f, 0.f));
 		//SpringArm->SetUsingAbsoluteRotation(false);
 		//SpringArm->bUsePawnControlRotation = true;
 		BackSpringArm->TargetArmLength = TargetSpringArmLength;
@@ -329,6 +329,14 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	ShootTimer += DeltaTime;
 	JumpTimer += DeltaTime;
 	HitSoundCooldown += DeltaTime;
+
+	if (bIsBraking)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("IsBraking: true"))
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("IsBraking: false"))
+	}
 }
 
 
@@ -371,8 +379,10 @@ void APlayerShipPhysics::Forward(const float Value)
 		// Determine if there is input
 		bForwardHasInput = !(Value == 0);
 
+		bIsBraking = bForwardHasInput ? (Value < 0.f ? true : false) : (Speed > 1000.f ? true : false);
+
 		// If there is input, set rotation target to based on input value, else set target to 0
-		const float TargetPitch = bForwardHasInput ? Value > 0.f ? -5.0f : 5.f : 0.f;
+		const float TargetPitch = bForwardHasInput ? (Value > 0.f ? -5.0f : 5.f) : 0.f;
 
 		// Interpolate rotation towards target
 		if (BaseMesh)
@@ -1052,5 +1062,10 @@ void APlayerShipPhysics::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 		HitSoundCooldown = 0.f;
 	}
 
-	
+	if (GameInstance)
+	{
+		// The amount of damage to cause to the player when they crash at x speed
+		const float Amount = FMath::Lerp(20, 100, Speed/18000.f);
+		GameInstance->AddHealth(-Amount);
+	}
 }

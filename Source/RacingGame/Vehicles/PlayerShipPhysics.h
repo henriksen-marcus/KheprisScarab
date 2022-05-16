@@ -129,8 +129,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float MinimapDistance{100000.f};
 
-	UPROPERTY(BlueprintReadOnly, Category = "EditableVariables")
+	UPROPERTY(BlueprintReadOnly, Category = "BlueprintVariables")
 	float Speed{};
+	
+	UPROPERTY(BlueprintReadOnly, Category = "BlueprintVariables")
+    bool bIsBraking{};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	TSubclassOf<class ABullet> BulletClassToSpawn;
