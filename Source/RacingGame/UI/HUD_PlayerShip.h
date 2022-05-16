@@ -26,6 +26,8 @@ class RACINGGAME_API UHUD_PlayerShip : public UUserWidget
 	void SetAmmoPrecentage();
 	void SetTimer_Display();
 	void SetSpeedDisplay();
+	void RealTimerDisplay();
+	void LapsDisplay();
 
 	void SetTimer(float DeltaTime);
 
@@ -80,13 +82,15 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Speed_Text;
 
-
 	//Round Counter
-	#pragma region Round Counter
+	#pragma region Lap Counter
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Current_Round_Text;
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Max_Round_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* Middle_Text;
+	
 	#pragma endregion
 
 	//Checkpoint Timer Display

@@ -27,6 +27,8 @@ void UMenu_Settings::NativeOnInitialized()
 	Currency1Display_Button->OnClicked.AddDynamic(this, &UMenu_Settings::Currency1Display_Button_Clicked);
 	Currency2Display_Button->OnClicked.AddDynamic(this, &UMenu_Settings::Currency2Display_Button_Clicked);
 	SpeedDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::SpeedDisplay_Button_Clicked);
+	RealTimeDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::RealTimeDisplay_Button_Clicked);
+	LapsDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::LapsDisplay_Button_Clicked);
 
 	EasyDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::EasyDisplay_Button_Clicked);
 	NormalDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::NormalDisplay_Button_Clicked);
@@ -84,6 +86,16 @@ void UMenu_Settings::SetBoxesSelected()
 			SpeedDisplay_Button_Image->SetBrushFromTexture(Box_Selected);
 		else
 			SpeedDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
+
+		if (GameInstance->RealTimer_Display == true)
+			RealTimeDisplay_Button_Image->SetBrushFromTexture(Box_Selected);
+		else
+			RealTimeDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
+
+		if (GameInstance->Laps_Display == true)
+			LapsDisplay_Button_Image->SetBrushFromTexture(Box_Selected);
+		else
+			LapsDisplay_Button_Image->SetBrushFromTexture(Box_Unselected);
 		#pragma endregion
 
 		#pragma region Difficulty
@@ -218,6 +230,32 @@ void UMenu_Settings::SpeedDisplay_Button_Clicked()
 			GameInstance->Speed_Display = false;
 		else
 			GameInstance->Speed_Display = true;
+	}
+}
+void UMenu_Settings::RealTimeDisplay_Button_Clicked()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
+
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		if (GameInstance->RealTimer_Display == true)
+			GameInstance->RealTimer_Display = false;
+		else
+			GameInstance->RealTimer_Display = true;
+	}
+}
+void UMenu_Settings::LapsDisplay_Button_Clicked()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
+
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		if (GameInstance->Laps_Display == true)
+			GameInstance->Laps_Display = false;
+		else
+			GameInstance->Laps_Display = true;
 	}
 }
 

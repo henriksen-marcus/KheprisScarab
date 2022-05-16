@@ -42,30 +42,46 @@ public:
 		class UButton* HealthDisplay_Button;
 	UPROPERTY(meta = (BindWidget))
 		class UImage* HealthDisplay_Button_Image;
+
 	UPROPERTY(meta = (BindWidget))
 		class UButton* AmmoDisplay_Button;
 	UPROPERTY(meta = (BindWidget))
 		class UImage* AmmoDisplay_Button_Image;
+
 	UPROPERTY(meta = (BindWidget))
 		class UButton* BoostDisplay_Button;
 	UPROPERTY(meta = (BindWidget))
 		class UImage* BoostDisplay_Button_Image;
+
 	UPROPERTY(meta = (BindWidget))
 		class UButton* TimeDisplay_Button;
 	UPROPERTY(meta = (BindWidget))
 		class UImage* TimeDisplay_Button_Image;
+
 	UPROPERTY(meta = (BindWidget))
 		class UButton* Currency1Display_Button;
 	UPROPERTY(meta = (BindWidget))
 		class UImage* Currency1Display_Button_Image;
+
 	UPROPERTY(meta = (BindWidget))
 		class UButton* Currency2Display_Button;
 	UPROPERTY(meta = (BindWidget))
 		class UImage* Currency2Display_Button_Image;
+
 	UPROPERTY(meta = (BindWidget))
 		class UButton* SpeedDisplay_Button;
 	UPROPERTY(meta = (BindWidget))
 		class UImage* SpeedDisplay_Button_Image;
+
+	UPROPERTY(meta = (BindWidget))
+		class UButton* RealTimeDisplay_Button;
+	UPROPERTY(meta = (BindWidget))
+		class UImage* RealTimeDisplay_Button_Image;
+
+	UPROPERTY(meta = (BindWidget))
+		class UButton* LapsDisplay_Button;
+	UPROPERTY(meta = (BindWidget))
+		class UImage* LapsDisplay_Button_Image;
 
 	UFUNCTION()
 		void HealthDisplay_Button_Clicked();
@@ -81,6 +97,10 @@ public:
 		void Currency2Display_Button_Clicked();
 	UFUNCTION()
 		void SpeedDisplay_Button_Clicked();
+	UFUNCTION()
+		void RealTimeDisplay_Button_Clicked();
+	UFUNCTION()
+		void LapsDisplay_Button_Clicked();
 	#pragma endregion
 
 	#pragma region Difficulty

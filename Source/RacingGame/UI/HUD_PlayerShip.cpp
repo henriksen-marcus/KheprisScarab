@@ -36,6 +36,7 @@ void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 	SetCurrency2_Display();
 	Boost_Display();
 	SetAmmoPrecentage();
+	RealTimerDisplay();
 
 	SetTimer_Display();
 	SetTimer(DeltaTime);
@@ -45,6 +46,7 @@ void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 	SetTrackTimer(DeltaTime);
 	SetTimeDisplay_Timer(DeltaTime);
 	SetRealTimeDisplay();
+	LapsDisplay();
 
 	SetlapCounter();
 
@@ -190,22 +192,19 @@ void UHUD_PlayerShip::SetTimer(float DeltaTime)
 
 	if (GameInstance)
 	{
-		if (GameInstance->TimeAttackMode == true)
+		if (!GameInstance->TimeAttackMode == true) {return;}
+		if (!GameInstance->bRaceNotStarted == false) {return;}
+
+		GameInstance->DeltaTimeCount += DeltaTime;
+
+		if (GameInstance->DeltaTimeCount >= 1)
 		{
-			if (GameInstance->bRaceNotStarted == false)
-			{
-				GameInstance->DeltaTimeCount += DeltaTime;
+			GameInstance->DeltaTimeCount = 0;
 
-				if (GameInstance->DeltaTimeCount >= 1)
-				{
-					GameInstance->DeltaTimeCount = 0;
-
-					if (GameInstance->TimeCount <= 0)
-						GameInstance->TimeCount = 0;
-					else
-						GameInstance->TimeCount -= 1;
-				}
-			}
+			if (GameInstance->TimeCount <= 0)
+				GameInstance->TimeCount = 0;
+			else
+				GameInstance->TimeCount -= 1;
 		}
 	}
 }
@@ -228,6 +227,49 @@ void UHUD_PlayerShip::SetSpeedDisplay()
 		}
 	}
 	
+}
+
+void UHUD_PlayerShip::RealTimerDisplay()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		if (GameInstance->RealTimer_Display == true)
+		{
+			RealTimeDisplay_Minutes_Text->SetVisibility(ESlateVisibility::Visible);
+			RealTimeDisplay_Seconds_Text->SetVisibility(ESlateVisibility::Visible);
+			RealTimeDisplay_Hundrets_Text->SetVisibility(ESlateVisibility::Visible);
+			Real_One->SetVisibility(ESlateVisibility::Visible);
+			Real_Two->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			RealTimeDisplay_Minutes_Text->SetVisibility(ESlateVisibility::Hidden);
+			RealTimeDisplay_Seconds_Text->SetVisibility(ESlateVisibility::Hidden);
+			RealTimeDisplay_Hundrets_Text->SetVisibility(ESlateVisibility::Hidden);
+			Real_One->SetVisibility(ESlateVisibility::Hidden);
+			Real_Two->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+void UHUD_PlayerShip::LapsDisplay()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		if (GameInstance->Laps_Display == true)
+		{
+			Current_Round_Text->SetVisibility(ESlateVisibility::Visible);
+			Max_Round_Text->SetVisibility(ESlateVisibility::Visible);
+			Middle_Text->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			Current_Round_Text->SetVisibility(ESlateVisibility::Hidden);
+			Max_Round_Text->SetVisibility(ESlateVisibility::Hidden);
+			Middle_Text->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
 }
 
 //Remove the "!" when the countdown are inplementet

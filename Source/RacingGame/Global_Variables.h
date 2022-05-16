@@ -91,7 +91,9 @@ public:
 	bool Time_Display{true};
 	bool Currency1_Display{true};
 	bool Currency2_Display{true};
-	bool Speed_Display{ true };
+	bool Speed_Display{true};
+	bool RealTimer_Display{true};
+	bool Laps_Display{true};
 
 	bool Difficulty_Easy{false};
 	bool Difficulty_Normal{true};
