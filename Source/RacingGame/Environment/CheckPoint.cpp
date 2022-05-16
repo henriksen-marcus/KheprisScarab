@@ -24,9 +24,11 @@ ACheckPoint::ACheckPoint()
 	
 	#pragma region Mesh
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	MeshComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 	MeshComponent->SetupAttachment(RootComponent);
+	
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshComponentAsset(TEXT("StaticMesh'/Game/3DAssets/Environment/SM_Ring.SM_Ring'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshComponentAsset(TEXT("StaticMesh'/Game/3DAssets/Environment/AdrianCube'"));
 	if (MeshComponentAsset.Succeeded())
 	{
 		MeshComponent->SetStaticMesh(MeshComponentAsset.Object);
@@ -63,19 +65,6 @@ void ACheckPoint::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
 {
 	if (OtherActor->IsA(APlayerShipPhysics::StaticClass()))
 	{
-		UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
-		if (GameInstance)
-		{
-			if (GameInstance->PlayerCheckpointNumber == ThisCheckpointNumber - 1)
-			{
-				GameInstance->PlayerCheckpointNumber += 1;
-
-				UE_LOG(LogTemp, Warning, TEXT("Checkpoint - SUCESS, No.%d"), ThisCheckpointNumber);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Checkpoint - Not in Range, No.%d"), ThisCheckpointNumber);
-			}
-		}
+		
 	}
 }
