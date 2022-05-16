@@ -209,6 +209,9 @@ void APlayerShipPhysics::BeginPlay()
 
 	GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	GamemodeBase = Cast<ARacingGameGameModeBase>(GetWorld()->GetAuthGameMode());
+
+	//Checkpoint
+	InitialLocation = GetActorLocation();
 }
 
 
@@ -658,29 +661,19 @@ void APlayerShipPhysics::Respawn()
 	if (GameInstance)
 	{
 		if (GameInstance->bRaceNotStarted) { return; }
-		
-		if (GamemodeBase)
+
+		if (CheckPoint_Last)
 		{
-			if (GameInstance->PlayerCheckpointNumber == 1)
-			{
-				SetActorLocation(GamemodeBase->Checkpoints[0]->SpawnPointArrow->GetRelativeLocation());
+			SetActorLocation(CheckPoint_Last->SpawnPointArrow->GetComponentLocation());
+			SetActorRotation(CheckPoint_Last->SpawnPointArrow->GetComponentRotation());
 
-				UE_LOG(LogTemp, Warning, TEXT("Respawn 1 - Success"));
-			}
+			UE_LOG(LogTemp, Warning, TEXT("Respawn %d - Success"), CheckPoint_Last->ThisCheckpointNumber);
+		}
+		else
+		{
+			SetActorLocation(InitialLocation);
 
-			if (GameInstance->PlayerCheckpointNumber == 2)
-			{
-				SetActorLocation(GamemodeBase->Checkpoints[1]->SpawnPointArrow->GetRelativeLocation());
-
-				UE_LOG(LogTemp, Warning, TEXT("Respawn 2 - Success"));
-			}
-
-			if (GameInstance->PlayerCheckpointNumber == 3)
-			{
-				SetActorLocation(GamemodeBase->Checkpoints[2]->SpawnPointArrow->GetRelativeLocation());
-
-				UE_LOG(LogTemp, Warning, TEXT("Respawn 3 - Success"));
-			}
+			UE_LOG(LogTemp, Warning, TEXT("Respawn - Failed"));
 		}
 	}
 }
@@ -1025,6 +1018,42 @@ void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 {
     UE_LOG(LogTemp, Warning, TEXT("Ship Overlapped with something."))
 	if (!OtherActor || OtherActor == this || !OtherComponent) { return; }
+
+	if (OtherActor->IsA(ACheckPoint::StaticClass()))
+	{
+		ACheckPoint* CheckPoint_Temp = Cast<ACheckPoint>(OtherActor);
+
+		if (CheckPoint_Temp)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("CheckPoint_Temp: %d | PlayerNumber: %d"), CheckPoint_Temp->ThisCheckpointNumber, GameInstance->PlayerCheckpointNumber);
+
+			if (GameInstance->PlayerCheckpointNumber == CheckPoint_Temp->ThisCheckpointNumber - 1)
+			{
+				CheckPoint_Last = CheckPoint_Temp;
+
+				if (CheckPoint_Temp->bIsLast_CheckPoint)
+				{
+					GameInstance->PlayerCheckpointNumber = 0;
+				}
+				else
+				{
+					GameInstance->PlayerCheckpointNumber += 1;
+				}
+
+
+				if (GameInstance->TimeAttackMode == true)
+				{
+					GameInstance->TimeCount += GameInstance->TimeAdded;
+				}
+
+				UE_LOG(LogTemp, Warning, TEXT("Checkpoint - SUCESS, No.%d"), CheckPoint_Temp->ThisCheckpointNumber);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Checkpoint - Not in Range, No.%d"), CheckPoint_Temp->ThisCheckpointNumber);
+			}
+		}
+	}
 }
 
 

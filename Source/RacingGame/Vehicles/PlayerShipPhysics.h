@@ -340,4 +340,8 @@ public:
 	float SandEndSystemTimer{};
 
 	/** Bools */
+
+
+	//CheckPoints
+	class ACheckPoint* CheckPoint_Last{};
 };
