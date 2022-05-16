@@ -45,5 +45,5 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Checkpoint")
 		bool bIsFirst_CheckPoint{};
 	UPROPERTY(EditAnywhere, Category = "Checkpoint")
-		bool bIsLast_CheckPoint{};
+		bool bIsGoal{};
 };

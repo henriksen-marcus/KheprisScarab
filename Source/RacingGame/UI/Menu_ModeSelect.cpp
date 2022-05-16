@@ -5,6 +5,7 @@
 #include "../Global_Variables.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetStringLibrary.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
@@ -22,6 +23,7 @@ void UMenu_ModeSelect::NativeOnInitialized()
 	TimeAttack_Button->OnClicked.AddDynamic(this, &UMenu_ModeSelect::TimeAttack_Button_Clicked);
 	Adventure_Button->OnClicked.AddDynamic(this, &UMenu_ModeSelect::Adventure_Button_Clicked);
 	Back_Button->OnClicked.AddDynamic(this, &UMenu_ModeSelect::Back_Button_Clicked);
+
 
 }
 void UMenu_ModeSelect::NativeTick(const FGeometry& MyGeometry, float DeltaTime)

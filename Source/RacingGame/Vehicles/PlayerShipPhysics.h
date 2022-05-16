@@ -347,4 +347,7 @@ public:
 
 	//CheckPoints
 	class ACheckPoint* CheckPoint_Last{};
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+		USoundBase* NewLap_Sound;
 };

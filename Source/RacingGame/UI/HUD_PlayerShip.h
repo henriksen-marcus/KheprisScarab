@@ -28,6 +28,17 @@ class RACINGGAME_API UHUD_PlayerShip : public UUserWidget
 	void SetSpeedDisplay();
 
 	void SetTimer(float DeltaTime);
+
+	void SetTrackTimer(float DeltaTime);
+	void SetTimeDisplay_Timer(float DeltaTime);
+	void CalculateTimeDisplay();
+
+	void SetRealTimeDisplay();
+
+	void SetlapCounter();
+
+	void RaceFinished();
+
 public:
 	//Health Bar
 	UPROPERTY(meta = (BindWidget))
@@ -68,5 +79,64 @@ public:
 	//Speed
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Speed_Text;
+
+
+	//Round Counter
+	#pragma region Round Counter
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* Current_Round_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* Max_Round_Text;
+	#pragma endregion
+
+	//Checkpoint Timer Display
+	#pragma region Checkpoint Timer Display
+	UPROPERTY(EditAnywhere, Category = "Sound")
+		USoundBase* CheckPointSound;
+
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* TimeDisplay_Minutes_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* TimeDisplay_Seconds_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* TimeDisplay_Hundrets_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* _One;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* _Two;
+
+	float CheckpointTimerDisplay_Timer{};
+	int Minutes{};
+	int Secounds{};
+	float Hundrets{};
+
+	bool Timer_SnapShot{};
+	int Minutes_Temp{};
+	int Secounds_Temp{};
+	int Hundrets_Temp{};
+
+	float TrackTimer_Temp{};
+	int TrackTimer{};
+	float TrackTimer_Accurate{0};
+	float TrackTime_DisplayTime{2};
+	#pragma endregion
+
+	#pragma region Timer Display
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* RealTimeDisplay_Minutes_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* RealTimeDisplay_Seconds_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* RealTimeDisplay_Hundrets_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* Real_One;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* Real_Two;
+
+	int Real_Minutes{};
+	int Real_Secounds{};
+	float Real_Hundrets{};
+	#pragma endregion
+
 
 };

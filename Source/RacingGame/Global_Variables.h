@@ -7,7 +7,7 @@
 #include "Global_Variables.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class RACINGGAME_API UGlobal_Variables : public UGameInstance
@@ -25,17 +25,14 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime);
-	
+
 public:
 	#pragma region Modes
 	UPROPERTY(BlueprintReadWrite, Category = "Variable")
-	bool Racing{};
-	#pragma endregion
+		bool Racing{};
 
-	#pragma region Modes
 	bool TimeAttackMode{};
 	#pragma endregion
-
 
 	#pragma region Shop_Menu
 	float DashTimer{2.f};
@@ -104,14 +101,18 @@ public:
 	#pragma endregion
 
 	#pragma region CheckPoints
+	bool CheckPoint_Connected{false};
+	bool NewCheckPoint{false};
 	int PlayerCheckpointNumber{};
+	int CurrentLap_Counter{1};
+	int MaxLap_Counter{3};
 	#pragma endregion
 
 	#pragma region StartRace
 	bool bRaceNotStarted{};
 	#pragma endregion
 
-#pragma region Music
+	#pragma region Music
 	bool MainMenu_Music{};
 
 	float Music_Volum{};
@@ -119,7 +120,7 @@ public:
 
 	UPROPERTY()
 	class APlayerShipPhysics* PlayerRef;
-	
+
 	/** Change the health of the player by a certain delta. Clamps values and checks for zero. */
 	void AddHealth(const float Amount);
 

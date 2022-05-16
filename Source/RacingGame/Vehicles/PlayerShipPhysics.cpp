@@ -231,7 +231,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 
 	if (bLogSpeed)
 	{
-		UE_LOG(LogTemp,Warning,TEXT("Speed is: %f"), Speed);
+		//UE_LOG(LogTemp,Warning,TEXT("Speed is: %f"), Speed);
 	}
 
 	if (AudioComp && CustomCurve2)
@@ -255,7 +255,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	// Sand effect
 	if (CurrentSurface == "")
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Spawn or update sand system"))
+		//UE_LOG(LogTemp, Warning, TEXT("Spawn or update sand system"))
 		SpawnSandEffect(HitLoc);
 		if (SandSystemEndPtr)
 		{
@@ -268,7 +268,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	{
 		if (SandSystemPtr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Destroy system, spawn end"))
+			//UE_LOG(LogTemp, Warning, TEXT("Destroy system, spawn end"))
 			SandSystemPtr->DestroyInstance();
 			SandSystemPtr = nullptr;
 		
@@ -278,20 +278,20 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 		{
 			if (SandEndSystemTimer > 1.5f)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Destroy end sand system"))
+				//UE_LOG(LogTemp, Warning, TEXT("Destroy end sand system"))
 				SandSystemEndPtr->DestroyInstance();
 				SandSystemEndPtr = nullptr;
 				SandEndSystemTimer = 0.f;
 			} else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Update sand end system"))
+				//UE_LOG(LogTemp, Warning, TEXT("Update sand end system"))
 				SpawnSandEffectEnd(HitLoc);
 				SandEndSystemTimer += DeltaTime;
 			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("SandENd no longer valid"))
+			//UE_LOG(LogTemp, Warning, TEXT("SandENd no longer valid"))
 		}
 	}
 	
@@ -533,13 +533,13 @@ void APlayerShipPhysics::SpawnSandEffect(FVector HitLoc)
 	{
 		if (NS_SandSystem)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Spawned new sand system"))
+			//UE_LOG(LogTemp, Warning, TEXT("Spawned new sand system"))
 			SandSystemPtr = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_SandSystem, HitLoc, FRotator::ZeroRotator);
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Updated sand system location"))
+		//UE_LOG(LogTemp, Warning, TEXT("Updated sand system location"))
 		SandSystemPtr->SetWorldLocation(HitLoc);
 		SandSystemPtr->SetWorldRotation(GetActorRotation());
 	}
@@ -861,7 +861,7 @@ void APlayerShipPhysics::HoverRaycast()
 			End = Start + Thrust4->GetComponentRotation().Vector() * RayCastLength;
 			break;
 		default:
-			UE_LOG(LogTemp, Warning, TEXT("Error in APlayerShipPhysics::MovementUpdate()"))
+			//UE_LOG(LogTemp, Warning, TEXT("Error in APlayerShipPhysics::MovementUpdate()"))
 			break;
 		}
 
@@ -1026,7 +1026,7 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num) const
 
 void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    UE_LOG(LogTemp, Warning, TEXT("Ship Overlapped with something."))
+    //UE_LOG(LogTemp, Warning, TEXT("Ship Overlapped with something."))
 	if (!OtherActor || OtherActor == this || !OtherComponent) { return; }
 
 	if (OtherActor->IsA(ACheckPoint::StaticClass()))
@@ -1040,16 +1040,20 @@ void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 			if (GameInstance->PlayerCheckpointNumber == CheckPoint_Temp->ThisCheckpointNumber - 1)
 			{
 				CheckPoint_Last = CheckPoint_Temp;
+				GameInstance->NewCheckPoint = true;
+				GameInstance->CheckPoint_Connected = true;
 
-				if (CheckPoint_Temp->bIsLast_CheckPoint)
+				if (CheckPoint_Temp->bIsGoal)
 				{
 					GameInstance->PlayerCheckpointNumber = 0;
+
+					GameInstance->CurrentLap_Counter += 1;
+					UGameplayStatics::PlaySound2D(GetWorld(), NewLap_Sound, 1.f);
 				}
 				else
 				{
 					GameInstance->PlayerCheckpointNumber += 1;
 				}
-
 
 				if (GameInstance->TimeAttackMode == true)
 				{
