@@ -282,8 +282,11 @@ void UHUD_PlayerShip::SetTrackTimer(float DeltaTime)
 	//Makes in-game timer counter
 	if (!GameInstance->bRaceNotStarted) 
 	{
-		TrackTimer_Temp += DeltaTime;
-		TrackTimer_Accurate += DeltaTime;
+		if (!GameInstance->Pause)
+		{
+			TrackTimer_Temp += DeltaTime;
+			TrackTimer_Accurate += DeltaTime;
+		}
 
 		if (TrackTimer_Temp >= 1)
 		{
@@ -344,35 +347,34 @@ void UHUD_PlayerShip::SetTimeDisplay_Timer(float DeltaTime)
 			Secounds_Temp = Secounds;
 			Hundrets_Temp = Hundrets * 100;
 
+			#pragma region Timer Text
+			if (Minutes_Temp < 10)
+				TimeDisplay_Minutes_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Minutes_Temp)));
+			else
+				TimeDisplay_Minutes_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Minutes_Temp)));
+
+			if (Secounds_Temp < 10)
+				TimeDisplay_Seconds_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Secounds_Temp)));
+			else
+				TimeDisplay_Seconds_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Secounds_Temp)));
+
+			if (Hundrets_Temp < 10)
+				TimeDisplay_Hundrets_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Hundrets_Temp)));
+			else
+				TimeDisplay_Hundrets_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Hundrets_Temp)));
+			#pragma endregion
+
+			#pragma region Timer text - Visible
+			TimeDisplay_Minutes_Text->SetVisibility(ESlateVisibility::Visible);
+			TimeDisplay_Seconds_Text->SetVisibility(ESlateVisibility::Visible);
+			TimeDisplay_Hundrets_Text->SetVisibility(ESlateVisibility::Visible);
+			_One->SetVisibility(ESlateVisibility::Visible);
+			_Two->SetVisibility(ESlateVisibility::Visible);
+			#pragma endregion
+
 			GameInstance->NewCheckPoint = false;
 			CheckpointTimerDisplay_Timer = 0;
 		}
-
-		#pragma region Timer Text
-		if (Minutes_Temp < 10)
-			TimeDisplay_Minutes_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Minutes_Temp)));
-		else
-			TimeDisplay_Minutes_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Minutes_Temp)));
-
-		if (Secounds_Temp < 10)
-			TimeDisplay_Seconds_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Secounds_Temp)));
-		else
-			TimeDisplay_Seconds_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Secounds_Temp)));
-
-		if (Hundrets_Temp < 10)
-			TimeDisplay_Hundrets_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Hundrets_Temp)));
-		else
-			TimeDisplay_Hundrets_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Hundrets_Temp)));
-		#pragma endregion
-
-		#pragma region Timer text - Visible
-		TimeDisplay_Minutes_Text->SetVisibility(ESlateVisibility::Visible);
-		TimeDisplay_Seconds_Text->SetVisibility(ESlateVisibility::Visible);
-		TimeDisplay_Hundrets_Text->SetVisibility(ESlateVisibility::Visible);
-		_One->SetVisibility(ESlateVisibility::Visible);
-		_Two->SetVisibility(ESlateVisibility::Visible);
-		#pragma endregion
-
 
 		CheckpointTimerDisplay_Timer += DeltaTime;
 
@@ -381,7 +383,6 @@ void UHUD_PlayerShip::SetTimeDisplay_Timer(float DeltaTime)
 			CheckpointTimerDisplay_Timer = 0;
 			GameInstance->CheckPoint_Connected = false;
 		}
-		
 	}
 	else
 	{

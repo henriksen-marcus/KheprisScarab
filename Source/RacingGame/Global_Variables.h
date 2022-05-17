@@ -112,6 +112,7 @@ public:
 
 	#pragma region StartRace
 	bool bRaceNotStarted{};
+	bool Pause{};
 	#pragma endregion
 
 	#pragma region Music
