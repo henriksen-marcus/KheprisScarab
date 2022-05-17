@@ -37,6 +37,8 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Arrow")
 		class UArrowComponent* SpawnPointArrow;
+	UPROPERTY(EditAnywhere, Category = "Arrow")
+		class UArrowComponent* SpawnPointArrowTimeAttack;
 
 	UFUNCTION()
 		void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -44,6 +46,8 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Checkpoint")
 		bool bIsFirst_CheckPoint{};
+	UPROPERTY(EditAnywhere, Category = "Checkpoint")
+		bool bIsLast_CheckPoint{};
 	UPROPERTY(EditAnywhere, Category = "Checkpoint")
 		bool bIsGoal{};
 };

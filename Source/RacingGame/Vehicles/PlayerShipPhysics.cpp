@@ -220,6 +220,14 @@ void APlayerShipPhysics::BeginPlay()
 
 	//Checkpoint
 	InitialLocation = GetActorLocation();
+	if (GameInstance->TimeAttackMode)
+	{
+		GameInstance->PlayerCheckpointNumber = CheckPointsAmount;
+	}
+	else
+	{
+		GameInstance->PlayerCheckpointNumber = 0;
+	}
 }
 
 
@@ -660,8 +668,17 @@ void APlayerShipPhysics::Respawn()
 
 		if (CheckPoint_Last)
 		{
-			SetActorLocation(CheckPoint_Last->SpawnPointArrow->GetComponentLocation());
-			SetActorRotation(CheckPoint_Last->SpawnPointArrow->GetComponentRotation());
+			if (GameInstance->TimeAttackMode)
+			{
+				SetActorLocation(CheckPoint_Last->SpawnPointArrowTimeAttack->GetComponentLocation());
+				SetActorRotation(CheckPoint_Last->SpawnPointArrowTimeAttack->GetComponentRotation());
+			}
+			else
+			{
+				SetActorLocation(CheckPoint_Last->SpawnPointArrow->GetComponentLocation());
+				SetActorRotation(CheckPoint_Last->SpawnPointArrow->GetComponentRotation());
+			}
+			
 
 			UE_LOG(LogTemp, Warning, TEXT("Respawn %d - Success"), CheckPoint_Last->ThisCheckpointNumber);
 		}
@@ -1007,7 +1024,7 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num) const
 
 	const float Constant = Gravity/5.f;
 
-	UE_LOG(LogTemp, Warning, TEXT("NormDist: %f"), NormalizedDistance)
+	//UE_LOG(LogTemp, Warning, TEXT("NormDist: %f"), NormalizedDistance)
 
 	// If we are close enough to the ground to give thrust
 	if (NormalizedDistance < 1.f)
@@ -1033,42 +1050,89 @@ void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 		{
 			UE_LOG(LogTemp, Warning, TEXT("CheckPoint_Temp: %d | PlayerNumber: %d"), CheckPoint_Temp->ThisCheckpointNumber, GameInstance->PlayerCheckpointNumber);
 
-			if (GameInstance->PlayerCheckpointNumber == CheckPoint_Temp->ThisCheckpointNumber - 1)
+			if (GameInstance->TimeAttackMode)
 			{
-				CheckPoint_Last = CheckPoint_Temp;
-				GameInstance->NewCheckPoint = true;
-				GameInstance->CheckPoint_Connected = true;
-
-				if (CheckPoint_Temp->bIsGoal)
+				if (GameInstance->PlayerCheckpointNumber - 1 == CheckPoint_Temp->ThisCheckpointNumber || (CheckPoint_Temp->bIsFirst_CheckPoint && GameInstance->PlayerCheckpointNumber <= 2))
 				{
-					GameInstance->PlayerCheckpointNumber = 0;
+					CheckPoint_Last = CheckPoint_Temp;
+					GameInstance->NewCheckPoint = true;
+					GameInstance->CheckPoint_Connected = true;
 
-					GameInstance->CurrentLap_Counter += 1;
-					
-					if (GameInstance->CurrentLap_Counter <= 3)
+					if (CheckPoint_Temp->bIsFirst_CheckPoint)
 					{
-						UGameplayStatics::PlaySound2D(GetWorld(), NewLap_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+						GameInstance->PlayerCheckpointNumber = CheckPointsAmount + 2;
+					}
+					if (CheckPoint_Temp->bIsGoal)
+					{
+						GameInstance->PlayerCheckpointNumber = CheckPointsAmount;
+
+						GameInstance->CurrentLap_Counter += 1;
+
+						if (GameInstance->CurrentLap_Counter <= 3)
+						{
+							UGameplayStatics::PlaySound2D(GetWorld(), NewLap_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+						}
+						else
+						{
+							UGameplayStatics::PlaySound2D(GetWorld(), RaceWon_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+						}
 					}
 					else
 					{
-						UGameplayStatics::PlaySound2D(GetWorld(), RaceWon_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+						GameInstance->PlayerCheckpointNumber -= 1;
 					}
+
+					if (GameInstance->TimeAttackMode == true)
+					{
+						GameInstance->TimeCount += GameInstance->TimeAdded;
+					}
+
+					UE_LOG(LogTemp, Warning, TEXT("Checkpoint - Time Attack - SUCESS, No.%d"), CheckPoint_Temp->ThisCheckpointNumber);
 				}
 				else
 				{
-					GameInstance->PlayerCheckpointNumber += 1;
+					UE_LOG(LogTemp, Warning, TEXT("Checkpoint - Time Attack - Not in Range, No.%d"), CheckPoint_Temp->ThisCheckpointNumber);
 				}
-
-				if (GameInstance->TimeAttackMode == true)
-				{
-					GameInstance->TimeCount += GameInstance->TimeAdded;
-				}
-
-				UE_LOG(LogTemp, Warning, TEXT("Checkpoint - SUCESS, No.%d"), CheckPoint_Temp->ThisCheckpointNumber);
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Checkpoint - Not in Range, No.%d"), CheckPoint_Temp->ThisCheckpointNumber);
+				if (GameInstance->PlayerCheckpointNumber == CheckPoint_Temp->ThisCheckpointNumber - 1)
+				{
+					CheckPoint_Last = CheckPoint_Temp;
+					GameInstance->NewCheckPoint = true;
+					GameInstance->CheckPoint_Connected = true;
+
+					if (CheckPoint_Temp->bIsGoal)
+					{
+						GameInstance->PlayerCheckpointNumber = 0;
+
+						GameInstance->CurrentLap_Counter += 1;
+
+						if (GameInstance->CurrentLap_Counter <= 3)
+						{
+							UGameplayStatics::PlaySound2D(GetWorld(), NewLap_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+						}
+						else
+						{
+							UGameplayStatics::PlaySound2D(GetWorld(), RaceWon_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+						}
+					}
+					else
+					{
+						GameInstance->PlayerCheckpointNumber += 1;
+					}
+
+					if (GameInstance->TimeAttackMode == true)
+					{
+						GameInstance->TimeCount += GameInstance->TimeAdded;
+					}
+
+					UE_LOG(LogTemp, Warning, TEXT("Checkpoint - Adventure Mode - SUCESS, No.%d"), CheckPoint_Temp->ThisCheckpointNumber);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Checkpoint - Adventure Mode - Not in Range, No.%d"), CheckPoint_Temp->ThisCheckpointNumber);
+				}
 			}
 		}
 	}

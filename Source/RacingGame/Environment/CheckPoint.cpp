@@ -21,6 +21,11 @@ ACheckPoint::ACheckPoint()
 	SpawnPointArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
 	SpawnPointArrow->SetupAttachment(GetRootComponent());
 	SpawnPointArrow->SetRelativeLocation(FVector(0.f, 0.f, -50.f));
+
+	SpawnPointArrowTimeAttack = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponentTimeAttack"));
+	SpawnPointArrowTimeAttack->SetupAttachment(GetRootComponent());
+	SpawnPointArrowTimeAttack->SetRelativeLocation(FVector(0.f, 0.f, -50.f));
+	SpawnPointArrowTimeAttack->SetRelativeRotation(FRotator(0.f, 0.f, -180.f));
 	
 	#pragma region Mesh
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));

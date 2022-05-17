@@ -326,6 +326,8 @@ public:
 	UPROPERTY()
 	class ACheckPoint* CheckPoint_Last{};
 	
+	int CheckPointsAmount{7}; //Amount of Checkpoints in the Track
+	
 	
 	/** Timers */
 	
