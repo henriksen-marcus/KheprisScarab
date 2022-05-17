@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "HoveringMovementComponent.h"
 #include "NiagaraSystem.h"
 #include "NiagaraComponent.h"
-#include "Engine/AutoDestroySubsystem.h"
 #include "PlayerShipPhysics.generated.h"
+
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDashDelegate);
 
 UCLASS()
 class RACINGGAME_API APlayerShipPhysics : public APawn
@@ -38,21 +38,26 @@ public:
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
 	UBoxComponent* Root;
 
+	/** The collision component of the ship. Only the center cabin part of the ship has physical collision. */
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
 	UCapsuleComponent* Collision;
 
 	
 	/** CAMERA */
 
+	/** Default camera */
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	UCameraComponent* BackCamera;
 
+	/** The camera that looks behind you */
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	UCameraComponent* BehindCamera;
 
+	/** The camera at the very front of the ship */
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	UCameraComponent* FrontCamera;
 
+	/** The minimap camera */
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	USceneCaptureComponent2D* BirdCam;
 
@@ -89,7 +94,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Curves")
 	UCurveFloat* MinusHoverForceCurve;
 	
-
 	
 	/* BLUEPRINT VARIABLES */
 
@@ -125,15 +129,23 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	bool bLogSpeed{false};
-	
+
+	/** How far the minimap camera is above the ship. */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float MinimapDistance{100000.f};
 
+	/** The speed of the ship in cm/s. Uses physics linear velocity vector size. */
 	UPROPERTY(BlueprintReadOnly, Category = "BlueprintVariables")
 	float Speed{};
 	
 	UPROPERTY(BlueprintReadOnly, Category = "BlueprintVariables")
     bool bIsBraking{};
+
+	UPROPERTY(BlueprintReadOnly, Category = "BlueprintVariables")
+	bool bIsDashing{};
+	
+	UPROPERTY(BlueprintReadOnly, Category = "BlueprintVariables")
+	bool bIsOnRoad{};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	TSubclassOf<class ABullet> BulletClassToSpawn;
@@ -161,6 +173,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* HitSound2;
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* NewLap_Sound;
+	
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* RaceWon_Sound;
 	
 	
 	/* LOCATION PLACEHOLDERS */
@@ -201,10 +219,6 @@ public:
 
 	UPROPERTY()
 	UUserWidget* OffTrackScreen;
-
-	/** Whether the player is on the road or not. */
-	UPROPERTY(BlueprintReadOnly)
-	bool bIsOnRoad{};
 	
 
 	// ---------- FUNCTIONS ---------- //
@@ -229,8 +243,13 @@ public:
 	void CameraYaw(float Value);
 
 	void Shoot();
+
+	/** Sends a signal to blueprint as an event */
+	UFUNCTION(BlueprintNativeEvent)
+	void DashNotifyEvent();
 	
 	void Dash();
+	
 	void Jump();
 	
 	void Respawn();
@@ -282,51 +301,18 @@ public:
 
 	FTimerHandle TimeDilationHandle;
 	
-	bool bForwardHasInput{};
-	bool bRollHasInput{};
-
-	float NextRollPosition{};
-	float NextPitchPosition{};
-	float NextYawPosition{};
-
-	/** The actual value that is multiplied with the speed. Will copy MaxSpeedBoost when Dash() is used. */
-	float SpeedBoost{1.f};
-	
-	bool bIsDashing{};
-	bool bIsJumping{};
-	bool bIsReloading{};
-
-	/** How much the players local yaw should change per tick */
-	float YawMove{};
-	
 	FRotator SpringArmRotTarget = FRotator::ZeroRotator;
 	FRotator SpringArmLocalChange = FRotator::ZeroRotator;
 	FRotator InitialBackSpringArmRotation = FRotator::ZeroRotator;
 	FRotator InitialBehindSpringArmRotation = FRotator::ZeroRotator;
 
-	/** Takes the time for how long the camera movement has been idle */
-	float CameraCenteringTimer{};
 	
-	/** Number that the engine sound pitch is multiplied with */
-	float PitchMultiplier{1.f};
 
 	/** The location the player spawns at, aka the position of the player start */
 	FVector InitialLocation;
 	
-	float InitialTargetHeight{};
-	float DistanceFromGround{500.f};
-	float Gravity{};
-
 	/** The amount of force to be applied the next tick */
 	FVector Force = FVector::ZeroVector;
-
-	/** Well, it's... the ships weight. */
-	float ShipWeight{};
-
-	float ForwardsSpeed{5500.f};
-	
-	float HitSoundCooldown{};
-	bool bEnableDrag{true};
 
 	FString CurrentSurface{};
 
@@ -335,21 +321,48 @@ public:
 
 	UPROPERTY()
 	class ARacingGameGameModeBase* GamemodeBase;
+
+	/** Reference to the last accepted checkpoint that the player has passed, used for respawn functionality */
+	UPROPERTY()
+	class ACheckPoint* CheckPoint_Last{};
+	
 	
 	/** Timers */
+	
 	float ShootTimer{};
 	float JumpTimer{};
 	float OffTrackTimer{};
 	float SandEndSystemTimer{};
+	float HitSoundCooldown{};
+	
 
 	/** Bools */
+	
+	bool bIsJumping{};
+	
 
+	/** Floats */
 
-	//CheckPoints
-	class ACheckPoint* CheckPoint_Last{};
+	/** Takes the time for how long the camera movement has been idle */
+	float CameraCenteringTimer{};
+	
+	/** Number that the engine sound pitch is multiplied with */
+	float PitchMultiplier{1.f};
 
-	UPROPERTY(EditAnywhere, Category = "Sound")
-		USoundBase* NewLap_Sound;
-	UPROPERTY(EditAnywhere, Category = "Sound")
-		USoundBase* RaceWon_Sound;
+	/** The actual value that is multiplied with the speed. Will copy MaxSpeedBoost when Dash() is used. */
+	float SpeedBoost{1.f};
+
+	/** How much the players local yaw should change per tick */
+	float YawMove{};
+
+	/** Well, it's... the ships weight. */
+	float ShipWeight{};
+
+	float ForwardsSpeed{5500.f};
+	float InitialTargetHeight{};
+	float Gravity{};
+	
+	float NextRollPosition{};
+	float NextPitchPosition{};
+	float NextYawPosition{};
 };

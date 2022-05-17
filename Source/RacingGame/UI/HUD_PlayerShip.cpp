@@ -116,7 +116,8 @@ void UHUD_PlayerShip::SetBarPercentage()
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
-		Player_Precentage = GameInstance->CurrentHealth / GameInstance->MaxHealth;
+		// Added an interpolation here to add some smoothness - Marcus
+		Player_Precentage = FMath::FInterpTo(Player_Precentage, GameInstance->CurrentHealth / GameInstance->MaxHealth, GetWorld()->GetDeltaSeconds(), 8.f);
 		PlayerHealth_Bar->SetPercent(Player_Precentage);
 	}
 }

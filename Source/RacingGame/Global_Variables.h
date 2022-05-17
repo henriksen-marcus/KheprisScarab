@@ -120,6 +120,8 @@ public:
 	float Music_Volum{};
 #pragma endregion
 
+	float GlobalVolumeMultiplier{1.f};
+	
 	UPROPERTY()
 	class APlayerShipPhysics* PlayerRef;
 

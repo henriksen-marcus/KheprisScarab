@@ -34,16 +34,19 @@ APlayerShipPhysics::APlayerShipPhysics()
 		Root->SetCollisionProfileName(FName("Ship"));
 	}
 
-	Collision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Collision"));
-	Collision->InitCapsuleSize(50.f, 120.f);
-	Collision->SetRelativeLocation(FVector(10.f, 0.f, 0.f));
-	Collision->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
-	Collision->SetupAttachment(GetRootComponent());
-	Collision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	Collision->SetCollisionProfileName(FName("Ship")); // Collision mot working properly? Make sure there is a collision preset named "Ship".
+	// Collision
+	{
+		Collision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Collision"));
+		Collision->InitCapsuleSize(50.f, 120.f);
+		Collision->SetRelativeLocation(FVector(10.f, 0.f, 0.f));
+		Collision->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
+		Collision->SetupAttachment(GetRootComponent());
+		Collision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		Collision->SetCollisionProfileName(FName("Ship")); // Collision mot working properly? Make sure there is a collision preset named "Ship".
 	
-	Collision->OnComponentBeginOverlap.AddDynamic(this, &APlayerShipPhysics::OnOverlapBegin);
-	Collision->OnComponentHit.AddDynamic(this, &APlayerShipPhysics::OnHit);
+		Collision->OnComponentBeginOverlap.AddDynamic(this, &APlayerShipPhysics::OnOverlapBegin);
+		Collision->OnComponentHit.AddDynamic(this, &APlayerShipPhysics::OnHit);
+	}
 	
 	BaseMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ShipMesh"));
 	BaseMesh->SetSkeletalMesh(ConstructorHelpers::FObjectFinder<USkeletalMesh>(TEXT("SkeletalMesh'/Game/3DAssets/New_Ship/MasterShip.MasterShip'")).Object);
@@ -54,8 +57,6 @@ APlayerShipPhysics::APlayerShipPhysics()
 	{
 		BackSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("BackSpringArm"));
 		BackSpringArm->SetRelativeRotation(FRotator(-22.f, 0.f, 0.f));
-		//SpringArm->SetUsingAbsoluteRotation(false);
-		//SpringArm->bUsePawnControlRotation = true;
 		BackSpringArm->TargetArmLength = TargetSpringArmLength;
 		BackSpringArm->bEnableCameraLag = false;
 		BackSpringArm->CameraLagSpeed = 30.f; // Lower = More delay
@@ -68,7 +69,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 		BehindSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("FrontSpringArm"));
 		BehindSpringArm->SetRelativeRotation(FRotator(-10.f, 180.f, 0.f));
 		BehindSpringArm->TargetArmLength = 1500.f;
-		BehindSpringArm->bEnableCameraLag = true;
+		BehindSpringArm->bEnableCameraLag = false;
 		//FrontSpringArm->CameraLagSpeed = 100.f; // Lower = More delay
 		BehindSpringArm->bEnableCameraRotationLag = false;
 		//FrontSpringArm->CameraRotationLagSpeed = 30.f;
@@ -94,6 +95,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 		
 		FrontCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FrontCamera"));
 		FrontCamera->bUsePawnControlRotation = false;
+		FrontCamera->FieldOfView = 120.f;
 		FrontCamera->SetupAttachment(GetRootComponent());
 		FrontCamera->SetRelativeLocation(FVector(160.f, 0.f, -20.f));
 
@@ -103,6 +105,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 		BirdCam->FOVAngle = 50.f;
 		BirdCam->SetupAttachment(GetRootComponent());
 		BirdCam->TextureTarget = RenderTarget;
+		BirdCam->bCaptureEveryFrame = true;
 	}
 
 	// Audio
@@ -115,9 +118,10 @@ APlayerShipPhysics::APlayerShipPhysics()
 		BoostSound = ConstructorHelpers::FObjectFinder<USoundWave>(TEXT("SoundWave'/Game/SoundEffects/Bang/firework-boom.firework-boom'")).Object;
 		HitSound1 = ConstructorHelpers::FObjectFinder<USoundWave>(TEXT("SoundWave'/Game/SoundEffects/Hit/impactPlate_heavy_001.impactPlate_heavy_001'")).Object;
 		HitSound2 = ConstructorHelpers::FObjectFinder<USoundWave>(TEXT("SoundWave'/Game/SoundEffects/Hit/impactPlate_heavy_004.impactPlate_heavy_004'")).Object;
+		//NewLap_Sound = ConstructorHelpers::FObjectFinder<USoundWave>(TEXT("SoundWave'/Game/SoundEffects/Hit/impactPlate_heavy_004.impactPlate_heavy_004'")).Object;
+		//RaceWon_Sound = ConstructorHelpers::FObjectFinder<USoundWave>(TEXT("SoundWave'/Game/SoundEffects/Hit/impactPlate_heavy_004.impactPlate_heavy_004'")).Object;
 	}
 	
-
 	// Location placeholders
 	{
 		Thrust1 = CreateDefaultSubobject<UArrowComponent>(TEXT("Thrust1"));
@@ -179,17 +183,18 @@ void APlayerShipPhysics::BeginPlay()
 	BehindCamera->SetActive(false);
 	FrontCamera->SetActive(false);
 
-	//UE_LOG(LogTemp, Warning, TEXT("Date: %s"), *FDateTime::Now().ToString())
-
 	if (StartSound)
 	{
-		UGameplayStatics::PlaySound2D(GetWorld(), StartSound, 0.2f);
+		if (GameInstance)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), StartSound, 1.1f * GameInstance->GlobalVolumeMultiplier);
+		}
 
 		FTimerHandle TH_BeginPlay;
 		FTimerDelegate TD_BeginPlay;
 		// Lambda expression
 		TD_BeginPlay.BindLambda([&]{ AudioComp->FadeIn(0.8f); AudioComp->PitchMultiplier = 1.f; });
-		GetWorld()->GetTimerManager().SetTimer(TH_BeginPlay, TD_BeginPlay, 0.6f, false);
+		GetWorld()->GetTimerManager().SetTimer(TH_BeginPlay, TD_BeginPlay, 0.7f, false);
 	}
 	else
 	{
@@ -234,15 +239,16 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 		//UE_LOG(LogTemp,Warning,TEXT("Speed is: %f"), Speed);
 	}
 
-	if (AudioComp && CustomCurve2)
+	if (AudioComp && CustomCurve2 && GameInstance)
 	{
 		// Interp to smooth out speed/audio fluctuations
 		AudioComp->PitchMultiplier = FMath::FInterpTo(AudioComp->PitchMultiplier, (CustomCurve2->GetFloatValue(Speed/20000.f) + 1), DeltaTime, 1.5f);
 		AudioComp->SetPitchMultiplier(AudioComp->PitchMultiplier);
+		AudioComp->VolumeMultiplier = AudioComp->VolumeMultiplier * GameInstance->GlobalVolumeMultiplier;
 	}
 
 	// Turning
-	AddActorLocalRotation(FRotator(0.f, YawMove, 0.f));
+	AddActorLocalRotation(FRotator(0.f, YawMove * DeltaTime * 110.f, 0.f));
 
 	// Cosmetic mesh rotation
 	BaseMesh->SetRelativeRotation(FRotator(NextPitchPosition, 0.f, NextRollPosition));
@@ -255,7 +261,6 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	// Sand effect
 	if (CurrentSurface == "")
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Spawn or update sand system"))
 		SpawnSandEffect(HitLoc);
 		if (SandSystemEndPtr)
 		{
@@ -268,7 +273,6 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	{
 		if (SandSystemPtr)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Destroy system, spawn end"))
 			SandSystemPtr->DestroyInstance();
 			SandSystemPtr = nullptr;
 		
@@ -278,20 +282,14 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 		{
 			if (SandEndSystemTimer > 1.5f)
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("Destroy end sand system"))
 				SandSystemEndPtr->DestroyInstance();
 				SandSystemEndPtr = nullptr;
 				SandEndSystemTimer = 0.f;
 			} else
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("Update sand end system"))
 				SpawnSandEffectEnd(HitLoc);
 				SandEndSystemTimer += DeltaTime;
 			}
-		}
-		else
-		{
-			//UE_LOG(LogTemp, Warning, TEXT("SandENd no longer valid"))
 		}
 	}
 	
@@ -315,7 +313,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 		{
 			bIsOnRoad = false;
 			SpeedMultiplier = 0.3f;
-			GameInstance->CurrentHealth -= DeltaTime;
+			GameInstance->AddHealth(-10 * DeltaTime);
 			if (Root->GetPhysicsLinearVelocity().Size() > 5000.f)
 			{
 				UGameplayStatics::PlayWorldCameraShake(GetWorld(), CamShake, ActiveCamera->GetComponentLocation(), 0, 0);
@@ -332,14 +330,6 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	ShootTimer += DeltaTime;
 	JumpTimer += DeltaTime;
 	HitSoundCooldown += DeltaTime;
-
-	if (bIsBraking)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("IsBraking: true"))
-	}else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("IsBraking: false"))
-	}
 }
 
 
@@ -380,7 +370,7 @@ void APlayerShipPhysics::Forward(const float Value)
 		if (GameInstance->bRaceNotStarted) { return; }
 		
 		// Determine if there is input
-		bForwardHasInput = !(Value == 0);
+		bool bForwardHasInput = !(Value == 0);
 
 		bIsBraking = bForwardHasInput ? (Value < 0.f ? true : false) : (Speed > 1000.f ? true : false);
 
@@ -390,7 +380,7 @@ void APlayerShipPhysics::Forward(const float Value)
 		// Interpolate rotation towards target
 		if (BaseMesh)
 		{
-			//NextPitchPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 5.0f);
+			NextPitchPosition = FMath::FInterpTo(BaseMesh->GetRelativeRotation().Pitch, TargetPitch, GetWorld()->GetDeltaSeconds(), 5.0f);
 		}
 
 		if (Value)
@@ -411,7 +401,7 @@ void APlayerShipPhysics::Turn(const float Value)
 		if (GameInstance->bRaceNotStarted) { return; }
 		
 		// Determine if there is input
-		bRollHasInput = !(Value == 0);
+		bool bRollHasInput = !(Value == 0);
 
 		// Roll
 		float TargetRoll = bRollHasInput ? Value > 0 ? 5.f : -5.f : 0.f;
@@ -423,7 +413,7 @@ void APlayerShipPhysics::Turn(const float Value)
 		}
 		
 		// Yaw
-		YawMove = FMath::FInterpTo(YawMove, Value * 2.5f, GetWorld()->GetDeltaSeconds(), 5.f);
+		YawMove = FMath::FInterpTo(YawMove, Value * 2.2f, GetWorld()->GetDeltaSeconds(), 5.f);
 	}
 }
 
@@ -533,13 +523,11 @@ void APlayerShipPhysics::SpawnSandEffect(FVector HitLoc)
 	{
 		if (NS_SandSystem)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Spawned new sand system"))
 			SandSystemPtr = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_SandSystem, HitLoc, FRotator::ZeroRotator);
 		}
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Updated sand system location"))
 		SandSystemPtr->SetWorldLocation(HitLoc);
 		SandSystemPtr->SetWorldRotation(GetActorRotation());
 	}
@@ -583,59 +571,59 @@ void APlayerShipPhysics::Shoot()
 		}
 		else if (GunClickSound)
 		{
-			UGameplayStatics::PlaySound2D(GetWorld(), GunClickSound, 0.8f);
+			UGameplayStatics::PlaySound2D(GetWorld(), GunClickSound, 0.8f  * GameInstance->GlobalVolumeMultiplier);
 		}
 	}
 }
 
+void APlayerShipPhysics::DashNotifyEvent_Implementation()
+{
+}
+
 void APlayerShipPhysics::Dash()
 {
+if (bIsDashing) { return; }
+
 	if (GameInstance)
 	{
 		if (GameInstance->bRaceNotStarted) { return; }
 		
 		if (GameInstance->BoostPickup)
+		{
+			GameInstance->BoostPickup = false;
+		
+			static float CamFovChange = 15.f;
+			static float SpringArmChange = 200.f;
+
+			TargetCameraFOV += CamFovChange;
+			TargetSpringArmLength -= SpringArmChange;
+			BackSpringArm->CameraLagSpeed = 35.f;
+			BackSpringArm->CameraRotationLagSpeed = 20.f;
+			SpeedBoost = MaxSpeedBoost;
+			bIsDashing = true;
+
+			if (BoostSound)
 			{
-				if (bIsDashing)
-				{
-					return;
-				}
-			
-				GameInstance->BoostPickup = false;
-			
-				static float CamFovChange = 15.f;
-				static float SpringArmChange = 200.f;
-
-				TargetCameraFOV += CamFovChange;
-				TargetSpringArmLength -= SpringArmChange;
-				BackSpringArm->CameraLagSpeed = 35.f;
-				BackSpringArm->CameraRotationLagSpeed = 20.f;
-				SpeedBoost = MaxSpeedBoost;
-				bIsDashing = true;
-
-				if (BoostSound)
-				{
-					UGameplayStatics::PlaySound2D(GetWorld(), BoostSound, 0.5f);
-				}
-
-				FTimerHandle TimerHandle;
-				FTimerDelegate TimerDelegate;
-				// Lambda expression
-				TimerDelegate.BindLambda([&]
-					{
-						TargetCameraFOV -= CamFovChange;
-						TargetSpringArmLength += SpringArmChange;
-						BackSpringArm->CameraLagSpeed = 30.f;
-						BackSpringArm->CameraRotationLagSpeed = 15.f;
-						SpeedBoost = 1.f;
-						bIsDashing = false;
-					});
-
-				if (GameInstance)
-				{
-					GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, GameInstance->DashTimer, false);
-				}
+				UGameplayStatics::PlaySound2D(GetWorld(), BoostSound, 0.5f * GameInstance->GlobalVolumeMultiplier);
 			}
+
+			FTimerHandle TimerHandle;
+			FTimerDelegate TimerDelegate;
+			// Lambda expression
+			TimerDelegate.BindLambda([&]
+				{
+					TargetCameraFOV -= CamFovChange;
+					TargetSpringArmLength += SpringArmChange;
+					BackSpringArm->CameraLagSpeed = 30.f;
+					BackSpringArm->CameraRotationLagSpeed = 15.f;
+					SpeedBoost = 1.f;
+					bIsDashing = false;
+				});
+		
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, GameInstance->DashTimer, false);
+			
+			DashNotifyEvent();
+		}
 	}
 }
 
@@ -775,11 +763,9 @@ void APlayerShipPhysics::ChangeCameraAngle()
 
 void APlayerShipPhysics::LookBehind()
 {
-	UE_LOG(LogTemp, Warning, TEXT("LookBehind"))
 	// Swap active camera based on which is active.
 	if (BehindCamera->IsActive())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BehindCamera Active!"))
 		BehindCamera->SetActive(false);
 		ActiveCamera->SetActive(true);
 		if (ActiveCamera == BackCamera)
@@ -1026,7 +1012,6 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num) const
 
 void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    //UE_LOG(LogTemp, Warning, TEXT("Ship Overlapped with something."))
 	if (!OtherActor || OtherActor == this || !OtherComponent) { return; }
 
 	if (OtherActor->IsA(ACheckPoint::StaticClass()))
@@ -1051,11 +1036,11 @@ void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 					
 					if (GameInstance->CurrentLap_Counter <= 3)
 					{
-						UGameplayStatics::PlaySound2D(GetWorld(), NewLap_Sound, 1.f);
+						UGameplayStatics::PlaySound2D(GetWorld(), NewLap_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 					}
 					else
 					{
-						UGameplayStatics::PlaySound2D(GetWorld(), RaceWon_Sound, 1.f);
+						UGameplayStatics::PlaySound2D(GetWorld(), RaceWon_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 					}
 				}
 				else
@@ -1083,7 +1068,7 @@ void APlayerShipPhysics::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (!OtherActor || OtherActor == this) { return; }
-	
+	UE_LOG(LogTemp, Warning, TEXT("We hit something."))
 	if (HitSound1 && HitSound2 && HitSoundCooldown > 0.5f)
 	{
 		USoundBase* Sound;
@@ -1099,14 +1084,19 @@ void APlayerShipPhysics::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 			Sound = HitSound1;
 			break;
 		}
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound, Hit.ImpactPoint, 0.6f);
+		
+		if (GameInstance)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound, Hit.ImpactPoint, 0.6f * GameInstance->GlobalVolumeMultiplier);
+		}
+		
 		HitSoundCooldown = 0.f;
 	}
 
 	if (GameInstance)
 	{
 		// The amount of damage to cause to the player when they crash at x speed
-		const float Amount = FMath::Lerp(20, 100, Speed/18000.f);
+		const float Amount = FMath::Lerp(5, 30, Speed/18000.f);
 		GameInstance->AddHealth(-Amount);
 	}
 }

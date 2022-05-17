@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
+#include "Components/Slider.h"
 #include "Engine/Texture2D.h"
 
 void UMenu_Settings::NativeConstruct()
@@ -35,6 +36,8 @@ void UMenu_Settings::NativeOnInitialized()
 	HardDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::HardDisplay_Button_Clicked);
 
 	Sound_Button->OnClicked.AddDynamic(this, &UMenu_Settings::Sound_Button_Clicked);
+	
+	GlobalVolumeSlider->OnValueChanged.AddDynamic(this, &UMenu_Settings::UpdateGlobalVolume);
 
 }
 void UMenu_Settings::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
@@ -319,4 +322,16 @@ void UMenu_Settings::Sound_Button_Clicked()
 	}
 	
 	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
+}
+
+void UMenu_Settings::UpdateGlobalVolume(const float NewVolume)
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	
+	if (GameInstance)
+	{
+		FString Str = FString::FormatAsNumber(NewVolume * 100) + "%";
+		GlobalVolumeNumber->SetText(FText::FromString(Str));
+		GameInstance->GlobalVolumeMultiplier = NewVolume;
+	}
 }

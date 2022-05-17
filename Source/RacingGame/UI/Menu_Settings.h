@@ -137,4 +137,14 @@ public:
 		void Sound_Button_Clicked();
 	#pragma endregion
 
+	
+	/** Added by Marcus */
+	UPROPERTY(meta = (BindWidget))
+	class USlider* GlobalVolumeSlider;
+
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* GlobalVolumeNumber;
+
+	UFUNCTION()
+	void UpdateGlobalVolume(const float NewVolume);
 };
