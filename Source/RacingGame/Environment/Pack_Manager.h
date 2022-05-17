@@ -26,6 +26,8 @@ public:
 public:
 	UPROPERTY(EditAnywhere, Category = "Collision")
 		class UBoxComponent* BoxComponent;
+	UPROPERTY(EditAnywhere, Category = "Collision")
+		class USphereComponent* SphereComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 		class UStaticMeshComponent* MeshComponent;

@@ -5,6 +5,7 @@
 #include "../Global_Variables.h"
 #include "../Vehicles/PlayerShipPhysics.h"
 #include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -67,6 +68,8 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 	//Collide with SpaceShip
 	if (OtherActor->IsA(APlayerShipPhysics::StaticClass()))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Box Overlapped"));
+
 		UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 		if (!GameInstance) { return; }
 
@@ -147,6 +150,7 @@ void APack_Manager::Movement(float DeltaTime)
 	FVector NewLocation = GetActorLocation();
 	NewLocation.Z = NewLocation.Z + (FMath::Sin(RunningTime * BounceSpeed) * BounceHight) * DeltaTime * 150;
 	SetActorLocation(NewLocation);
+
 	RunningTime += DeltaTime;
 
 	//Rotation
