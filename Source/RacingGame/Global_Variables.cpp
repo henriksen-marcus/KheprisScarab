@@ -14,7 +14,7 @@ UGlobal_Variables::UGlobal_Variables()
 	MaxAmmo = 10;
 	CurrentAmmo = MaxAmmo;
 	TimeCount = 60;
-	TimeAdded = 15;
+	TimeAdded = 25;
 }
 
 void UGlobal_Variables::BeginPlay()

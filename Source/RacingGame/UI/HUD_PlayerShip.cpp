@@ -62,10 +62,18 @@ void UHUD_PlayerShip::SetHUDVisibility()
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
-		if (GameInstance->Health_Display == true)
-			PlayerHealth_Bar->SetVisibility(ESlateVisibility::Visible);
-		else
+		if (GameInstance->TimeAttackMode)
+		{
 			PlayerHealth_Bar->SetVisibility(ESlateVisibility::Hidden);
+		}
+		else
+		{
+			if (GameInstance->Health_Display == true)
+				PlayerHealth_Bar->SetVisibility(ESlateVisibility::Visible);
+			else
+				PlayerHealth_Bar->SetVisibility(ESlateVisibility::Hidden);
+		}
+		
 
 		if (GameInstance->Ammo_Display == true)
 			Ammo_Bar->SetVisibility(ESlateVisibility::Visible);
@@ -77,10 +85,17 @@ void UHUD_PlayerShip::SetHUDVisibility()
 		else
 			Boost_Image->SetVisibility(ESlateVisibility::Hidden);
 
-		if (GameInstance->Time_Display == true)
-			Time_Text->SetVisibility(ESlateVisibility::Visible);
+		if (GameInstance->TimeAttackMode)
+		{
+			if (GameInstance->Time_Display == true)
+				Time_Text->SetVisibility(ESlateVisibility::Visible);
+			else
+				Time_Text->SetVisibility(ESlateVisibility::Hidden);
+		}
 		else
+		{
 			Time_Text->SetVisibility(ESlateVisibility::Hidden);
+		}
 
 		if (GameInstance->Currency1_Display == true)
 		{
@@ -196,7 +211,10 @@ void UHUD_PlayerShip::SetTimer(float DeltaTime)
 		if (!GameInstance->TimeAttackMode == true) {return;}
 		if (!GameInstance->bRaceNotStarted == false) {return;}
 
-		GameInstance->DeltaTimeCount += DeltaTime / 2;
+		if (!GameInstance->Pause)
+		{
+			GameInstance->DeltaTimeCount += DeltaTime / 2;
+		}
 
 		if (GameInstance->DeltaTimeCount >= 1)
 		{
