@@ -47,7 +47,11 @@ void APack_Manager::BeginPlay()
 
 	if (GameInstance->TimeAttackMode)
 	{
-		MeshComponent->SetStaticMesh(EmptyMeshComponent);
+		MeshComponent->SetVisibility(true);
+	}
+	else
+	{
+		MeshComponent->SetVisibility(false);
 	}
 }
 
@@ -64,7 +68,7 @@ void APack_Manager::Tick(float DeltaTime)
 
 		RespawnCounter += DeltaTime;
 
-		if (RespawnCounter >= 10)
+		if (RespawnCounter >= RespawnTime)
 		{
 			RespawnCounter = 0;
 			Respawn = false;

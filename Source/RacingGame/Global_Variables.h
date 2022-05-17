@@ -29,13 +29,7 @@ public:
 public:
 
 	//Variables that needs to be saved
-	#pragma region Modes
-	UPROPERTY(BlueprintReadWrite, Category = "Variable")
-		bool Racing{};
-
-	bool TimeAttackMode{};
-	#pragma endregion
-
+	
 	#pragma region Shop_Menu
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		float CurrentHealth{};
@@ -99,7 +93,21 @@ public:
 	bool Difficulty_Normal{ true };
 	bool Difficulty_Hard{ false };
 
-	bool Sound{ true };
+	float GlobalVolumeMultiplier{ 1.f };
+	#pragma endregion
+
+
+	//---------------------------------------
+
+
+	//other variables
+	float DashTimer{2.f};
+	
+	#pragma region Modes
+	UPROPERTY(BlueprintReadWrite, Category = "Variable")
+		bool Racing{};
+
+	bool TimeAttackMode{};
 	#pragma endregion
 
 	#pragma region CheckPoints
@@ -114,28 +122,24 @@ public:
 	bool bRaceNotStarted{};
 
 	UPROPERTY(BlueprintReadWrite)
-	bool Pause{};
-
+		bool Pause{};
 	#pragma endregion
 
-	//---------------------------------------
-
-
-	//other variables
-	float DashTimer{2.f};
-	
 	#pragma region Music
 	bool MainMenu_Music{};
-
-	float Music_Volum{};
 	#pragma endregion
 
-	float GlobalVolumeMultiplier{1.f};
-	
 	UPROPERTY()
 	class APlayerShipPhysics* PlayerRef;
 
 	/** Change the health of the player by a certain delta. Clamps values and checks for zero. */
 	void AddHealth(const float Amount);
 
+
+	//----------------------------------------
+
+
+	//Fjernes
+	bool Sound{ true };
+	float Music_Volum{};
 };

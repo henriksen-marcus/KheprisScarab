@@ -52,6 +52,7 @@ public:
 public:
 	bool Respawn{};
 	float RespawnCounter{};
+	int RespawnTime{40};
 
 	float BounceSpeed;
 	float BounceHight;
