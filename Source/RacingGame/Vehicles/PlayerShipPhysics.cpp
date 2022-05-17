@@ -23,20 +23,23 @@ APlayerShipPhysics::APlayerShipPhysics()
 	// Root
 	{
 		Root = CreateDefaultSubobject<UBoxComponent>(TEXT("RootReplacement"));
-		Root->InitBoxExtent(FVector(1.f));
+		//Root->InitBoxExtent(FVector(1.f));
+		Root->InitBoxExtent(FVector(200.f, 200.f, 50.f));
 		SetRootComponent(Root);
 		Root->SetSimulatePhysics(true);
 		Root->SetEnableGravity(false);
 		Root->SetLinearDamping(0.f);
 		Root->SetAngularDamping(20.f);
-		Root->SetPhysicsMaxAngularVelocityInDegrees(200.f);
+		Root->SetPhysicsMaxAngularVelocityInDegrees(400.f);
 		Root->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		Root->SetCollisionProfileName(FName("Ship"));
+		Root->OnComponentBeginOverlap.AddDynamic(this, &APlayerShipPhysics::OnOverlapBegin);
+		Root->OnComponentHit.AddDynamic(this, &APlayerShipPhysics::OnHit);
 	}
 
 	// Collision
 	{
-		Collision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Collision"));
+		/*Collision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Collision"));
 		Collision->InitCapsuleSize(50.f, 120.f);
 		Collision->SetRelativeLocation(FVector(10.f, 0.f, 0.f));
 		Collision->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
@@ -45,12 +48,12 @@ APlayerShipPhysics::APlayerShipPhysics()
 		Collision->SetCollisionProfileName(FName("Ship")); // Collision mot working properly? Make sure there is a collision preset named "Ship".
 	
 		Collision->OnComponentBeginOverlap.AddDynamic(this, &APlayerShipPhysics::OnOverlapBegin);
-		Collision->OnComponentHit.AddDynamic(this, &APlayerShipPhysics::OnHit);
+		Collision->OnComponentHit.AddDynamic(this, &APlayerShipPhysics::OnHit);*/
 	}
 	
 	BaseMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ShipMesh"));
 	BaseMesh->SetSkeletalMesh(ConstructorHelpers::FObjectFinder<USkeletalMesh>(TEXT("SkeletalMesh'/Game/3DAssets/New_Ship/MasterShip.MasterShip'")).Object);
-	BaseMesh->SetRelativeScale3D(FVector(.3f, .3f, .3f));
+	BaseMesh->SetRelativeScale3D(FVector(.6f, .6f, .6f));
 	BaseMesh->SetupAttachment(GetRootComponent());
 
 	// SpringArm
@@ -228,7 +231,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 
 	if (bIsJumping)
 	{
-		Root->AddForce(GetActorUpVector() * Gravity * 50);
+		Root->AddForce(GetActorUpVector() * Gravity * 15);
 	}
 
 	// Engine dynamic audio
@@ -370,9 +373,9 @@ void APlayerShipPhysics::Forward(const float Value)
 		if (GameInstance->bRaceNotStarted) { return; }
 		
 		// Determine if there is input
-		bool bForwardHasInput = !(Value == 0);
+		const bool bForwardHasInput = !(Value == 0);
 
-		bIsBraking = bForwardHasInput ? (Value < 0.f ? true : false) : (Speed > 1000.f ? true : false);
+		bIsBraking = bForwardHasInput ? (Value < 0.f ? true : false) : false;
 
 		// If there is input, set rotation target to based on input value, else set target to 0
 		const float TargetPitch = bForwardHasInput ? (Value > 0.f ? -5.0f : 5.f) : 0.f;
@@ -631,12 +634,7 @@ void APlayerShipPhysics::Jump()
 {
 	if (GameInstance)
 	{
-		if (GameInstance->bRaceNotStarted) { return; }
-		
-		if (bIsJumping || JumpTimer < 2.f)
-		{
-			return;
-		}
+		if (GameInstance->bRaceNotStarted || bIsJumping || JumpTimer < 2.f) { return; }
 
 		bIsJumping = true;
 		JumpTimer = 0.f;
@@ -789,6 +787,7 @@ void APlayerShipPhysics::MovementUpdate()
 	// Local + Global gravity, added a little more force the the opposing (local) force
 	const FVector CombinedGravity = ( FVector::DownVector - (GetActorUpVector() * 1.1f) ).GetSafeNormal();
 	Root->AddForce(CombinedGravity * (Gravity));
+	//Root->AddForce(Gravity * FVector::DownVector);
 
 	// Local forwards force
 	Root->AddForce(GetActorForwardVector() * Force.X, FName(), true);
@@ -809,7 +808,7 @@ void APlayerShipPhysics::MovementUpdate()
 	Root->AddForce(-LinearVelocity * 0.85f, FName(), true);
 
 	// Makes the ship go more in it's forward direction, instead of following inertia
-	Root->SetPhysicsLinearVelocity(FMath::VInterpTo(Root->GetPhysicsLinearVelocity(), GetActorForwardVector() * Root->GetPhysicsLinearVelocity().Size(), GetWorld()->GetDeltaSeconds(), 0.9f));
+	Root->SetPhysicsLinearVelocity(FMath::VInterpTo(Root->GetPhysicsLinearVelocity(), GetActorForwardVector() * Root->GetPhysicsLinearVelocity().Size(), GetWorld()->GetDeltaSeconds(), 0.92f));
 
 	HoverRaycast();
 }
@@ -874,7 +873,6 @@ void APlayerShipPhysics::HoverRaycast()
 		}
 		
 	}
-	// End raycast
 
 	// Raycast for ground sticking
 	if (bIsOnRoad) {
@@ -892,10 +890,15 @@ void APlayerShipPhysics::HoverRaycast()
 			{
 				FVector UpVector = GetActorUpVector();
 				float Constant = Gravity / 2.f;
+				float ZVelocity = FVector::DotProduct(Root->GetPhysicsLinearVelocity(), GetActorUpVector()); // Note: This value will be negative!
+				
 				const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(FMath::Clamp(2.5f - NormalizedDistance, 0.5f, 2.5f)) * -UpVector);
-				const FVector Damping = FVector::DotProduct(Root->GetPhysicsLinearVelocity(), GetActorUpVector()) * -UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 500;
+				const FVector Damping = ZVelocity * UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 1000;
+				
 				Root->AddForce(ThrustForce);
 				Root->AddForce(Damping);
+				
+				UE_LOG(LogTemp, Warning, TEXT("DownSpeed: %f"), FVector::DotProduct(Root->GetPhysicsLinearVelocity(), GetActorUpVector()))
 			}
 		}
 	}
@@ -930,7 +933,7 @@ void APlayerShipPhysics::HoverRaycast()
 	{
 		// Interpolate ship back to upright position if we are in the air
 		FRotator CurrentRotation = GetActorRotation();
-		CurrentRotation.Pitch = FMath::FInterpTo(CurrentRotation.Pitch, -5.f, GetWorld()->GetDeltaSeconds(), 0.6f);
+		CurrentRotation.Pitch = FMath::FInterpTo(CurrentRotation.Pitch, -10.f, GetWorld()->GetDeltaSeconds(), 0.6f);
 		CurrentRotation.Roll = FMath::FInterpTo(CurrentRotation.Roll, 0.f, GetWorld()->GetDeltaSeconds(), 1.f);
 		SetActorRotation(CurrentRotation);
 		Root->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
@@ -973,7 +976,6 @@ void APlayerShipPhysics::RaycastHover()
 void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num) const
 {
 	FVector Start, CompLocation, UpVector = GetActorUpVector();
-	float Constant = Gravity/5.f;
 
 	switch (Num)
 	{
@@ -1000,13 +1002,22 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num) const
 	
 	// Get distance from thrust point to ground
 	const float NormalizedDistance = UKismetMathLibrary::Vector_Distance(Start, End) / TargetHeight;
+	
 	const float ZVelocity = FVector::DotProduct(Root->GetPhysicsLinearVelocity(), GetActorUpVector());
 
+	const float Constant = Gravity/5.f;
+
+	UE_LOG(LogTemp, Warning, TEXT("NormDist: %f"), NormalizedDistance)
+
 	// If we are close enough to the ground to give thrust
-	const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(NormalizedDistance) * UpVector);
-	const FVector Damping = ZVelocity * -UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 2000;
-	Root->AddForceAtLocation(ThrustForce, CompLocation);
-	Root->AddForceAtLocation(Damping, CompLocation);
+	if (NormalizedDistance < 1.f)
+	{
+		const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(NormalizedDistance) * UpVector);
+		const FVector Damping = ZVelocity * -UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 2000;
+		Root->AddForceAtLocation(ThrustForce, CompLocation);
+		Root->AddForceAtLocation(Damping, CompLocation);
+	}
+	
 }
 
 
