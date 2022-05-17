@@ -16,8 +16,11 @@ void UHUD_RaceStartCounter::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	UGameplayStatics::PlaySound2D(GetWorld(), Silence);
-	UGameplayStatics::PlaySound2D(GetWorld(), Track_Start);
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance) { return; }
+
+	UGameplayStatics::PlaySound2D(GetWorld(), Silence, 1.f * GameInstance->GlobalVolumeMultiplier);
+	UGameplayStatics::PlaySound2D(GetWorld(), Track_Start, 1.f * GameInstance->GlobalVolumeMultiplier);
 }
 void UHUD_RaceStartCounter::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {
@@ -46,7 +49,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			TimeCounter = 0;
 			Repetitions += 1;
 
-			UGameplayStatics::PlaySound2D(GetWorld(), Wait_Sound);
+			UGameplayStatics::PlaySound2D(GetWorld(), Wait_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
 			Image_1->SetBrushFromTexture(Red);
 		}
@@ -55,7 +58,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			TimeCounter = 0;
 			Repetitions += 1;
 
-			UGameplayStatics::PlaySound2D(GetWorld(), Wait_Sound);
+			UGameplayStatics::PlaySound2D(GetWorld(), Wait_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
 			Image_1->SetBrushFromTexture(Red);
 			Image_2->SetBrushFromTexture(Red);
@@ -65,7 +68,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			TimeCounter = 0;
 			Repetitions += 1;
 
-			UGameplayStatics::PlaySound2D(GetWorld(), Wait_Sound);
+			UGameplayStatics::PlaySound2D(GetWorld(), Wait_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 			
 			Image_1->SetBrushFromTexture(Yellow);
 			Image_2->SetBrushFromTexture(Yellow);
@@ -76,7 +79,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			TimeCounter = 0;
 			Repetitions += 1;
 
-			UGameplayStatics::PlaySound2D(GetWorld(), GO_Sound);
+			UGameplayStatics::PlaySound2D(GetWorld(), GO_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 			
 			Image_1->SetBrushFromTexture(Green);
 			Image_2->SetBrushFromTexture(Green);
@@ -88,7 +91,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			if (Hello == true)
 			{
 				Hello = false;
-				UGameplayStatics::PlaySound2D(GetWorld(), Track_Music);
+				UGameplayStatics::PlaySound2D(GetWorld(), Track_Music, 1.f * GameInstance->GlobalVolumeMultiplier);
 			}
 			
 		}

@@ -37,11 +37,10 @@ void UMenu_ModeSelect::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 void UMenu_ModeSelect::TimeAttack_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 		GameInstance->TimeAttackMode = true;
 	}
 
@@ -51,11 +50,10 @@ void UMenu_ModeSelect::TimeAttack_Button_Clicked()
 }
 void UMenu_ModeSelect::Adventure_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 		GameInstance->TimeAttackMode = false;
 	}
 
@@ -65,5 +63,9 @@ void UMenu_ModeSelect::Adventure_Button_Clicked()
 }
 void UMenu_ModeSelect::Back_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), BackSound);
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), BackSound, 1.f * GameInstance->GlobalVolumeMultiplier);
+	}
 }

@@ -126,7 +126,11 @@ void UMenu_Shop::Currency_Dispaly()
 
 void UMenu_Shop::Back_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), BackSound);
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), BackSound, 1.f * GameInstance->GlobalVolumeMultiplier);
+	}
 }
 
 void UMenu_Shop::SetHealthUpgrade_Display()
@@ -194,9 +198,9 @@ void UMenu_Shop::HealthShop_Button_Clicked()
 				if (GameInstance->Currency1 >= GameInstance->HealthUpgradeCost)
 				{
 					if (GameInstance->HealthUpgradeTier == 9)
-						UGameplayStatics::PlaySound2D(GetWorld(), LastUpgradeSound);
+						UGameplayStatics::PlaySound2D(GetWorld(), LastUpgradeSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 					else
-						UGameplayStatics::PlaySound2D(GetWorld(), UpgradeSound);
+						UGameplayStatics::PlaySound2D(GetWorld(), UpgradeSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
 					GameInstance->Currency1 -= GameInstance->HealthUpgradeCost;
 					GameInstance->HealthUpgradeTier += 1;
@@ -204,7 +208,7 @@ void UMenu_Shop::HealthShop_Button_Clicked()
 					GameInstance->MaxHealth += 1;
 				}
 				else
-					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound);
+					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound, 1.f * GameInstance->GlobalVolumeMultiplier);
 			}
 		}
 		else
@@ -216,10 +220,10 @@ void UMenu_Shop::HealthShop_Button_Clicked()
 					GameInstance->HealthActivate = true;
 					GameInstance->Currency2 -= 1;
 
-					UGameplayStatics::PlaySound2D(GetWorld(), UnlockSound);
+					UGameplayStatics::PlaySound2D(GetWorld(), UnlockSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 				}
 				else
-					UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound);
+					UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 			}
 		}
 	}
@@ -322,9 +326,9 @@ void UMenu_Shop::AmmoShop_Button_Clicked()
 				if (GameInstance->Currency1 >= GameInstance->AmmoUpgradeCost)
 				{
 					if (GameInstance->AmmoUpgradeTier == 9)
-						UGameplayStatics::PlaySound2D(GetWorld(), LastUpgradeSound);
+						UGameplayStatics::PlaySound2D(GetWorld(), LastUpgradeSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 					else
-						UGameplayStatics::PlaySound2D(GetWorld(), UpgradeSound);
+						UGameplayStatics::PlaySound2D(GetWorld(), UpgradeSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
 					GameInstance->Currency1 -= GameInstance->AmmoUpgradeCost;
 					GameInstance->AmmoUpgradeTier += 1;
@@ -332,7 +336,7 @@ void UMenu_Shop::AmmoShop_Button_Clicked()
 					GameInstance->MaxAmmo += 5;
 				}
 				else
-					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound);
+					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound, 1.f * GameInstance->GlobalVolumeMultiplier);
 			}
 		}
 		else
@@ -344,10 +348,10 @@ void UMenu_Shop::AmmoShop_Button_Clicked()
 					GameInstance->AmmoActivate = true;
 					GameInstance->Currency2 -= 1;
 
-					UGameplayStatics::PlaySound2D(GetWorld(), UnlockSound);
+					UGameplayStatics::PlaySound2D(GetWorld(), UnlockSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 				}
 				else
-					UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound);
+					UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 			}
 		}
 	}
@@ -451,9 +455,9 @@ void UMenu_Shop::BoostShop_Button_Clicked()
 				if (GameInstance->Currency1 >= GameInstance->BoostUpgradeCost)
 				{
 					if (GameInstance->BoostUpgradeTier == 9)
-						UGameplayStatics::PlaySound2D(GetWorld(), LastUpgradeSound);
+						UGameplayStatics::PlaySound2D(GetWorld(), LastUpgradeSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 					else
-						UGameplayStatics::PlaySound2D(GetWorld(), UpgradeSound);
+						UGameplayStatics::PlaySound2D(GetWorld(), UpgradeSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
 					GameInstance->Currency1 -= GameInstance->BoostUpgradeCost;
 					GameInstance->BoostUpgradeTier += 1;
@@ -461,7 +465,7 @@ void UMenu_Shop::BoostShop_Button_Clicked()
 					GameInstance->DashTimer += 0.5f;
 				}
 				else
-					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound);
+					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound, 1.f * GameInstance->GlobalVolumeMultiplier);
 			}
 		}
 		else
@@ -473,10 +477,10 @@ void UMenu_Shop::BoostShop_Button_Clicked()
 					GameInstance->BoostActivate = true;
 					GameInstance->Currency2 -= 1;
 
-					UGameplayStatics::PlaySound2D(GetWorld(), UnlockSound);
+					UGameplayStatics::PlaySound2D(GetWorld(), UnlockSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 				}
 				else
-					UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound);
+					UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 			}
 		}
 	}
@@ -580,9 +584,9 @@ void UMenu_Shop::TimeShop_Button_Clicked()
 				if (GameInstance->Currency1 >= GameInstance->TimeUpgradeCost)
 				{
 					if (GameInstance->TimeUpgradeTier == 9)
-						UGameplayStatics::PlaySound2D(GetWorld(), LastUpgradeSound);
+						UGameplayStatics::PlaySound2D(GetWorld(), LastUpgradeSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 					else
-						UGameplayStatics::PlaySound2D(GetWorld(), UpgradeSound);
+						UGameplayStatics::PlaySound2D(GetWorld(), UpgradeSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
 					GameInstance->Currency1 -= GameInstance->TimeUpgradeCost;
 					GameInstance->TimeUpgradeTier += 1;
@@ -590,7 +594,7 @@ void UMenu_Shop::TimeShop_Button_Clicked()
 					GameInstance->TimeAdded += 2;
 				}
 				else
-					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound);
+					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound, 1.f * GameInstance->GlobalVolumeMultiplier);
 			}
 		}
 		else
@@ -602,10 +606,10 @@ void UMenu_Shop::TimeShop_Button_Clicked()
 					GameInstance->TimeActivate = true;
 					GameInstance->Currency2 -= 1;
 
-					UGameplayStatics::PlaySound2D(GetWorld(), UnlockSound);
+					UGameplayStatics::PlaySound2D(GetWorld(), UnlockSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 				}
 				else
-					UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound);
+					UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 			}
 		}
 	}

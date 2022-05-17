@@ -42,22 +42,38 @@ void UMenu_Start::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 void UMenu_Start::Start_Button_Clickd()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), SelectSound);
-	/*Menu_Music_AudioComponent->SetActive(false);*/
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), SelectSound, 1.f * GameInstance->GlobalVolumeMultiplier);
+		/*Menu_Music_AudioComponent->SetActive(false);*/
+	}
 }
 void UMenu_Start::Shop_Button_Clickd()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), SelectSound);
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), SelectSound, 1.f * GameInstance->GlobalVolumeMultiplier);
+	}
 }
 void UMenu_Start::Settings_Button_Clickd()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), SelectSound);
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), SelectSound, 1.f * GameInstance->GlobalVolumeMultiplier);
+	}
 }
 void UMenu_Start::Quit_Button_Clickd()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), SelectSound);
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), SelectSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
-	TEnumAsByte<EQuitPreference::Type> Quit;
-	UKismetSystemLibrary::QuitGame(GetWorld(), 0, Quit, false);
+		TEnumAsByte<EQuitPreference::Type> Quit;
+		UKismetSystemLibrary::QuitGame(GetWorld(), 0, Quit, false);
+	}
 }
 

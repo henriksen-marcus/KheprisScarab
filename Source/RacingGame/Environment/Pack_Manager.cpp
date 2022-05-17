@@ -40,18 +40,18 @@ void APack_Manager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UGameplayStatics::PlaySound2D(GetWorld(), PackSound_Default); // Play Default Sound
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (!GameInstance) { return; }
+	
+	UGameplayStatics::PlaySound2D(GetWorld(), PackSound_Default, 1.f * GameInstance->GlobalVolumeMultiplier); // Play Default Sound
 
 	if (GameInstance->TimeAttackMode)
 	{
-		MeshComponent->SetVisibility(true);
+		MeshComponent->SetVisibility(false);
 	}
 	else
 	{
-		MeshComponent->SetVisibility(false);
+		MeshComponent->SetVisibility(true);
 	}
 }
 
@@ -61,6 +61,11 @@ void APack_Manager::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	Movement(DeltaTime);
+
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (!GameInstance) {return;}
+
+	if (GameInstance->TimeAttackMode) {return;}
 
 	if (Respawn == true)
 	{
@@ -103,7 +108,7 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (GameInstance)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), HealthPack_Sound);
+				UGameplayStatics::PlaySound2D(GetWorld(), HealthPack_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
 				GameInstance->CurrentHealth = GameInstance->MaxHealth;
 				UE_LOG(LogTemp, Warning, TEXT("Pack_Health | Max Health: %i"), GameInstance->MaxHealth);
@@ -114,7 +119,7 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (GameInstance)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), AmmoPack_Sound);
+				UGameplayStatics::PlaySound2D(GetWorld(), AmmoPack_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
 				GameInstance->CurrentAmmo = GameInstance->MaxAmmo;
 				UE_LOG(LogTemp, Warning, TEXT("AmmoPack - SUCCESS"));
@@ -124,7 +129,7 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (GameInstance)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), BoostPack_Sound, 0.2f);
+				UGameplayStatics::PlaySound2D(GetWorld(), BoostPack_Sound, 0.2f * GameInstance->GlobalVolumeMultiplier);
 
 				GameInstance->BoostPickup = true;
 				UE_LOG(LogTemp, Warning, TEXT("BoostPack - SUCCESS"));
@@ -134,7 +139,7 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (GameInstance)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), Currency1_Sound);
+				UGameplayStatics::PlaySound2D(GetWorld(), Currency1_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
 				GameInstance->Currency1 += 1;
 				UE_LOG(LogTemp, Warning, TEXT("Currency1 - SUCCESS | %dp."), GameInstance->Currency1);
@@ -144,7 +149,7 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (GameInstance)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), Currency2_Sound);
+				UGameplayStatics::PlaySound2D(GetWorld(), Currency2_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
 				GameInstance->Currency2 += 1;
 				UE_LOG(LogTemp, Warning, TEXT("Currency2 - SUCCESS | %dp."), GameInstance->Currency2);
@@ -154,14 +159,14 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			if (GameInstance)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), Time_Sound);
+				UGameplayStatics::PlaySound2D(GetWorld(), Time_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
 				GameInstance->TimeCount += GameInstance->TimeAdded;
 				UE_LOG(LogTemp, Warning, TEXT("TimePack - SUCCESS"));
 			}
 		}
 
-		UGameplayStatics::PlaySound2D(GetWorld(), PackSound_OnPlayerHit); // Play Sound
+		UGameplayStatics::PlaySound2D(GetWorld(), PackSound_OnPlayerHit, 1.f * GameInstance->GlobalVolumeMultiplier); // Play Sound
 
 		Respawn = true;
 		UE_LOG(LogTemp, Warning, TEXT("Respawn = true"));

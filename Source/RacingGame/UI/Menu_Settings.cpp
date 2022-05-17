@@ -34,8 +34,6 @@ void UMenu_Settings::NativeOnInitialized()
 	EasyDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::EasyDisplay_Button_Clicked);
 	NormalDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::NormalDisplay_Button_Clicked);
 	HardDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::HardDisplay_Button_Clicked);
-
-	Sound_Button->OnClicked.AddDynamic(this, &UMenu_Settings::Sound_Button_Clicked);
 	
 	GlobalVolumeSlider->OnValueChanged.AddDynamic(this, &UMenu_Settings::UpdateGlobalVolume);
 
@@ -121,36 +119,26 @@ void UMenu_Settings::SetBoxesSelected()
 			HardDisplay_Button_Image->SetBrushFromTexture(Box_Selected);
 		}
 		#pragma endregion
-
-		#pragma region Sound
-		if (GameInstance->Sound == true)
-		{
-			Sound_Button_Image->SetBrushFromTexture(Box_Selected);
-			Sound_Text->SetText(FText::FromString("On"));
-		}
-		else
-		{
-			Sound_Button_Image->SetBrushFromTexture(Box_Unselected);
-			Sound_Text->SetText(FText::FromString("Off"));
-		}
-		#pragma endregion
-
 	}
 }
 
 void UMenu_Settings::Back_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), BackSound);
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (GameInstance)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), BackSound, 1.f * GameInstance->GlobalVolumeMultiplier);
+	}
 }
 
 //Edited to global variable
 void UMenu_Settings::HealthDisplay_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+
 		if (GameInstance->Health_Display == true)
 			GameInstance->Health_Display = false;
 		else
@@ -159,11 +147,11 @@ void UMenu_Settings::HealthDisplay_Button_Clicked()
 }
 void UMenu_Settings::AmmoDisplay_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+
 		if (GameInstance->Ammo_Display == true)
 			GameInstance->Ammo_Display = false;
 		else
@@ -172,11 +160,11 @@ void UMenu_Settings::AmmoDisplay_Button_Clicked()
 }
 void UMenu_Settings::BoostDisplay_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+
 		if (GameInstance->Boost_Display == true)
 			GameInstance->Boost_Display = false;
 		else
@@ -185,11 +173,11 @@ void UMenu_Settings::BoostDisplay_Button_Clicked()
 }
 void UMenu_Settings::TimeDisplay_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+
 		if (GameInstance->Time_Display == true)
 			GameInstance->Time_Display = false;
 		else
@@ -198,11 +186,11 @@ void UMenu_Settings::TimeDisplay_Button_Clicked()
 }
 void UMenu_Settings::Currency1Display_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+
 		if (GameInstance->Currency1_Display == true)
 			GameInstance->Currency1_Display = false;
 		else
@@ -211,11 +199,11 @@ void UMenu_Settings::Currency1Display_Button_Clicked()
 }
 void UMenu_Settings::Currency2Display_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+
 		if (GameInstance->Currency2_Display == true)
 			GameInstance->Currency2_Display = false;
 		else
@@ -224,11 +212,11 @@ void UMenu_Settings::Currency2Display_Button_Clicked()
 }
 void UMenu_Settings::SpeedDisplay_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+
 		if (GameInstance->Speed_Display == true)
 			GameInstance->Speed_Display = false;
 		else
@@ -237,11 +225,11 @@ void UMenu_Settings::SpeedDisplay_Button_Clicked()
 }
 void UMenu_Settings::RealTimeDisplay_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+
 		if (GameInstance->RealTimer_Display == true)
 			GameInstance->RealTimer_Display = false;
 		else
@@ -250,11 +238,11 @@ void UMenu_Settings::RealTimeDisplay_Button_Clicked()
 }
 void UMenu_Settings::LapsDisplay_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+
 		if (GameInstance->Laps_Display == true)
 			GameInstance->Laps_Display = false;
 		else
@@ -264,11 +252,11 @@ void UMenu_Settings::LapsDisplay_Button_Clicked()
 
 void UMenu_Settings::EasyDisplay_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+
 		GameInstance->Difficulty_Easy = true;
 		GameInstance->Difficulty_Normal = false;
 		GameInstance->Difficulty_Hard = false;
@@ -278,11 +266,11 @@ void UMenu_Settings::EasyDisplay_Button_Clicked()
 }
 void UMenu_Settings::NormalDisplay_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+
 		GameInstance->Difficulty_Easy = false;
 		GameInstance->Difficulty_Normal = true;
 		GameInstance->Difficulty_Hard = false;
@@ -292,36 +280,17 @@ void UMenu_Settings::NormalDisplay_Button_Clicked()
 }
 void UMenu_Settings::HardDisplay_Button_Clicked()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
-
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (GameInstance)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+
 		GameInstance->Difficulty_Easy = false;
 		GameInstance->Difficulty_Normal = false;
 		GameInstance->Difficulty_Hard = true;
 
 		GameInstance->TimeCount = 45;
 	}
-}
-
-void UMenu_Settings::Sound_Button_Clicked()
-{
-	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
-	if (GameInstance)
-	{
-		if (GameInstance->Sound == true)
-		{
-			GameInstance->Sound = false;
-
-		}
-		else
-		{
-			GameInstance->Sound = true;
-		}
-	}
-	
-	UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound);
 }
 
 void UMenu_Settings::UpdateGlobalVolume(const float NewVolume)

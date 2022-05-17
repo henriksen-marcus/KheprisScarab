@@ -124,19 +124,6 @@ public:
 	UFUNCTION()
 		void HardDisplay_Button_Clicked();
 	#pragma endregion
-
-	#pragma region Sound
-	UPROPERTY(meta = (BindWidget))
-		class UButton* Sound_Button;
-	UPROPERTY(meta = (BindWidget))
-		class UImage* Sound_Button_Image;
-	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* Sound_Text;
-
-	UFUNCTION()
-		void Sound_Button_Clicked();
-	#pragma endregion
-
 	
 	/** Added by Marcus */
 	UPROPERTY(meta = (BindWidget))

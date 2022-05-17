@@ -196,7 +196,7 @@ void UHUD_PlayerShip::SetTimer(float DeltaTime)
 		if (!GameInstance->TimeAttackMode == true) {return;}
 		if (!GameInstance->bRaceNotStarted == false) {return;}
 
-		GameInstance->DeltaTimeCount += DeltaTime;
+		GameInstance->DeltaTimeCount += DeltaTime / 2;
 
 		if (GameInstance->DeltaTimeCount >= 1)
 		{
@@ -341,7 +341,7 @@ void UHUD_PlayerShip::SetTimeDisplay_Timer(float DeltaTime)
 
 		if (GameInstance->NewCheckPoint == true)
 		{
-			UGameplayStatics::PlaySound2D(GetWorld(), CheckPointSound, 1.f);
+			UGameplayStatics::PlaySound2D(GetWorld(), CheckPointSound, 1.f * GameInstance->GlobalVolumeMultiplier);
 
 			Minutes_Temp = Minutes;
 			Secounds_Temp = Secounds;
