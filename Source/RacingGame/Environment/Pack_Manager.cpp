@@ -57,6 +57,24 @@ void APack_Manager::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	Movement(DeltaTime);
+
+	if (Respawn == true)
+	{
+		MeshComponent->SetVisibility(false);
+
+		RespawnCounter += DeltaTime;
+
+		if (RespawnCounter >= 10)
+		{
+			RespawnCounter = 0;
+			Respawn = false;
+			UE_LOG(LogTemp, Warning, TEXT("Respawn = false"));
+		}
+	}
+	else
+	{
+		MeshComponent->SetVisibility(true);
+	}
 }
 
 
@@ -73,74 +91,78 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 		if (!GameInstance) { return; }
 
-		if (!GameInstance->TimeAttackMode)
+		if (GameInstance->TimeAttackMode) {return;}
+		
+		if (Respawn) {return;}
+
+		if (HealthPack)
 		{
-			if (HealthPack)
+			if (GameInstance)
 			{
-				if (GameInstance)
-				{
-					UGameplayStatics::PlaySound2D(GetWorld(), HealthPack_Sound);
+				UGameplayStatics::PlaySound2D(GetWorld(), HealthPack_Sound);
 
-					GameInstance->CurrentHealth = GameInstance->MaxHealth;
-					UE_LOG(LogTemp, Warning, TEXT("Pack_Health | Max Health: %i"), GameInstance->MaxHealth);
-					UE_LOG(LogTemp, Warning, TEXT("HealthPack - SUCCESS"));
-				}
+				GameInstance->CurrentHealth = GameInstance->MaxHealth;
+				UE_LOG(LogTemp, Warning, TEXT("Pack_Health | Max Health: %i"), GameInstance->MaxHealth);
+				UE_LOG(LogTemp, Warning, TEXT("HealthPack - SUCCESS"));
 			}
-			else if (AmmoPack)
-			{
-				if (GameInstance)
-				{
-					UGameplayStatics::PlaySound2D(GetWorld(), AmmoPack_Sound);
-
-					GameInstance->CurrentAmmo = GameInstance->MaxAmmo;
-					UE_LOG(LogTemp, Warning, TEXT("AmmoPack - SUCCESS"));
-				}
-			}
-			else if (BoostPack)
-			{
-				if (GameInstance)
-				{
-					UGameplayStatics::PlaySound2D(GetWorld(), BoostPack_Sound, 0.2f);
-
-					GameInstance->BoostPickup = true;
-					UE_LOG(LogTemp, Warning, TEXT("BoostPack - SUCCESS"));
-				}
-			}
-			else if (Currency1)
-			{
-				if (GameInstance)
-				{
-					UGameplayStatics::PlaySound2D(GetWorld(), Currency1_Sound);
-
-					GameInstance->Currency1 += 1;
-					UE_LOG(LogTemp, Warning, TEXT("Currency1 - SUCCESS | %dp."), GameInstance->Currency1);
-				}
-			}
-			else if (Currency2)
-			{
-				if (GameInstance)
-				{
-					UGameplayStatics::PlaySound2D(GetWorld(), Currency2_Sound);
-
-					GameInstance->Currency2 += 1;
-					UE_LOG(LogTemp, Warning, TEXT("Currency2 - SUCCESS | %dp."), GameInstance->Currency2);
-				}
-			}
-			else if (TimePack)
-			{
-				if (GameInstance)
-				{
-					UGameplayStatics::PlaySound2D(GetWorld(), Time_Sound);
-
-					GameInstance->TimeCount += GameInstance->TimeAdded;
-					UE_LOG(LogTemp, Warning, TEXT("TimePack - SUCCESS"));
-				}
-			}
-
-			UGameplayStatics::PlaySound2D(GetWorld(), PackSound_OnPlayerHit); // Play Sound
-
-			this->Destroy();
 		}
+		else if (AmmoPack)
+		{
+			if (GameInstance)
+			{
+				UGameplayStatics::PlaySound2D(GetWorld(), AmmoPack_Sound);
+
+				GameInstance->CurrentAmmo = GameInstance->MaxAmmo;
+				UE_LOG(LogTemp, Warning, TEXT("AmmoPack - SUCCESS"));
+			}
+		}
+		else if (BoostPack)
+		{
+			if (GameInstance)
+			{
+				UGameplayStatics::PlaySound2D(GetWorld(), BoostPack_Sound, 0.2f);
+
+				GameInstance->BoostPickup = true;
+				UE_LOG(LogTemp, Warning, TEXT("BoostPack - SUCCESS"));
+			}
+		}
+		else if (Currency1)
+		{
+			if (GameInstance)
+			{
+				UGameplayStatics::PlaySound2D(GetWorld(), Currency1_Sound);
+
+				GameInstance->Currency1 += 1;
+				UE_LOG(LogTemp, Warning, TEXT("Currency1 - SUCCESS | %dp."), GameInstance->Currency1);
+			}
+		}
+		else if (Currency2)
+		{
+			if (GameInstance)
+			{
+				UGameplayStatics::PlaySound2D(GetWorld(), Currency2_Sound);
+
+				GameInstance->Currency2 += 1;
+				UE_LOG(LogTemp, Warning, TEXT("Currency2 - SUCCESS | %dp."), GameInstance->Currency2);
+			}
+		}
+		else if (TimePack)
+		{
+			if (GameInstance)
+			{
+				UGameplayStatics::PlaySound2D(GetWorld(), Time_Sound);
+
+				GameInstance->TimeCount += GameInstance->TimeAdded;
+				UE_LOG(LogTemp, Warning, TEXT("TimePack - SUCCESS"));
+			}
+		}
+
+		UGameplayStatics::PlaySound2D(GetWorld(), PackSound_OnPlayerHit); // Play Sound
+
+		Respawn = true;
+		UE_LOG(LogTemp, Warning, TEXT("Respawn = true"));
+
+		//this->Destroy();
 	}
 }
 

@@ -50,6 +50,9 @@ public:
 		void Movement(float DeltaTime);
 
 public:
+	bool Respawn{};
+	float RespawnCounter{};
+
 	float BounceSpeed;
 	float BounceHight;
 	float RotationSpeed;

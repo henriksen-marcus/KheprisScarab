@@ -27,6 +27,8 @@ public:
 	virtual void Tick(float DeltaTime);
 
 public:
+
+	//Variables that needs to be saved
 	#pragma region Modes
 	UPROPERTY(BlueprintReadWrite, Category = "Variable")
 		bool Racing{};
@@ -35,8 +37,6 @@ public:
 	#pragma endregion
 
 	#pragma region Shop_Menu
-	float DashTimer{2.f};
-
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		float CurrentHealth{};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
@@ -69,45 +69,45 @@ public:
 
 	bool HealthActivate{};
 	int HealthUpgradeTier{};
-	int HealthUpgradeCost{2};
+	int HealthUpgradeCost{ 2 };
 
 	bool AmmoActivate{};
 	int AmmoUpgradeTier{};
-	float AmmoUpgradeCost{2};
+	float AmmoUpgradeCost{ 2 };
 
 	bool BoostActivate{};
 	int BoostUpgradeTier{};
-	float BoostUpgradeCost{2};
+	float BoostUpgradeCost{ 2 };
 
 	bool TimeActivate{};
 	int TimeUpgradeTier{};
-	float TimeUpgradeCost{2};
+	float TimeUpgradeCost{ 2 };
 	#pragma endregion
 
 	#pragma region Settings_Menu
-	bool Health_Display{true};
-	bool Boost_Display{true};
-	bool Ammo_Display{true};
-	bool Time_Display{true};
-	bool Currency1_Display{true};
-	bool Currency2_Display{true};
-	bool Speed_Display{true};
-	bool RealTimer_Display{true};
-	bool Laps_Display{true};
+	bool Health_Display{ true };
+	bool Boost_Display{ true };
+	bool Ammo_Display{ true };
+	bool Time_Display{ true };
+	bool Currency1_Display{ true };
+	bool Currency2_Display{ true };
+	bool Speed_Display{ true };
+	bool RealTimer_Display{ true };
+	bool Laps_Display{ true };
 
-	bool Difficulty_Easy{false};
-	bool Difficulty_Normal{true};
-	bool Difficulty_Hard{false};
+	bool Difficulty_Easy{ false };
+	bool Difficulty_Normal{ true };
+	bool Difficulty_Hard{ false };
 
-	bool Sound{true};
+	bool Sound{ true };
 	#pragma endregion
 
 	#pragma region CheckPoints
-	bool CheckPoint_Connected{false};
-	bool NewCheckPoint{false};
+	bool CheckPoint_Connected{ false };
+	bool NewCheckPoint{ false };
 	int PlayerCheckpointNumber{};
-	int CurrentLap_Counter{1};
-	int MaxLap_Counter{3};
+	int CurrentLap_Counter{ 1 };
+	int MaxLap_Counter{ 3 };
 	#pragma endregion
 
 	#pragma region StartRace
@@ -115,11 +115,17 @@ public:
 	bool Pause{};
 	#pragma endregion
 
+	//---------------------------------------
+
+
+	//other variables
+	float DashTimer{2.f};
+	
 	#pragma region Music
 	bool MainMenu_Music{};
 
 	float Music_Volum{};
-#pragma endregion
+	#pragma endregion
 
 	float GlobalVolumeMultiplier{1.f};
 	
