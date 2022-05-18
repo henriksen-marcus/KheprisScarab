@@ -43,10 +43,6 @@ void UMenu_ModeSelect::TimeAttack_Button_Clicked()
 		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 		GameInstance->TimeAttackMode = true;
 	}
-
-	//Change Level
-	FName NewLevel = FName("Master_Map");
-	UGameplayStatics::OpenLevel(GetWorld(), NewLevel);
 }
 void UMenu_ModeSelect::Adventure_Button_Clicked()
 {
@@ -56,11 +52,8 @@ void UMenu_ModeSelect::Adventure_Button_Clicked()
 		UGameplayStatics::PlaySound2D(GetWorld(), Select_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
 		GameInstance->TimeAttackMode = false;
 	}
-
-	//Change Level
-	FName NewLevel = FName("Master_Map");
-	UGameplayStatics::OpenLevel(GetWorld(), NewLevel);
 }
+
 void UMenu_ModeSelect::Back_Button_Clicked()
 {
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());

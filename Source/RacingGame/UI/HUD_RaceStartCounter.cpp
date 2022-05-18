@@ -6,6 +6,7 @@
 #include "Components/Image.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/Texture2D.h"
+#include "../RacingGameGameModeBase.h"
 
 
 void UHUD_RaceStartCounter::NativeConstruct()
@@ -85,7 +86,12 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			Image_2->SetBrushFromTexture(Green);
 			Image_3->SetBrushFromTexture(Green);
 
-			GameInstance->bRaceNotStarted = false;
+			ARacingGameGameModeBase* GamemodeBase = Cast<ARacingGameGameModeBase>(GetWorld()->GetAuthGameMode());
+			
+			if (GamemodeBase)
+			{
+				GamemodeBase->StartRace();
+			}
 
 			bool Hello = true;
 			if (Hello == true)

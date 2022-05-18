@@ -134,4 +134,7 @@ public:
 
 	UFUNCTION()
 	void UpdateGlobalVolume(const float NewVolume);
+
+	UPROPERTY()
+	class UGlobal_Variables* GlobalVars; 
 };

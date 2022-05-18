@@ -10,6 +10,7 @@
 #include "Components/Image.h"
 #include "Components/Slider.h"
 #include "Engine/Texture2D.h"
+#include "RacingGame/Global_Variables.h"
 
 void UMenu_Settings::NativeConstruct()
 {
@@ -36,6 +37,17 @@ void UMenu_Settings::NativeOnInitialized()
 	HardDisplay_Button->OnClicked.AddDynamic(this, &UMenu_Settings::HardDisplay_Button_Clicked);
 	
 	GlobalVolumeSlider->OnValueChanged.AddDynamic(this, &UMenu_Settings::UpdateGlobalVolume);
+
+
+	GlobalVars = Cast<UGlobal_Variables>(GetGameInstance());
+	
+	if (GlobalVars)
+	{
+		GlobalVolumeSlider->SetValue(GlobalVars->GlobalVolumeMultiplier);
+		const FString Str = FString::FormatAsNumber(GlobalVars->GlobalVolumeMultiplier * 100) + "%";
+		GlobalVolumeNumber->SetText(FText::FromString(Str));
+	}
+	
 
 }
 void UMenu_Settings::NativeTick(const FGeometry& MyGeometry, float DeltaTime)

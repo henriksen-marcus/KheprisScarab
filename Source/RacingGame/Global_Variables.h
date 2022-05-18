@@ -95,6 +95,8 @@ public:
 	bool Difficulty_Normal{ true };
 	bool Difficulty_Hard{ false };
 
+
+	UPROPERTY(BlueprintReadWrite)
 	float GlobalVolumeMultiplier{ 1.f };
 	#pragma endregion
 
@@ -146,6 +148,25 @@ public:
 
 	/** Change the health of the player by a certain delta. Clamps values and checks for zero. */
 	void AddHealth(const float Amount);
+
+	UFUNCTION(BlueprintCallable)
+	void ChangeLevel();
+
+	UFUNCTION()
+	void MapLoadCompleted();
+
+	enum EGhostDifficulty : uint8
+	{
+		Player,
+		Gold,
+		Silver,
+		Bronze
+	};
+
+	EGhostDifficulty GhostDifficulty{};
+
+	UPROPERTY(BlueprintReadWrite)
+	UUserWidget* PauseScreenRef;
 
 
 	//----------------------------------------

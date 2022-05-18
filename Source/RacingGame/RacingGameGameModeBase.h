@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Global_Variables.h"
 #include "Environment/CheckPoint.h"
 #include "GameFramework/GameModeBase.h"
 #include "RacingGameGameModeBase.generated.h"
@@ -43,12 +44,13 @@ public:
 
 	FTimerHandle RecordingTimerHandle;
 
-	float TimeStart{};
-
 	FString LastSaveDate{};
 
 	UPROPERTY()
 	class UGlobal_Variables* GameInstance;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AGhostImageShip> GhostShipClass;
 
 	UFUNCTION(BlueprintCallable)
 	void StartRecording();
@@ -58,14 +60,19 @@ public:
 
 	UFUNCTION()
 	void RecordTick();
+	
+	bool LoadGameState();
 
+	/** Loads a ghost of x difficulty into the memory. */
+	bool LoadGhost(int32 Difficulty);
+	
+	/** Loads and spawns a ghost of x difficulty. */
 	UFUNCTION(BlueprintCallable)
-	bool SpawnGhost();
-
-	UFUNCTION(BlueprintCallable)
-	void UnloadCompleted();
+	bool SpawnGhost(int32 Difficulty);
 
 	bool SaveGame(ESaveType SaveType);
 
-	bool LoadGame(ESaveType SaveType);
+	void StartRace();
+
+	void ChangeLevel();
 };

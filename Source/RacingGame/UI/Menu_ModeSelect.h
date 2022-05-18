@@ -42,7 +42,4 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Music")
 		USoundBase* Menu_Music;
-
-
-
 };

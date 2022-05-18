@@ -47,3 +47,27 @@ void UGlobal_Variables::AddHealth(const float Amount)
 		}
 	}
 }
+
+void UGlobal_Variables::ChangeLevel()
+{
+	//UGameplayStatics::OpenLevel(GetWorld(), NewLevel);
+	/**
+	 * The point of latent actions are that they can take more than one frame to execute and then will trigger a function when finished.
+	 * Fill out the struct:
+	 */
+
+	/*UE_LOG(LogTemp, Warning, TEXT("Starting level load!"))
+	
+	FLatentActionInfo ActionInfo;
+	ActionInfo.CallbackTarget = this;
+	ActionInfo.ExecutionFunction = FName("MapLoadCompleted");
+	ActionInfo.Linkage = 0;
+	ActionInfo.UUID = 0;
+	UGameplayStatics::LoadStreamLevel(GetWorld(), FName("Master_Map"), true, true, ActionInfo);*/
+	
+}
+
+void UGlobal_Variables::MapLoadCompleted()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Level Load Completed, mvh. GameInstance"));
+}

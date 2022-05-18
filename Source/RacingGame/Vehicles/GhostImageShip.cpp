@@ -2,7 +2,11 @@
 
 
 #include "GhostImageShip.h"
-#include "Materials/MaterialInstanceDynamic.h"
+#include "Components/WidgetComponent.h"
+#include "RacingGame/Global_Variables.h"
+#include "../Global_Variables.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "PlayerShipPhysics.h"
 
 AGhostImageShip::AGhostImageShip()
 {
@@ -15,38 +19,39 @@ AGhostImageShip::AGhostImageShip()
 	Root->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Root->SetCollisionProfileName(FName("NoCollision"));
 	
-	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShipMesh"));
-	BaseMesh->SetStaticMesh(ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/3DAssets/Characters/Spaceship/spaceship.spaceship'")).Object);
-	BaseMesh->SetRelativeScale3D(FVector(.3f, .3f, .3f));
+	BaseMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ShipMesh"));
+	BaseMesh->SetSkeletalMesh(ConstructorHelpers::FObjectFinder<USkeletalMesh>(TEXT("SkeletalMesh'/Game/3DAssets/New_Ship/MasterShip.MasterShip'")).Object);
+	BaseMesh->SetRelativeScale3D(FVector(.6f, .6f, .6f));
 	BaseMesh->SetupAttachment(GetRootComponent());
 	BaseMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BaseMesh->SetCollisionProfileName(FName("NoCollision"));
-	BaseMesh->SetMaterial(0, ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT("Material'/Game/3DAssets/Characters/Spaceship/M_PlayerShip_TransLucent.M_PlayerShip_TransLucent'")).Object);
-
 	
+	//BaseMesh->SetMaterial(0, ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT("Material'/Game/3DAssets/New_Ship/TMaterials/Ship_2.Ship_2'")).Object);
+	//BaseMesh->SetMaterial(1, ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT("Material'/Game/3DAssets/New_Ship/TMaterials/windows_2.windows_2'")).Object);
+	//BaseMesh->SetMaterial(2, ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT("Material'/Game/3DAssets/New_Ship/TMaterials/Black_2.Black_2'")).Object);
 
-	
+	WidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComp"));
+	WidgetComp->SetRelativeLocation(FVector(0.f, 0.f, 150.f));
+	WidgetComp->SetDrawAtDesiredSize(false);
+	WidgetComp->SetupAttachment(GetRootComponent());
 }
 
 void AGhostImageShip::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Make ghost ship translucent - didn't work
-	/*UMaterialInstanceDynamic* NewMaterial = UMaterialInstanceDynamic::Create(BaseMesh->GetMaterial(0), NULL);
-	TEnumAsByte<EBlendMode> MyEnum = EBlendMode::BLEND_Translucent;
-	NewMaterial->BlendMode = MyEnum;
-	NewMaterial->SetScalarParameterValue(FName("OpacityVar"), 0.25f);
-	NewMaterial->TwoSided = true;
-
-	BaseMesh->SetMaterial(0, NewMaterial);*/
+	PlayerRef = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 }
 
 void AGhostImageShip::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//if (bPlayback) { MovementUpdate(); }
+	if (PlayerRef && WidgetComp)
+	{
+		WidgetComp->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), PlayerRef->GetActorLocation()));
+	}
+	
 }
 
 void AGhostImageShip::MovementUpdate()
@@ -93,5 +98,15 @@ void AGhostImageShip::StopPlayback()
 
 	bPlayback = false;
 	
+}
+
+void AGhostImageShip::PausePlayback() const
+{
+	GetWorld()->GetTimerManager().PauseTimer(PlayBackTimerHandle);
+}
+
+void AGhostImageShip::ResumePlayback() const
+{
+	GetWorld()->GetTimerManager().UnPauseTimer(PlayBackTimerHandle);
 }
 

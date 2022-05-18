@@ -2,7 +2,6 @@
 
 
 #include "RacingGameGameModeBase.h"
-#include "Global_Variables.h"
 #include "Other/GhostImageSaveGame.h"
 #include "Vehicles/GhostImageShip.h"
 #include "Vehicles/PlayerShipPhysics.h"
@@ -26,18 +25,23 @@ void ARacingGameGameModeBase::BeginPlay()
 
 	GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	
-	LoadGame(GameState);
-	/**
-	 * The point of latent actions are that they can take more than one frame to execute and then will trigger a function when finished.
-	 * Fill out the struct
-	 */
-	/*TimeStart = GetWorld()->TimeSeconds;
-	FLatentActionInfo Info;
-	Info.CallbackTarget = this;
-	Info.ExecutionFunction = FName("UnloadCompleted");
-	Info.Linkage = 0;
-	Info.UUID = 0;
-	UGameplayStatics::UnloadStreamLevel(GetWorld(), FName("Main"), Info, false);*/
+	LoadGameState();
+
+	// Ghost
+	if (GameInstance)
+	{
+		if (GameInstance->TimeAttackMode)
+		{
+			if (SpawnGhost(GameInstance->GhostDifficulty))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Ghost spawned"))
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Ghost could not spawn"))
+			}
+		}
+	}
 }
 
 
@@ -148,93 +152,97 @@ bool ARacingGameGameModeBase::SaveGame(ESaveType SaveType)
 	return false;
 }
 
-bool ARacingGameGameModeBase::LoadGame(ESaveType SaveType)
+bool ARacingGameGameModeBase::LoadGameState()
 {
-	switch (SaveType)
+	// Load the entire game
+	if (!GameInstance)
 	{
-	case GameState:
-		{
-			// Load the entire game
-			if (!GameInstance)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Could not get UGlobalVariables class object. Returning."))
-				return false;
-			}
-
-			if (!UGameplayStatics::DoesSaveGameExist(TEXT("GameState"), 0)) { return false; }
-
-			UGlobal_Variables* GV = GameInstance;
-			UGameInstanceSaveGame* SGI = Cast<UGameInstanceSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("GameState"), 0));
-
-			if (!SGI) { return false; }
-		
-			GV->CurrentHealth=SGI->CurrentHealth;
-			GV->MaxHealth= SGI->MaxHealth;
-			GV->MaxAmmo= SGI->MaxAmmo;
-			GV->CurrentAmmo= SGI->CurrentAmmo;
-			GV->AmmoPercentage= SGI->AmmoPercentage;
-			GV->Currency1= SGI->Currency1;
-			GV->Currency2= SGI->Currency2;
-			GV->BoostPickup= SGI->BoostPickup;
-			GV->MaxBoost= SGI->MaxBoost;
-			GV->TimeCount= SGI->TimeCount;
-			GV->TimeAdded= SGI->TimeAdded;
-			GV->DeltaTimeCount= SGI->DeltaTimeCount;
-			GV->HealthActivate= SGI->HealthActivate;
-			GV->HealthUpgradeTier= SGI->HealthUpgradeTier;
-			GV->HealthUpgradeCost= SGI->HealthUpgradeCost;
-			GV->AmmoActivate= SGI->AmmoActivate;
-			GV->AmmoUpgradeTier= SGI->AmmoUpgradeTier;
-			GV->AmmoUpgradeCost= SGI->AmmoUpgradeCost;
-			GV->BoostActivate= SGI->BoostActivate;
-			GV->BoostUpgradeTier= SGI->BoostUpgradeTier;
-			GV->BoostUpgradeCost= SGI->BoostUpgradeCost;
-			GV->TimeActivate= SGI->TimeActivate;
-			GV->TimeUpgradeTier= SGI->TimeUpgradeTier;
-			GV->TimeUpgradeCost= SGI->TimeUpgradeCost;
-			GV->Health_Display= SGI->Health_Display;
-			GV->Boost_Display= SGI->Boost_Display;
-			GV->Ammo_Display= SGI->Ammo_Display;
-			GV->Time_Display= SGI->Time_Display;
-			GV->Currency1_Display= SGI->Currency1_Display;
-			GV->Currency2_Display= SGI->Currency2_Display;
-			GV->Speed_Display= SGI->Speed_Display;
-			GV->RealTimer_Display= SGI->RealTimer_Display;
-			GV->Laps_Display= SGI->Laps_Display;
-			GV->Difficulty_Easy= SGI->Difficulty_Easy;
-			GV->Difficulty_Normal= SGI->Difficulty_Normal;
-			GV->Difficulty_Hard= SGI->Difficulty_Hard;
-			GV->GlobalVolumeMultiplier= SGI->GlobalVolumeMultiplier;
-		
-			return true;
-		}
-		break;
-	case GhostImage:
-		{
-			//Create an instance of the save-game class
-
-			if (!UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 0)) { return false; }
-		
-			UGhostImageSaveGame* SaveGameInstance1;
-			SaveGameInstance1 = Cast<UGhostImageSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("GhostSave"), 0));
-			if (SaveGameInstance1)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("SaveGameInstance in loadgame is valid. LocationArr size: %d  %s"), SaveGameInstance1->LocationArr.Num(), *SaveGameInstance1->SaveName)
-				LocationArr = SaveGameInstance1->LocationArr;
-				RotationArr = SaveGameInstance1->RotationArr;
-				return true;
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("LoadGame failed."))
-			}
-		}
-		break;
-	default:
+		UE_LOG(LogTemp, Warning, TEXT("Could not get UGlobalVariables class object. Returning."))
 		return false;
 	}
+
+	if (!UGameplayStatics::DoesSaveGameExist(TEXT("GameState"), 0)) { return false; }
+
+	UGlobal_Variables* GV = GameInstance;
+	UGameInstanceSaveGame* SGI = Cast<UGameInstanceSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("GameState"), 0));
+
+	if (!SGI) { return false; }
+
+	GV->CurrentHealth=SGI->CurrentHealth;
+	GV->MaxHealth= SGI->MaxHealth;
+	GV->MaxAmmo= SGI->MaxAmmo;
+	GV->CurrentAmmo= SGI->CurrentAmmo;
+	GV->AmmoPercentage= SGI->AmmoPercentage;
+	GV->Currency1= SGI->Currency1;
+	GV->Currency2= SGI->Currency2;
+	GV->BoostPickup= SGI->BoostPickup;
+	GV->MaxBoost= SGI->MaxBoost;
+	GV->TimeCount= SGI->TimeCount;
+	GV->TimeAdded= SGI->TimeAdded;
+	GV->DeltaTimeCount= SGI->DeltaTimeCount;
+	GV->HealthActivate= SGI->HealthActivate;
+	GV->HealthUpgradeTier= SGI->HealthUpgradeTier;
+	GV->HealthUpgradeCost= SGI->HealthUpgradeCost;
+	GV->AmmoActivate= SGI->AmmoActivate;
+	GV->AmmoUpgradeTier= SGI->AmmoUpgradeTier;
+	GV->AmmoUpgradeCost= SGI->AmmoUpgradeCost;
+	GV->BoostActivate= SGI->BoostActivate;
+	GV->BoostUpgradeTier= SGI->BoostUpgradeTier;
+	GV->BoostUpgradeCost= SGI->BoostUpgradeCost;
+	GV->TimeActivate= SGI->TimeActivate;
+	GV->TimeUpgradeTier= SGI->TimeUpgradeTier;
+	GV->TimeUpgradeCost= SGI->TimeUpgradeCost;
+	GV->Health_Display= SGI->Health_Display;
+	GV->Boost_Display= SGI->Boost_Display;
+	GV->Ammo_Display= SGI->Ammo_Display;
+	GV->Time_Display= SGI->Time_Display;
+	GV->Currency1_Display= SGI->Currency1_Display;
+	GV->Currency2_Display= SGI->Currency2_Display;
+	GV->Speed_Display= SGI->Speed_Display;
+	GV->RealTimer_Display= SGI->RealTimer_Display;
+	GV->Laps_Display= SGI->Laps_Display;
+	GV->Difficulty_Easy= SGI->Difficulty_Easy;
+	GV->Difficulty_Normal= SGI->Difficulty_Normal;
+	GV->Difficulty_Hard= SGI->Difficulty_Hard;
+	GV->GlobalVolumeMultiplier= SGI->GlobalVolumeMultiplier;
+	return true;
+}
+
+bool ARacingGameGameModeBase::LoadGhost(int32 Difficulty)
+{
+	//Create an instance of the save-game class
+
+	if (!UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), Difficulty)) { return false; }
+		
+	UGhostImageSaveGame* SaveGameInstance;
+	SaveGameInstance = Cast<UGhostImageSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("GhostSave"), Difficulty));
+	if (SaveGameInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SaveGameInstance in loadgame is valid. LocationArr size: %d  %s"), SaveGameInstance->LocationArr.Num(), *SaveGameInstance->SaveName)
+		LocationArr = SaveGameInstance->LocationArr;
+		RotationArr = SaveGameInstance->RotationArr;
+		return true;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LoadGame failed."))
+		return false;
+	}
+}
+
+void ARacingGameGameModeBase::StartRace()
+{
+	// Start race
+	if (GameInstance)
+	{
+		GameInstance->bRaceNotStarted = false;
+	}
 	
-	return false;
+	if (GhostShipRef)
+	{
+		GhostShipRef->StartPlayback();
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Starting race"))
 }
 
 void ARacingGameGameModeBase::StartRecording()
@@ -266,15 +274,13 @@ void ARacingGameGameModeBase::RecordTick()
 	RotationArr.Add(PlayerShipRef->GetActorRotation());
 }
 
-bool ARacingGameGameModeBase::SpawnGhost()
+bool ARacingGameGameModeBase::SpawnGhost(int32 Difficulty)
 {
-	UE_LOG(LogTemp, Warning, TEXT("SpawnGhost()"))
-
 	// Load ghost
 	LocationArr.Empty();
 	RotationArr.Empty();
 
-	if (!LoadGame(GhostImage))
+	if (!LoadGhost(Difficulty))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Could not spawn as loadgame returned false."))
 		return false;
@@ -287,8 +293,11 @@ bool ARacingGameGameModeBase::SpawnGhost()
 	}
 	
 	// Spawn the actor
-	GhostShipRef = GetWorld()->SpawnActor<AGhostImageShip>(AGhostImageShip::StaticClass(), LocationArr[0], RotationArr[0]);
-
+	if (GhostShipClass)
+	{
+		GhostShipRef = GetWorld()->SpawnActor<AGhostImageShip>(GhostShipClass, LocationArr[0], RotationArr[0]);
+	}
+	
 	// Check if the actor was successfully spawned
 	if (GhostShipRef)
 	{
@@ -299,7 +308,6 @@ bool ARacingGameGameModeBase::SpawnGhost()
 		{
 			GhostShipRef->LocationArr = LocationArr;
 			GhostShipRef->RotationArr = RotationArr;
-			GhostShipRef->StartPlayback();
 			return true;
 		} 
 	}
@@ -307,8 +315,10 @@ bool ARacingGameGameModeBase::SpawnGhost()
 	return false;
 }
 
-void ARacingGameGameModeBase::UnloadCompleted()
+void ARacingGameGameModeBase::ChangeLevel()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Unload Completed, Time taken: %f"), GetWorld()->TimeSeconds - TimeStart);
+	//Change Level
+	FName NewLevel = FName("Master_Map");
+	UGameplayStatics::OpenLevel(GetWorld(), NewLevel);
 }
 

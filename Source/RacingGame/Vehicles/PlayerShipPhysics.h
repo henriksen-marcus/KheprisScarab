@@ -332,7 +332,7 @@ public:
 	UPROPERTY()
 	class ACheckPoint* CheckPoint_Last;
 	
-	int CheckPointsAmount{7}; //Amount of Checkpoints in the Track
+	int CheckPointsAmount{8}; //Amount of Checkpoints in the Track
 
 	/**
 	 * The dynamic material used to dynamically change the color of the ships material.
@@ -354,6 +354,7 @@ public:
 	/** Bools */
 	
 	bool bIsJumping{};
+	bool bShouldGroundStickingWait{};
 	
 
 	/** Floats */
@@ -375,6 +376,9 @@ public:
 
 	/** Multiplied with the hovering force. */
 	float ForceScalar{1.f};
+
+	/** How much delay there should be before the ship catches up with it's intertia, the lower the more delay. */
+	float DirectionScalar{1.f};
 
 	float ForwardsSpeed{5500.f};
 	float InitialTargetHeight{};

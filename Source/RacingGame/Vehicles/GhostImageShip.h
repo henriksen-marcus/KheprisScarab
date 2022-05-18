@@ -24,7 +24,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
-	UStaticMeshComponent* BaseMesh;
+	USkeletalMeshComponent* BaseMesh;
 	
 	/** Root replacement, using this for potential overlap events */
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
@@ -50,11 +50,21 @@ public:
 
 	void StopPlayback();
 
+	void PausePlayback() const;
+
+	void ResumePlayback() const;
+
 	FVector CurrentLocTarget;
 	FRotator CurrentRotTarget;
+
+	UPROPERTY(EditAnywhere)
+	class UWidgetComponent* WidgetComp;
 
 	bool bPlayback{};
 	
 	FTimerHandle PlayBackTimerHandle;
+
+	UPROPERTY()
+	class APlayerShipPhysics* PlayerRef;
 
 };

@@ -171,6 +171,8 @@ APlayerShipPhysics::APlayerShipPhysics()
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Could not find MinusHoverForceCurve"));
 		}
 	}
+
+	
 }
 
 
@@ -346,6 +348,9 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	ShootTimer += DeltaTime;
 	JumpTimer += DeltaTime;
 	HitSoundCooldown += DeltaTime;
+
+
+	
 }
 
 
@@ -364,8 +369,8 @@ void APlayerShipPhysics::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &APlayerShipPhysics::Jump);
 	PlayerInputComponent->BindAction("UseItem", EInputEvent::IE_Pressed, this, &APlayerShipPhysics::Dash);
 
-	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &APlayerShipPhysics::Crouch);
-	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &APlayerShipPhysics::CrouchEnd);
+	//PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &APlayerShipPhysics::Crouch);
+	//PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &APlayerShipPhysics::CrouchEnd);
 
 	PlayerInputComponent->BindAction("LookBehind", EInputEvent::IE_Pressed, this, &APlayerShipPhysics::LookBehind);
 	PlayerInputComponent->BindAction("LookBehind", EInputEvent::IE_Released, this, &APlayerShipPhysics::LookBehind);
@@ -870,7 +875,7 @@ void APlayerShipPhysics::MovementUpdate()
 	Root->AddForce(-LinearVelocity * 0.85f, FName(), true);
 
 	// Makes the ship go more in it's forward direction, instead of following inertia
-	Root->SetPhysicsLinearVelocity(FMath::VInterpTo(Root->GetPhysicsLinearVelocity(), GetActorForwardVector() * Root->GetPhysicsLinearVelocity().Size(), GetWorld()->GetDeltaSeconds(), 0.92f));
+	Root->SetPhysicsLinearVelocity(FMath::VInterpTo(Root->GetPhysicsLinearVelocity(), GetActorForwardVector() * Root->GetPhysicsLinearVelocity().Size(), GetWorld()->GetDeltaSeconds(), DirectionScalar));
 
 	HoverRaycast();
 }
@@ -955,12 +960,12 @@ void APlayerShipPhysics::HoverRaycast()
 				float ZVelocity = FVector::DotProduct(Root->GetPhysicsLinearVelocity(), GetActorUpVector()); // Note: This value will be negative!
 				
 				const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(FMath::Clamp(2.5f - NormalizedDistance, 0.5f, 2.5f)) * -UpVector).GetClampedToMaxSize(35000000.f);
-				const FVector Damping = ZVelocity * UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 1000;
+				const FVector Damping = ZVelocity * UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 500;
 				
 				Root->AddForce(ThrustForce);
 				Root->AddForce(Damping);
 				
-				UE_LOG(LogTemp, Warning, TEXT("TForce: %s"), *ThrustForce.ToString())
+				//UE_LOG(LogTemp, Warning, TEXT("TForce: %s"), *ThrustForce.ToString())
 			}
 		}
 	}
@@ -1075,7 +1080,7 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num) const
 	if (NormalizedDistance < 1.f)
 	{
 		const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(NormalizedDistance) * UpVector).GetClampedToMaxSize(11000000.f);
-		const FVector Damping = ZVelocity * -UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 2000;
+		const FVector Damping = ZVelocity * -UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 1600;
 		Root->AddForceAtLocation(ThrustForce, CompLocation);
 		Root->AddForceAtLocation(Damping, CompLocation);
 	}
