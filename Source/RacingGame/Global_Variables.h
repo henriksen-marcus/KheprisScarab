@@ -98,6 +98,11 @@ public:
 	float GlobalVolumeMultiplier{ 1.f };
 	#pragma endregion
 
+	#pragma region High Score
+	TArray<float> HighScoreTimeList{};
+	#pragma endregion
+
+
 
 	//---------------------------------------
 
@@ -130,6 +135,11 @@ public:
 	#pragma region Music
 	bool MainMenu_Music{};
 	#pragma endregion
+
+	#pragma region Timer
+	float InGame_Timer{};
+	#pragma endregion
+
 
 	UPROPERTY()
 	class APlayerShipPhysics* PlayerRef;
