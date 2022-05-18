@@ -37,7 +37,7 @@ void UMenu_Shop::NativeOnInitialized()
 	HealthShop_Button->OnReleased.AddDynamic(this, &UMenu_Shop::HealthShop_Button_Realised);
 
 	//Ammo Button functionality
-	if (GameInstance->HealthActivate == true)
+	if (GameInstance->AmmoActivate == true)
 		Ammo_Img->SetBrushFromTexture(Ammo_Image_Open_Idle);
 	else
 		Ammo_Img->SetBrushFromTexture(Ammo_Image_Locked_Idle);
@@ -48,7 +48,7 @@ void UMenu_Shop::NativeOnInitialized()
 	AmmoShop_Button->OnReleased.AddDynamic(this, &UMenu_Shop::AmmoShop_Button_Realised);
 
 	//Boost Button functionality
-	if (GameInstance->HealthActivate == true)
+	if (GameInstance->BoostActivate == true)
 		Boost_Img->SetBrushFromTexture(Boost_Image_Open_Idle);
 	else
 		Boost_Img->SetBrushFromTexture(Boost_Image_Locked_Idle);
@@ -59,7 +59,7 @@ void UMenu_Shop::NativeOnInitialized()
 	BoostShop_Button->OnReleased.AddDynamic(this, &UMenu_Shop::BoostShop_Button_Realised);
 
 	//Time Button functionality
-	if (GameInstance->HealthActivate == true)
+	if (GameInstance->TimeActivate == true)
 		Time_Img->SetBrushFromTexture(Time_Image_Open_Idle);
 	else
 		Time_Img->SetBrushFromTexture(Time_Image_Locked_Idle);
@@ -231,7 +231,7 @@ void UMenu_Shop::HealthShop_Button_Clicked()
 	if (GameInstance->HealthActivate == true)
 		Health_Img->SetBrushFromTexture(Health_Image_Open_Hover);
 	else
-		Health_Img->SetBrushFromTexture(Health_Image_Open_Hover);
+		Health_Img->SetBrushFromTexture(Health_Image_Locked_Hover);
 }
 void UMenu_Shop::HealthShop_Button_Hovered()
 {
@@ -359,7 +359,7 @@ void UMenu_Shop::AmmoShop_Button_Clicked()
 	if (GameInstance->AmmoActivate == true)
 		Ammo_Img->SetBrushFromTexture(Ammo_Image_Open_Hover);
 	else
-		Ammo_Img->SetBrushFromTexture(Ammo_Image_Open_Hover);
+		Ammo_Img->SetBrushFromTexture(Ammo_Image_Locked_Hover);
 }
 void UMenu_Shop::AmmoShop_Button_Hovered()
 {
@@ -488,7 +488,7 @@ void UMenu_Shop::BoostShop_Button_Clicked()
 	if (GameInstance->BoostActivate == true)
 		Boost_Img->SetBrushFromTexture(Boost_Image_Open_Hover);
 	else
-		Boost_Img->SetBrushFromTexture(Boost_Image_Open_Hover);
+		Boost_Img->SetBrushFromTexture(Boost_Image_Locked_Hover);
 }
 void UMenu_Shop::BoostShop_Button_Hovered()
 {
@@ -617,7 +617,7 @@ void UMenu_Shop::TimeShop_Button_Clicked()
 	if (GameInstance->TimeActivate == true)
 		Time_Img->SetBrushFromTexture(Time_Image_Open_Hover);
 	else
-		Time_Img->SetBrushFromTexture(Time_Image_Open_Hover);
+		Time_Img->SetBrushFromTexture(Time_Image_Locked_Hover);
 }
 void UMenu_Shop::TimeShop_Button_Hovered()
 {

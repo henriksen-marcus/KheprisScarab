@@ -57,6 +57,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		int TimeCount{};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
+		int TimeStartCount{60};
+	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		int TimeAdded{};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		float DeltaTimeCount{};

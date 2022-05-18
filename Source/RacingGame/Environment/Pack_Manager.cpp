@@ -153,6 +153,8 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 
 				GameInstance->Currency2 += 1;
 				UE_LOG(LogTemp, Warning, TEXT("Currency2 - SUCCESS | %dp."), GameInstance->Currency2);
+
+				this->Destroy();
 			}
 		}
 		else if (TimePack)
@@ -171,7 +173,7 @@ void APack_Manager::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		Respawn = true;
 		UE_LOG(LogTemp, Warning, TEXT("Respawn = true"));
 
-		//this->Destroy();
+		
 	}
 }
 

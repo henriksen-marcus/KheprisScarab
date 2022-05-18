@@ -77,6 +77,7 @@ public:
 	//Time Attack
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Time_Text;
+	int StartTime{};
 
 	//Speed
 	UPROPERTY(meta = (BindWidget))

@@ -22,6 +22,10 @@ void UHUD_PlayerShip::NativeOnInitialized()
 
 	GameInstance->CheckPoint_Connected = false;
 	GameInstance->CurrentLap_Counter = 1;
+	
+	//Set Start Time based on Difficulty
+	GameInstance->TimeCount = 0;
+	GameInstance->TimeCount = GameInstance->TimeStartCount;
 
 	//Set Start Round Counter text
 	Current_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->CurrentLap_Counter)));
@@ -208,8 +212,8 @@ void UHUD_PlayerShip::SetTimer(float DeltaTime)
 
 	if (GameInstance)
 	{
-		if (!GameInstance->TimeAttackMode == true) {return;}
-		if (!GameInstance->bRaceNotStarted == false) {return;}
+		if (!GameInstance->TimeAttackMode) {return;}
+		if (GameInstance->bRaceNotStarted) {return;}
 
 		if (!GameInstance->Pause)
 		{
