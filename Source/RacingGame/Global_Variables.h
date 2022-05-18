@@ -103,7 +103,7 @@ public:
 
 
 	//other variables
-	float DashTimer{2.f};
+	float DashTimer{3.5f};
 	
 	#pragma region Modes
 	UPROPERTY(BlueprintReadWrite, Category = "Variable")

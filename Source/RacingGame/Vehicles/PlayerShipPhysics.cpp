@@ -30,7 +30,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 		Root->SetEnableGravity(false);
 		Root->SetLinearDamping(0.f);
 		Root->SetAngularDamping(20.f);
-		Root->SetPhysicsMaxAngularVelocityInDegrees(400.f);
+		Root->SetPhysicsMaxAngularVelocityInDegrees(150.f);
 		Root->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		Root->SetCollisionProfileName(FName("Ship"));
 		Root->OnComponentBeginOverlap.AddDynamic(this, &APlayerShipPhysics::OnOverlapBegin);
@@ -55,6 +55,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 	BaseMesh->SetSkeletalMesh(ConstructorHelpers::FObjectFinder<USkeletalMesh>(TEXT("SkeletalMesh'/Game/3DAssets/New_Ship/MasterShip.MasterShip'")).Object);
 	BaseMesh->SetRelativeScale3D(FVector(.6f, .6f, .6f));
 	BaseMesh->SetupAttachment(GetRootComponent());
+	
 
 	// SpringArm
 	{
@@ -186,6 +187,9 @@ void APlayerShipPhysics::BeginPlay()
 	BehindCamera->SetActive(false);
 	FrontCamera->SetActive(false);
 
+	DynMat = UMaterialInstanceDynamic::Create(BaseMesh->GetMaterial(0), NULL);
+	BaseMesh->SetMaterial(0, DynMat);
+	
 	if (StartSound)
 	{
 		if (GameInstance)
@@ -320,14 +324,15 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	{
 		OffTrackTimer += DeltaTime;
 		
-		if (OffTrackTimer >= 0.5f)
+		if (OffTrackTimer >= 1.f)
 		{
 			bIsOnRoad = false;
 			SpeedMultiplier = 0.3f;
-			GameInstance->AddHealth(-10 * DeltaTime);
+			
+			GameInstance->AddHealth(-8 * DeltaTime);
 			if (Root->GetPhysicsLinearVelocity().Size() > 5000.f)
 			{
-				UGameplayStatics::PlayWorldCameraShake(GetWorld(), CamShake, ActiveCamera->GetComponentLocation(), 0, 0);
+				UGameplayStatics::PlayWorldCameraShake(GetWorld(), CamShake, ActiveCamera->GetComponentLocation(), 20, 40);
 			}
 
 			if (OffTrackScreen)
@@ -396,7 +401,14 @@ void APlayerShipPhysics::Forward(const float Value)
 
 		if (Value)
 		{
-			Force.X = FMath::FInterpTo(Force.X, (Value * 2.f * SpeedBoost * SpeedMultiplier * ForwardsSpeed), GetWorld()->GetDeltaSeconds(), 1.5f);
+			if (Value > 0.f)
+			{
+				Force.X = FMath::FInterpTo(Force.X, (Value * 2.f * SpeedBoost * SpeedMultiplier * ForwardsSpeed), GetWorld()->GetDeltaSeconds(), 1.5f);
+			}
+			else
+			{
+				Force.X = FMath::FInterpTo(Force.X, (Value * 2.f * SpeedBoost * SpeedMultiplier * ForwardsSpeed), GetWorld()->GetDeltaSeconds(), 0.9f);
+			}
 		}
 		else
 		{
@@ -559,6 +571,39 @@ void APlayerShipPhysics::SpawnSandEffectEnd(FVector HitLoc)
 		SandSystemEndPtr->SetWorldLocation(HitLoc);
 		SandSystemEndPtr->SetWorldRotation(GetActorRotation());
 	}
+}
+
+void APlayerShipPhysics::Tunnel(bool bIsInside)
+{
+	if (bIsInside)
+	{
+		ForceScalar = 2.f;
+		Root->SetPhysicsMaxAngularVelocityInDegrees(500.f);
+		Thrust1->SetRelativeLocation(FVector(300.f, -300.f, 0.f));
+		Thrust2->SetRelativeLocation(FVector(300.f, 300.f, 0.f));
+		Thrust3->SetRelativeLocation(FVector(-300.f, -300.f, 0.f));
+		Thrust4->SetRelativeLocation(FVector(-300.f, 300.f, 0.f));
+	}
+	else
+	{
+		ForceScalar = 1.f;
+		Root->SetPhysicsMaxAngularVelocityInDegrees(150.f);
+		Thrust1->SetRelativeLocation(FVector(300.f, -100.f, 0.f));
+		Thrust2->SetRelativeLocation(FVector(300.f, 100.f, 0.f));
+		Thrust3->SetRelativeLocation(FVector(-300.f, -100.f, 0.f));
+		Thrust4->SetRelativeLocation(FVector(-300.f, 100.f, 0.f));
+	}
+}
+
+void APlayerShipPhysics::ChangeColor(FLinearColor NewColor) const
+{
+	DynMat->SetVectorParameterValue(FName("ShipColor"), NewColor);
+	DynMat->SetScalarParameterValue(FName("ColorLerp"), 0.8f);
+}
+
+void APlayerShipPhysics::RemoveColor() const 
+{
+	DynMat->SetScalarParameterValue(FName("ColorLerp"), 1.f);
 }
 
 void APlayerShipPhysics::Shoot()
@@ -903,19 +948,19 @@ void APlayerShipPhysics::HoverRaycast()
 			float NormalizedDistance = UKismetMathLibrary::Vector_Distance(Start, HitRes.Location) / TargetHeight;
 
 			// If we are above our target hovering distance, add a downwards force to keep us on the track
-			if (NormalizedDistance > 1.f)
+			if (NormalizedDistance > 1.f && !bIsJumping)
 			{
 				FVector UpVector = GetActorUpVector();
 				float Constant = Gravity / 2.f;
 				float ZVelocity = FVector::DotProduct(Root->GetPhysicsLinearVelocity(), GetActorUpVector()); // Note: This value will be negative!
 				
-				const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(FMath::Clamp(2.5f - NormalizedDistance, 0.5f, 2.5f)) * -UpVector);
+				const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(FMath::Clamp(2.5f - NormalizedDistance, 0.5f, 2.5f)) * -UpVector).GetClampedToMaxSize(35000000.f);
 				const FVector Damping = ZVelocity * UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 1000;
 				
 				Root->AddForce(ThrustForce);
 				Root->AddForce(Damping);
 				
-				UE_LOG(LogTemp, Warning, TEXT("DownSpeed: %f"), FVector::DotProduct(Root->GetPhysicsLinearVelocity(), GetActorUpVector()))
+				UE_LOG(LogTemp, Warning, TEXT("TForce: %s"), *ThrustForce.ToString())
 			}
 		}
 	}
@@ -1022,14 +1067,14 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num) const
 	
 	const float ZVelocity = FVector::DotProduct(Root->GetPhysicsLinearVelocity(), GetActorUpVector());
 
-	const float Constant = Gravity/5.f;
+	const float Constant = (Gravity/5.f) * ForceScalar;
 
 	//UE_LOG(LogTemp, Warning, TEXT("NormDist: %f"), NormalizedDistance)
 
 	// If we are close enough to the ground to give thrust
 	if (NormalizedDistance < 1.f)
 	{
-		const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(NormalizedDistance) * UpVector);
+		const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(NormalizedDistance) * UpVector).GetClampedToMaxSize(11000000.f);
 		const FVector Damping = ZVelocity * -UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 2000;
 		Root->AddForceAtLocation(ThrustForce, CompLocation);
 		Root->AddForceAtLocation(Damping, CompLocation);

@@ -6,5 +6,5 @@
 
 UGameInstanceSaveGame::UGameInstanceSaveGame()
 {
-	
+	SaveDate = FDateTime::Now();
 }

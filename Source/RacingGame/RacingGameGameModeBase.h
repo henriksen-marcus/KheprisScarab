@@ -20,18 +20,11 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY()
-		TArray<ACheckPoint*> Checkpoints;
-
 	enum ESaveType : uint8
 	{
 		GameState,
 		GhostImage
 	};
-	
-	bool SaveGame(ESaveType SaveType);
-
-	bool LoadGame(ESaveType SaveType);
 	
 	UPROPERTY()
 	TArray<FVector> LocationArr;
@@ -41,6 +34,21 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsRecording{};
+
+	UPROPERTY(EditAnywhere)
+	class AGhostImageShip* GhostShipRef;
+
+	UPROPERTY(EditAnywhere)
+	class APlayerShipPhysics* PlayerShipRef;
+
+	FTimerHandle RecordingTimerHandle;
+
+	float TimeStart{};
+
+	FString LastSaveDate{};
+
+	UPROPERTY()
+	class UGlobal_Variables* GameInstance;
 
 	UFUNCTION(BlueprintCallable)
 	void StartRecording();
@@ -57,16 +65,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UnloadCompleted();
 
-	UPROPERTY(EditAnywhere)
-	class AGhostImageShip* GhostShipRef;
+	bool SaveGame(ESaveType SaveType);
 
-	UPROPERTY(EditAnywhere)
-	class APlayerShipPhysics* PlayerShipRef;
-
-	FTimerHandle RecordingTimerHandle;
-
-	float TimeStart{};
-
-	UPROPERTY()
-	class UGlobal_Variables* GlobalVariables;
+	bool LoadGame(ESaveType SaveType);
 };

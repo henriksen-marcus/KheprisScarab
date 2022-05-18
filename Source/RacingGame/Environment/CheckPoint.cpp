@@ -42,7 +42,7 @@ void ACheckPoint::BeginPlay()
 	ARacingGameGameModeBase* GamemodeBase = Cast<ARacingGameGameModeBase>(GetWorld()->GetAuthGameMode());
 	if (GamemodeBase)
 	{
-		GamemodeBase->Checkpoints.Add(this);
+		//GamemodeBase->Checkpoints.Add(this);
 	}
 
 	//Collision checker

@@ -8,8 +8,6 @@
 #include "NiagaraComponent.h"
 #include "PlayerShipPhysics.generated.h"
 
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDashDelegate);
-
 UCLASS()
 class RACINGGAME_API APlayerShipPhysics : public APawn
 {
@@ -31,7 +29,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
-	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerMesh")
 	USkeletalMeshComponent* BaseMesh;
 	
 	/** Root replacement */
@@ -139,7 +137,7 @@ public:
 	float Speed{};
 	
 	UPROPERTY(BlueprintReadOnly, Category = "BlueprintVariables")
-    bool bIsBraking{};
+	bool bIsBraking{};
 
 	UPROPERTY(BlueprintReadOnly, Category = "BlueprintVariables")
 	bool bIsDashing{};
@@ -286,6 +284,16 @@ public:
 	/** Spawns a niagara sand system vanishing effect at the specified location. If a system already exists, update position. */
 	void SpawnSandEffectEnd(FVector HitLoc);
 
+	/** Changes the needed variables for smooth driving inside the tunnel. */
+	UFUNCTION(BlueprintCallable)
+	void Tunnel(bool bIsInside);
+
+	/** Blends the ships texture with the given color. This function also works as a color-enabler. */
+	void ChangeColor(FLinearColor NewColor) const;
+
+	/** Removes the color blend on the ships texture, revealing the original texture. */
+	void RemoveColor() const;
+
 	
 	// ---------- Variables ---------- //
 
@@ -306,8 +314,6 @@ public:
 	FRotator InitialBackSpringArmRotation = FRotator::ZeroRotator;
 	FRotator InitialBehindSpringArmRotation = FRotator::ZeroRotator;
 
-	
-
 	/** The location the player spawns at, aka the position of the player start */
 	FVector InitialLocation;
 	
@@ -324,9 +330,16 @@ public:
 
 	/** Reference to the last accepted checkpoint that the player has passed, used for respawn functionality */
 	UPROPERTY()
-	class ACheckPoint* CheckPoint_Last{};
+	class ACheckPoint* CheckPoint_Last;
 	
 	int CheckPointsAmount{7}; //Amount of Checkpoints in the Track
+
+	/**
+	 * The dynamic material used to dynamically change the color of the ships material.
+	 * Needs to be a dynamic material because we are changing parameter values.
+	 */
+	UPROPERTY()
+	UMaterialInstanceDynamic* DynMat;
 	
 	
 	/** Timers */
@@ -359,6 +372,9 @@ public:
 
 	/** Well, it's... the ships weight. */
 	float ShipWeight{};
+
+	/** Multiplied with the hovering force. */
+	float ForceScalar{1.f};
 
 	float ForwardsSpeed{5500.f};
 	float InitialTargetHeight{};

@@ -49,6 +49,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	UNiagaraSystem* NS_BulletHitFX;
+
+	UPROPERTY()
+	class UGlobal_Variables* GameInstance;
 	
 
 	UFUNCTION()

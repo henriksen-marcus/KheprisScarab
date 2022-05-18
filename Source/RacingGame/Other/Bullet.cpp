@@ -4,6 +4,7 @@
 #include "Bullet.h"
 #include "../Vehicles/PlayerShipPhysics.h"
 #include "NiagaraFunctionLibrary.h"
+#include "RacingGame/Global_Variables.h"
 
 // Sets default values
 ABullet::ABullet()
@@ -34,12 +35,14 @@ ABullet::ABullet()
 void ABullet::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 
 	BaseMesh->OnComponentBeginOverlap.AddDynamic(this, &ABullet::OnOverlapBegin);
 	
-	if (BulletShootSound)
+	if (BulletShootSound && GameInstance)
 	{
-		UGameplayStatics::PlaySound2D(GetWorld(), BulletShootSound, 0.5f);
+		UGameplayStatics::PlaySound2D(GetWorld(), BulletShootSound, 0.6f * GameInstance->GlobalVolumeMultiplier);
 	}
 	if (BulletFireFX)
 	{
@@ -48,6 +51,8 @@ void ABullet::BeginPlay()
 
 	// Unreal uses cm measurement, we are converting it from km/h
 	BulletSpeed /= 0.036f;
+
+	
 }
 
 
@@ -76,16 +81,17 @@ void ABullet::OnOverlapBegin (
 	 - Other instances of this class
 	*/
 	if (!OtherActor || OtherActor == this || !OtherComponent  || this->GetClass() == OtherActor->GetClass() || OtherActor->IsA(APlayerShipPhysics::StaticClass())) { return; }
+	
 	// Play bullet hit sound & effect then begone
-	if (BulletHitSound1 && BulletHitSound2)
+	if (BulletHitSound1 && BulletHitSound2 && GameInstance)
 	{
 		if (FMath::RandBool())
 		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), BulletHitSound1, SweepResult.ImpactPoint, 2.f);
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), BulletHitSound1, SweepResult.ImpactPoint, 2.f * GameInstance->GlobalVolumeMultiplier);
 			//UGameplayStatics::PlaySound2D(GetWorld(), BulletHitSound1, 0.6f, 1.6f);
 		}
 		else {
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), BulletHitSound2, SweepResult.ImpactPoint, 2.f);
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), BulletHitSound2, SweepResult.ImpactPoint, 2.f * GameInstance->GlobalVolumeMultiplier);
 			//UGameplayStatics::PlaySound2D(GetWorld(), BulletHitSound2, 0.6f, 1.6f);
 		}
 	}
