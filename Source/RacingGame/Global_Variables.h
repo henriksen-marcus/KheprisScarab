@@ -101,9 +101,8 @@ public:
 	#pragma endregion
 
 	#pragma region High Score
-	TArray<float> HighScoreTimeList{};
+	float HighScoreTime{};
 	#pragma endregion
-
 
 
 	//---------------------------------------

@@ -40,7 +40,16 @@ void ARacingGameGameModeBase::BeginPlay()
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Ghost could not spawn"))
 			}
+
+
+
 		}
+	}
+
+	if (PlayerShipRef)
+	{
+		PlayerShipRef->SetActorLocation(CheckpointArrowLocation);
+		PlayerShipRef->SetActorRotation(CheckpointArrowRotation);
 	}
 }
 

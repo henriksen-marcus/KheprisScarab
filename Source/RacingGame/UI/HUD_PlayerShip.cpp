@@ -568,7 +568,7 @@ void UHUD_PlayerShip::RaceFinished()
 		//Save Time if there is "Time Attack" Mode
 		if (GameInstance->TimeAttackMode)
 		{
-			GameInstance->HighScoreTimeList.Add(TrackTimer_Accurate);
+			//Add best time to variabel GameInstance->HighScoreTime
 		}
 
 		if (Screen_Win_Class)

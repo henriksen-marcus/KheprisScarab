@@ -47,6 +47,23 @@ void ACheckPoint::BeginPlay()
 
 	//Collision checker
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &ACheckPoint::OnOverlapBegin);
+
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (!GameInstance) {return;}
+
+	if (bIsGoal)
+	{
+		if (GameInstance->TimeAttackMode)
+		{
+			GamemodeBase->CheckpointArrowLocation = SpawnPointArrowTimeAttack->GetComponentLocation();
+			GamemodeBase->CheckpointArrowRotation = SpawnPointArrowTimeAttack->GetComponentRotation();
+		}
+		else
+		{
+			GamemodeBase->CheckpointArrowLocation = SpawnPointArrow->GetComponentLocation();
+			GamemodeBase->CheckpointArrowRotation = SpawnPointArrow->GetComponentRotation();
+		}
+	}
 }
 
 // Called every frame

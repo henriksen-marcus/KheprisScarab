@@ -33,6 +33,12 @@ public:
 	UPROPERTY()
 	TArray<FRotator> RotationArr;
 
+
+	UPROPERTY()
+		FVector CheckpointArrowLocation{};
+	UPROPERTY()
+		FRotator CheckpointArrowRotation{};
+
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsRecording{};
 
