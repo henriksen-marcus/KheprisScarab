@@ -24,8 +24,6 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Music")
 		USoundBase* Menu_Music_SB;
-	UPROPERTY(EditAnywhere, Category = "Music")
-		UAudioComponent* Menu_Music;
 	
 
 	UFUNCTION()

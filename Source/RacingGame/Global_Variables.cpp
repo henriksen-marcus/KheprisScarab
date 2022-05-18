@@ -6,15 +6,15 @@
 
 UGlobal_Variables::UGlobal_Variables()
 {
-	Currency1 = 0;
-	Currency2 = 0;
+	Currency1 = 1000;
+	Currency2 = 4;
 
 	MaxHealth = 200.f;
 	CurrentHealth = MaxHealth;
 	MaxAmmo = 10;
 	CurrentAmmo = MaxAmmo;
 	TimeCount = 60;
-	TimeAdded = 25;
+	TimeAdded = 15;
 }
 
 void UGlobal_Variables::BeginPlay()

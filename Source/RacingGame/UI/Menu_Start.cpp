@@ -30,6 +30,7 @@ void UMenu_Start::NativeOnInitialized()
 	Quit_Button->OnClicked.AddDynamic(this, &UMenu_Start::Quit_Button_Clickd);
 
 	//Music
+	
 
 }
 void UMenu_Start::NativeTick(const FGeometry& MyGeometry, float DeltaTime)

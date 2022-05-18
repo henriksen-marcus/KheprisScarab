@@ -100,6 +100,7 @@ void UMenu_Shop::NativeOnInitialized()
 	//	else
 	//		TimeShop_Uprade_Image->SetBrushFromTexture(TimeShop_Uprade_Image_Inactive);
 	//}
+	
 }
 void UMenu_Shop::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {
@@ -205,7 +206,7 @@ void UMenu_Shop::HealthShop_Button_Clicked()
 					GameInstance->Currency1 -= GameInstance->HealthUpgradeCost;
 					GameInstance->HealthUpgradeTier += 1;
 					GameInstance->HealthUpgradeCost += 1;
-					GameInstance->MaxHealth += 1;
+					GameInstance->MaxHealth += 20;
 				}
 				else
 					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound, 1.f * GameInstance->GlobalVolumeMultiplier);
@@ -333,7 +334,7 @@ void UMenu_Shop::AmmoShop_Button_Clicked()
 					GameInstance->Currency1 -= GameInstance->AmmoUpgradeCost;
 					GameInstance->AmmoUpgradeTier += 1;
 					GameInstance->AmmoUpgradeCost += 1;
-					GameInstance->MaxAmmo += 5;
+					GameInstance->MaxAmmo += 3;
 				}
 				else
 					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound, 1.f * GameInstance->GlobalVolumeMultiplier);

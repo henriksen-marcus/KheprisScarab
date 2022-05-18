@@ -152,9 +152,9 @@ void UHUD_PlayerShip::SetHUDVisibility()
 		}
 
 		if (GameInstance->Speed_Display == true)
-			Speed_Text->SetVisibility(ESlateVisibility::Visible);
+			Speed_Panel->SetVisibility(ESlateVisibility::Visible);
 		else
-			Speed_Text->SetVisibility(ESlateVisibility::Hidden);
+			Speed_Panel->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -268,16 +268,10 @@ void UHUD_PlayerShip::SetSpeedDisplay()
 		APlayerShipPhysics* PlayerShipPhysics = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 		if (PlayerShipPhysics)
 		{
-			int TempSpeed = PlayerShipPhysics->Root->GetPhysicsLinearVelocity().Size() * 0.036f;
-			FString Speed = UKismetStringLibrary::Conv_IntToString(TempSpeed);
-
-			if (GameInstance->bRaceNotStarted == true)
-				Speed_Text->SetText(FText::FromString("0"));
-			else
-				Speed_Text->SetText(FText::FromString(Speed));
+			//Set angle of Speed_Arrow_Image
+			Speed_Arrow->SetRenderTransformAngle(FMath::Lerp(-135, 135, PlayerShipPhysics->Speed / 15000));
 		}
 	}
-	
 }
 
 void UHUD_PlayerShip::RealTimerDisplay()

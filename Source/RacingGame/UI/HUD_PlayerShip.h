@@ -82,7 +82,9 @@ public:
 
 	//Speed
 	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* Speed_Text;
+		class UCanvasPanel* Speed_Panel;
+	UPROPERTY(meta = (BindWidget))
+		class UImage* Speed_Arrow;
 
 	//Round Counter
 	#pragma region Lap Counter
