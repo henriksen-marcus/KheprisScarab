@@ -38,6 +38,22 @@ void UHUD_PlayerShip::NativeOnInitialized()
 	//Set Boost to Empty
 	GameInstance->BoostPickup = false;
 
+	//Set Display for each Mode
+	if (GameInstance->TimeAttackMode)
+	{
+		Currency1_Panel->SetVisibility(ESlateVisibility::Hidden);
+		Currency2_Panel->SetVisibility(ESlateVisibility::Hidden);
+		Boost_Panel->SetVisibility(ESlateVisibility::Hidden);
+		Ammo_Panel->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else
+	{
+		Currency1_Panel->SetVisibility(ESlateVisibility::Visible);
+		Currency2_Panel->SetVisibility(ESlateVisibility::Visible);
+		Boost_Panel->SetVisibility(ESlateVisibility::Visible);
+		Ammo_Panel->SetVisibility(ESlateVisibility::Visible);
+	}
+
 	//Set Start Round Counter text
 	Current_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->CurrentLap_Counter)));
 	Max_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->MaxLap_Counter)));

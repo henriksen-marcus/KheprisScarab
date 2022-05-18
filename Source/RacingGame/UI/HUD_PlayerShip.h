@@ -149,6 +149,15 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UCanvasPanel* Panel;
 
+	UPROPERTY(meta = (BindWidget))
+		class UCanvasPanel* Currency1_Panel;
+	UPROPERTY(meta = (BindWidget))
+		class UCanvasPanel* Currency2_Panel;
+	UPROPERTY(meta = (BindWidget))
+		class UCanvasPanel* Boost_Panel;
+	UPROPERTY(meta = (BindWidget))
+		class UCanvasPanel* Ammo_Panel;
+
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UUserWidget> Screen_Lose_Class;
 	UPROPERTY()
