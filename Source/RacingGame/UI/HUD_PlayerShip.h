@@ -28,6 +28,7 @@ class RACINGGAME_API UHUD_PlayerShip : public UUserWidget
 	void SetSpeedDisplay();
 	void RealTimerDisplay();
 	void LapsDisplay();
+	void CheckDefeat();
 
 	void SetTimer(float DeltaTime);
 
@@ -143,5 +144,22 @@ public:
 	float Real_Hundrets{};
 	#pragma endregion
 
+
+	#pragma region Widgets
+	UPROPERTY(meta = (BindWidget))
+		class UCanvasPanel* Panel;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UUserWidget> Screen_Lose_Class;
+	UPROPERTY()
+		UUserWidget* Screen_Lose;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UUserWidget> Screen_Win_Class;
+	UPROPERTY()
+		UUserWidget* Screen_Win;
+
+	bool SpawnWidget{};
+	#pragma endregion
 
 };

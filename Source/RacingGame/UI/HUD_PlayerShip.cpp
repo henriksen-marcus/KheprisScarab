@@ -10,6 +10,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
+#include "Blueprint/UserWidget.h"
+#include <Components/CanvasPanel.h>
 
 void UHUD_PlayerShip::NativeConstruct()
 {
@@ -26,6 +28,15 @@ void UHUD_PlayerShip::NativeOnInitialized()
 	//Set Start Time based on Difficulty
 	GameInstance->TimeCount = 0;
 	GameInstance->TimeCount = GameInstance->TimeStartCount;
+
+	//Set Health to Max
+	GameInstance->CurrentHealth = GameInstance->MaxHealth;
+
+	//Set Ammot to Max
+	GameInstance->CurrentAmmo = GameInstance->MaxAmmo;
+
+	//Set Boost to Empty
+	GameInstance->BoostPickup = false;
 
 	//Set Start Round Counter text
 	Current_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->CurrentLap_Counter)));
@@ -54,6 +65,7 @@ void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 	SetlapCounter();
 
+	CheckDefeat();
 	RaceFinished();
 }
 
@@ -295,6 +307,7 @@ void UHUD_PlayerShip::LapsDisplay()
 	}
 }
 
+
 //Remove the "!" when the countdown are inplementet
 void UHUD_PlayerShip::SetTrackTimer(float DeltaTime)
 {
@@ -324,6 +337,11 @@ void UHUD_PlayerShip::SetTrackTimer(float DeltaTime)
 }
 void UHUD_PlayerShip::CalculateTimeDisplay()
 {
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (!GameInstance) { return; }
+
+	GameInstance->InGame_Timer = TrackTimer_Accurate;
+
 	int TrackTimer_TempInt = TrackTimer;
 	float TrackTimer_TempAccurate = TrackTimer_Accurate;
 	Minutes = 0;
@@ -471,19 +489,97 @@ void UHUD_PlayerShip::SetlapCounter()
 	Max_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->MaxLap_Counter)));
 }
 
+void UHUD_PlayerShip::CheckDefeat()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (!GameInstance) { return; }
+
+	if (GameInstance->TimeAttackMode)
+	{
+		if (GameInstance->TimeCount <= 0)
+		{
+			if (Screen_Lose_Class)
+			{
+				if (!SpawnWidget)
+				{
+					if (!GameInstance->Pause)
+					{
+						GameInstance->Pause = true;
+
+						UE_LOG(LogTemp, Warning, TEXT("HUD_PLayerShip - Spawning in Lose_Screen 1"));
+
+						SpawnWidget = true;
+
+						Panel->SetVisibility(ESlateVisibility::Hidden);
+
+						Screen_Lose = CreateWidget<UUserWidget>(GetWorld(), Screen_Lose_Class);
+						Screen_Lose->AddToViewport();
+						Screen_Lose->SetVisibility(ESlateVisibility::Visible);
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		if (Player_Precentage <= 0)
+		{
+			if (Screen_Lose_Class)
+			{
+				if (!SpawnWidget)
+				{
+					if (!GameInstance->Pause)
+					{
+						GameInstance->Pause = true;
+
+						UE_LOG(LogTemp, Warning, TEXT("HUD_PLayerShip - Spawning in Lose_Screen 2"));
+
+						SpawnWidget = true;
+
+						Panel->SetVisibility(ESlateVisibility::Hidden);
+
+						Screen_Lose = CreateWidget<UUserWidget>(GetWorld(), Screen_Lose_Class);
+						Screen_Lose->AddToViewport();
+						Screen_Lose->SetVisibility(ESlateVisibility::Visible);
+					}
+				}
+			}
+		}
+	}
+}
 void UHUD_PlayerShip::RaceFinished()
 {
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (!GameInstance) { return; }
 
+	//Open Win Widget after 3 laps
 	if (GameInstance->CurrentLap_Counter > 3)
 	{
-		GameInstance->CurrentLap_Counter = 0;
-		GameInstance->Racing = false;
-		GameInstance->bRaceNotStarted = true;
+		//Save Time if there is "Time Attack" Mode
+		if (GameInstance->TimeAttackMode)
+		{
+			GameInstance->HighScoreTimeList.Add(TrackTimer_Accurate);
+		}
 
-		//Change Level
-		FName NewLevel = FName("Start_Screen");
-		UGameplayStatics::OpenLevel(GetWorld(), NewLevel);
+		if (Screen_Win_Class)
+		{
+			if (!SpawnWidget)
+			{
+				if (!GameInstance->Pause)
+				{
+					GameInstance->Pause = true;
+
+					Panel->SetVisibility(ESlateVisibility::Collapsed);
+
+					Screen_Win = CreateWidget<UUserWidget>(GetWorld(), Screen_Win_Class);
+					Screen_Win->AddToViewport();
+					Screen_Win->SetVisibility(ESlateVisibility::Visible);
+
+					SpawnWidget = true;
+
+					UE_LOG(LogTemp, Warning, TEXT("HUD_PLayerShip - Spawning in Win_Screen UUUEEE"));
+				}
+			}
+		}
 	}
 }
