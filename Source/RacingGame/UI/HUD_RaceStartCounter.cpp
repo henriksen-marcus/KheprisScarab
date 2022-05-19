@@ -21,7 +21,7 @@ void UHUD_RaceStartCounter::NativeOnInitialized()
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (!GameInstance) { return; }
 
-	UGameplayStatics::PlaySound2D(GetWorld(), Track_Start, 1.f * GameInstance->GlobalVolumeMultiplier);
+	UGameplayStatics::PlaySound2D(GetWorld(), Track_Start, 0.7f * GameInstance->GlobalVolumeMultiplier);
 }
 
 void UHUD_RaceStartCounter::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
@@ -98,7 +98,7 @@ void UHUD_RaceStartCounter::ReadySetGo(float DeltaTime)
 			if (Hello == true)
 			{
 				Hello = false;
-				UGameplayStatics::PlaySound2D(GetWorld(), Track_Music, 1.f * GameInstance->GlobalVolumeMultiplier);
+				UGameplayStatics::PlaySound2D(GetWorld(), Track_Music, 0.6f * GameInstance->GlobalVolumeMultiplier);
 			}
 			
 		}

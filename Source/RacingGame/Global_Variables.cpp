@@ -17,7 +17,7 @@ UGlobal_Variables::UGlobal_Variables()
 	MaxAmmo = 10;
 	CurrentAmmo = MaxAmmo;
 	TimeCount = 60;
-	TimeAdded = 20;
+	TimeAdded = 15;
 	
 }
 
@@ -27,8 +27,6 @@ void UGlobal_Variables::BeginPlay()
 
 void UGlobal_Variables::Tick(float DeltaTime)
 {
-	
-
 	if (Sound == true)
 		Music_Volum = 1;
 	else
@@ -40,7 +38,7 @@ void UGlobal_Variables::AddHealth(const float Amount)
 {
 	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.f, MaxHealth);
 
-	if (!CurrentHealth)
+	/*if (!CurrentHealth)
 	{
 		if (PlayerRef)
 		{
@@ -48,7 +46,7 @@ void UGlobal_Variables::AddHealth(const float Amount)
 			// Handle respawn screens and effects here, or do it in playershipphysics
 			CurrentHealth = MaxHealth;
 		}
-	}
+	}*/
 }
 
 void UGlobal_Variables::ChangeLevel()
@@ -151,9 +149,9 @@ bool UGlobal_Variables::SaveGame(ESaveType SaveType)
 				UE_LOG(LogTemp, Warning, TEXT("Saved game... Location Arr size in saveinstance: %d"), SaveGameInstance->LocationArr.Num())
 			}
 
-			if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("GhostSave"), 3))
+			if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("GhostSave"), 1))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Successfully saved the ghost image. Recording size: %d"), GameModeBase->LocationArr.Num())
+				UE_LOG(LogTemp, Warning, TEXT("Successfully saved the ghost image on index 1. Recording size: %d"), GameModeBase->LocationArr.Num())
 				return true;
 			}
 			else

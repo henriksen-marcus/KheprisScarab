@@ -242,6 +242,11 @@ void APlayerShipPhysics::BeginPlay()
 	{
 		GameInstance->PlayerCheckpointNumber = 0;
 	}
+
+	if (GameInstance)
+	{
+		GameInstance->TimeAdded = 15;
+	}
 }
 
 
@@ -267,7 +272,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	if (AudioComp && CustomCurve2 && GameInstance)
 	{
 		// Interp to smooth out speed/audio fluctuations
-		AudioComp->PitchMultiplier = FMath::FInterpTo(AudioComp->PitchMultiplier, (CustomCurve2->GetFloatValue(Speed/16000.f) + 1), DeltaTime, 1.5f);
+		AudioComp->PitchMultiplier = FMath::FInterpTo(AudioComp->PitchMultiplier, (CustomCurve2->GetFloatValue(Speed/20000.f) + 1), DeltaTime, 1.5f);
 		AudioComp->SetPitchMultiplier(AudioComp->PitchMultiplier);
 		//AudioComp->SetFloatParameter(FName("ShipSpeed"), Speed/20.f);
 		AudioComp->VolumeMultiplier = GameInstance->GlobalVolumeMultiplier * 2;
@@ -655,6 +660,8 @@ void APlayerShipPhysics::RemoveColor() const
 
 void APlayerShipPhysics::Shoot()
 {
+	GamemodeBase->StopRecording();
+	GameInstance->SaveGame(UGlobal_Variables::GhostImage);
 	if (GameInstance)
 	{
 		if (GameInstance->bRaceNotStarted) { return; }
@@ -697,7 +704,7 @@ if (bIsDashing) { return; }
 		{
 			GameInstance->BoostPickup = false;
 		
-			static float CamFovChange = 20.f;
+			static float CamFovChange = 15.f;
 			static float SpringArmChange = 200.f;
 
 			TargetCameraFOV += CamFovChange;
@@ -1152,7 +1159,7 @@ void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 
 		if (CheckPoint_Temp)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("CheckPoint_Temp: %d | PlayerNumber: %d"), CheckPoint_Temp->ThisCheckpointNumber, GameInstance->PlayerCheckpointNumber);
+			//UE_LOG(LogTemp, Warning, TEXT("CheckPoint_Temp: %d | PlayerNumber: %d"), CheckPoint_Temp->ThisCheckpointNumber, GameInstance->PlayerCheckpointNumber);
 
 			if (GameInstance->TimeAttackMode)
 			{
@@ -1188,7 +1195,10 @@ void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 
 					if (GameInstance->TimeAttackMode == true)
 					{
+						float TimeBefore = GameInstance->TimeCount;
 						GameInstance->TimeCount += GameInstance->TimeAdded;
+						float TimeAfter = GameInstance->TimeCount;
+						UE_LOG(LogTemp, Warning, TEXT("Added this much time: %f"), TimeAfter - TimeBefore)
 					}
 
 					UE_LOG(LogTemp, Warning, TEXT("Checkpoint - Time Attack - SUCESS, No.%d"), CheckPoint_Temp->ThisCheckpointNumber);

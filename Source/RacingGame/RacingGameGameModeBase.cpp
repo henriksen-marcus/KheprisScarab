@@ -50,6 +50,7 @@ void ARacingGameGameModeBase::BeginPlay()
 	if (UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 0))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found player ghost"))
+		//UGameplayStatics::DeleteGameInSlot("GhostSave", 0);
 	}else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't find player ghost"))
@@ -57,6 +58,7 @@ void ARacingGameGameModeBase::BeginPlay()
 	if (UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 1))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found gold ghost"))
+		//UGameplayStatics::DeleteGameInSlot("GhostSave", 1);
 	}else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't find gold ghost"))
@@ -64,6 +66,7 @@ void ARacingGameGameModeBase::BeginPlay()
 	if (UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 2))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found silver ghost"))
+		//UGameplayStatics::DeleteGameInSlot("GhostSave", 2);
 	}else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't find silver ghost"))
@@ -71,10 +74,16 @@ void ARacingGameGameModeBase::BeginPlay()
 	if (UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 3))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found bronze ghost"))
+		//UGameplayStatics::DeleteGameInSlot("GhostSave", 3);
 	}else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't find bronze ghost"))
 	}
+
+	
+	
+	
+	
 	
 }
 
@@ -141,9 +150,6 @@ void ARacingGameGameModeBase::StopRecording()
 	bIsRecording = false;
 
 	GetWorld()->GetTimerManager().ClearTimer(RecordingTimerHandle);
-	
-	LocationArr.Empty();
-	RotationArr.Empty();
 }
 
 void ARacingGameGameModeBase::RecordTick()

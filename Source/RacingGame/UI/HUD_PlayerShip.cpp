@@ -280,7 +280,7 @@ void UHUD_PlayerShip::SetSpeedDisplay()
 		if (PlayerShipPhysics)
 		{
 			//Set angle of Speed_Arrow_Image
-			Speed_Arrow->SetRenderTransformAngle(FMath::Lerp(-135, 135, PlayerShipPhysics->Speed / 15000));
+			Speed_Arrow->SetRenderTransformAngle(FMath::Lerp(-135, 135, PlayerShipPhysics->Speed / 19000));
 		}
 	}
 }
@@ -573,6 +573,8 @@ void UHUD_PlayerShip::CheckDefeat()
 						Screen_Lose = CreateWidget<UUserWidget>(GetWorld(), Screen_Lose_Class);
 						Screen_Lose->AddToViewport();
 						Screen_Lose->SetVisibility(ESlateVisibility::Visible);
+						FInputModeUIOnly InData;
+						GetWorld()->GetFirstPlayerController()->SetInputMode(InData);
 					}
 				}
 			}
@@ -599,6 +601,8 @@ void UHUD_PlayerShip::CheckDefeat()
 						Screen_Lose = CreateWidget<UUserWidget>(GetWorld(), Screen_Lose_Class);
 						Screen_Lose->AddToViewport();
 						Screen_Lose->SetVisibility(ESlateVisibility::Visible);
+						FInputModeUIOnly InData;
+						GetWorld()->GetFirstPlayerController()->SetInputMode(InData);
 					}
 				}
 			}
@@ -628,10 +632,13 @@ void UHUD_PlayerShip::RaceFinished()
 					GameInstance->Pause = true;
 
 					Panel->SetVisibility(ESlateVisibility::Collapsed);
-
+					
 					Screen_Win = CreateWidget<UUserWidget>(GetWorld(), Screen_Win_Class);
 					Screen_Win->AddToViewport();
 					Screen_Win->SetVisibility(ESlateVisibility::Visible);
+
+					FInputModeUIOnly InData;
+					GetWorld()->GetFirstPlayerController()->SetInputMode(InData);
 
 					SpawnWidget = true;
 
@@ -642,12 +649,13 @@ void UHUD_PlayerShip::RaceFinished()
 					if (GameModeBase)
 					{
 						GameModeBase->StopRecording();
-
-						if (TrackTimer_Accurate < GameInstance->HighScoreTime || !GameInstance->HighScoreTime)
+						GameInstance->SaveGame(UGlobal_Variables::GhostImage);
+						UE_LOG(LogTemp, Warning, TEXT("Saved new ghost, mvh hud playership"))
+						/*if (TrackTimer_Accurate < GameInstance->HighScoreTime || !GameInstance->HighScoreTime)
 						{
 							GameInstance->HighScoreTime = TrackTimer_Accurate;
 							GameInstance->SaveGame(UGlobal_Variables::GhostImage);
-						}
+						}*/
 					}
 				}
 			}

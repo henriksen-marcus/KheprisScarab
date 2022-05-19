@@ -101,7 +101,7 @@ public:
 	/* BLUEPRINT VARIABLES */
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float MaxSpeedBoost{1.4f};
+	float MaxSpeedBoost{2.f};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float SpeedMultiplier{1.f};
@@ -391,7 +391,7 @@ public:
 	/** How much delay there should be before the ship catches up with it's intertia, the lower the more delay. */
 	float DirectionScalar{1.f};
 
-	float ForwardsSpeed{5500.f};
+	float ForwardsSpeed{6500.f};
 	float InitialTargetHeight{};
 	float Gravity{};
 	
