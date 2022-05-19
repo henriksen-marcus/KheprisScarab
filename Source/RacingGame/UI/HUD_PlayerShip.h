@@ -27,6 +27,7 @@ class RACINGGAME_API UHUD_PlayerShip : public UUserWidget
 	void SetTimer_Display();
 	void SetSpeedDisplay();
 	void RealTimerDisplay();
+	void HighScoreDisplay();
 	void LapsDisplay();
 	void CheckDefeat();
 
@@ -78,6 +79,8 @@ public:
 	//Time Attack
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Time_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UCanvasPanel* Fuel_Panel;
 	int StartTime{};
 
 	//Speed
@@ -85,6 +88,21 @@ public:
 		class UCanvasPanel* Speed_Panel;
 	UPROPERTY(meta = (BindWidget))
 		class UImage* Speed_Arrow;
+
+	//HighScore
+	UPROPERTY(meta = (BindWidget))
+		class UCanvasPanel* HighScore_Display_Panel;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* HighScore_Minutes_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* HighScore_Seconds_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* HighScore_Hundrets_Text;
+
+	float Timer_Temp{};
+	int HighScore_Minutes{};
+	int HighScore_Seconds{};
+	int HighScore_Hundrets{};
 
 	//Round Counter
 	#pragma region Lap Counter
@@ -94,7 +112,8 @@ public:
 		class UTextBlock* Max_Round_Text;
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Middle_Text;
-	
+	UPROPERTY(meta = (BindWidget))
+		class UCanvasPanel* Round_Counter_Panel;
 	#pragma endregion
 
 	//Checkpoint Timer Display
@@ -102,6 +121,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Sound")
 		USoundBase* CheckPointSound;
 
+	UPROPERTY(meta = (BindWidget))
+		class UCanvasPanel* Checkpoint_Time_Display;
+	
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* TimeDisplay_Minutes_Text;
 	UPROPERTY(meta = (BindWidget))
@@ -130,6 +152,8 @@ public:
 	#pragma endregion
 
 	#pragma region Timer Display
+	UPROPERTY(meta = (BindWidget))
+		class UCanvasPanel* RealTime_Display;
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* RealTimeDisplay_Minutes_Text;
 	UPROPERTY(meta = (BindWidget))

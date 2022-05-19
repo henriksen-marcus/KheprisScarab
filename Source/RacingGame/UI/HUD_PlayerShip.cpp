@@ -46,6 +46,15 @@ void UHUD_PlayerShip::NativeOnInitialized()
 		Currency2_Panel->SetVisibility(ESlateVisibility::Hidden);
 		Boost_Panel->SetVisibility(ESlateVisibility::Hidden);
 		Ammo_Panel->SetVisibility(ESlateVisibility::Hidden);
+
+		if (GameInstance->HighScoreTime <= 0)
+		{
+			HighScore_Display_Panel->SetVisibility(ESlateVisibility::Hidden);
+		}
+		else
+		{
+			HighScore_Display_Panel->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 	else
 	{
@@ -53,6 +62,7 @@ void UHUD_PlayerShip::NativeOnInitialized()
 		Currency2_Panel->SetVisibility(ESlateVisibility::Visible);
 		Boost_Panel->SetVisibility(ESlateVisibility::Visible);
 		Ammo_Panel->SetVisibility(ESlateVisibility::Visible);
+		HighScore_Display_Panel->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	//Set Start Round Counter text
@@ -121,13 +131,13 @@ void UHUD_PlayerShip::SetHUDVisibility()
 		if (GameInstance->TimeAttackMode)
 		{
 			if (GameInstance->Time_Display == true)
-				Time_Text->SetVisibility(ESlateVisibility::Visible);
+				Fuel_Panel->SetVisibility(ESlateVisibility::Visible);
 			else
-				Time_Text->SetVisibility(ESlateVisibility::Hidden);
+				Fuel_Panel->SetVisibility(ESlateVisibility::Hidden);
 		}
 		else
 		{
-			Time_Text->SetVisibility(ESlateVisibility::Hidden);
+			Fuel_Panel->SetVisibility(ESlateVisibility::Hidden);
 		}
 
 		if (GameInstance->Currency1_Display == true)
@@ -282,22 +292,74 @@ void UHUD_PlayerShip::RealTimerDisplay()
 	{
 		if (GameInstance->RealTimer_Display == true)
 		{
-			RealTimeDisplay_Minutes_Text->SetVisibility(ESlateVisibility::Visible);
-			RealTimeDisplay_Seconds_Text->SetVisibility(ESlateVisibility::Visible);
-			RealTimeDisplay_Hundrets_Text->SetVisibility(ESlateVisibility::Visible);
-			Real_One->SetVisibility(ESlateVisibility::Visible);
-			Real_Two->SetVisibility(ESlateVisibility::Visible);
+			RealTime_Display->SetVisibility(ESlateVisibility::Visible);
 		}
 		else
 		{
-			RealTimeDisplay_Minutes_Text->SetVisibility(ESlateVisibility::Hidden);
-			RealTimeDisplay_Seconds_Text->SetVisibility(ESlateVisibility::Hidden);
-			RealTimeDisplay_Hundrets_Text->SetVisibility(ESlateVisibility::Hidden);
-			Real_One->SetVisibility(ESlateVisibility::Hidden);
-			Real_Two->SetVisibility(ESlateVisibility::Hidden);
+			RealTime_Display->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
+
+void UHUD_PlayerShip::HighScoreDisplay()
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (!GameInstance) { return; }
+
+	#pragma region Setup Timer Display
+	Timer_Temp = GameInstance->InGame_Timer;
+
+	while (Timer_Temp >= 60)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("WinScreen - Calculate Minutes"));
+		Timer_Temp -= 60;
+		HighScore_Minutes += 1;
+	}
+
+	while (Timer_Temp >= 1)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("WinScreen - Calculate Seconds"));
+		Timer_Temp -= 1;
+		HighScore_Seconds += 1;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("WinScreen - Add Hundreds"));
+	HighScore_Hundrets = Timer_Temp;
+
+	HighScore_Hundrets = Hundrets * 100;
+	HighScore_Hundrets -= 2;
+
+	#pragma endregion
+
+	#pragma region Timer Text
+	if (HighScore_Minutes < 10)
+		HighScore_Minutes_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(HighScore_Minutes)));
+	else
+		HighScore_Minutes_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(HighScore_Minutes)));
+
+	if (HighScore_Seconds < 10)
+		HighScore_Seconds_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(HighScore_Seconds)));
+	else
+		HighScore_Seconds_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(HighScore_Seconds)));
+
+	if (HighScore_Hundrets < 10)
+		HighScore_Hundrets_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(HighScore_Hundrets)));
+	else
+		HighScore_Hundrets_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(HighScore_Hundrets)));
+	#pragma endregion
+
+	#pragma region Timer text - Visible
+	if (GameInstance->TimeAttackMode)
+	{
+		HighScore_Display_Panel->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		HighScore_Display_Panel->SetVisibility(ESlateVisibility::Hidden);
+	}
+	#pragma endregion
+}
+
 void UHUD_PlayerShip::LapsDisplay()
 {
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
@@ -305,21 +367,16 @@ void UHUD_PlayerShip::LapsDisplay()
 	{
 		if (GameInstance->Laps_Display == true)
 		{
-			Current_Round_Text->SetVisibility(ESlateVisibility::Visible);
-			Max_Round_Text->SetVisibility(ESlateVisibility::Visible);
-			Middle_Text->SetVisibility(ESlateVisibility::Visible);
+			Round_Counter_Panel->SetVisibility(ESlateVisibility::Visible);
 		}
 		else
 		{
-			Current_Round_Text->SetVisibility(ESlateVisibility::Hidden);
-			Max_Round_Text->SetVisibility(ESlateVisibility::Hidden);
-			Middle_Text->SetVisibility(ESlateVisibility::Hidden);
+			Round_Counter_Panel->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
 
 
-//Remove the "!" when the countdown are inplementet
 void UHUD_PlayerShip::SetTrackTimer(float DeltaTime)
 {
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
@@ -415,13 +472,7 @@ void UHUD_PlayerShip::SetTimeDisplay_Timer(float DeltaTime)
 				TimeDisplay_Hundrets_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Hundrets_Temp)));
 			#pragma endregion
 
-			#pragma region Timer text - Visible
-			TimeDisplay_Minutes_Text->SetVisibility(ESlateVisibility::Visible);
-			TimeDisplay_Seconds_Text->SetVisibility(ESlateVisibility::Visible);
-			TimeDisplay_Hundrets_Text->SetVisibility(ESlateVisibility::Visible);
-			_One->SetVisibility(ESlateVisibility::Visible);
-			_Two->SetVisibility(ESlateVisibility::Visible);
-			#pragma endregion
+			Checkpoint_Time_Display->SetVisibility(ESlateVisibility::Visible);
 
 			GameInstance->NewCheckPoint = false;
 			CheckpointTimerDisplay_Timer = 0;
@@ -437,11 +488,7 @@ void UHUD_PlayerShip::SetTimeDisplay_Timer(float DeltaTime)
 	}
 	else
 	{
-		TimeDisplay_Minutes_Text->SetVisibility(ESlateVisibility::Hidden);
-		TimeDisplay_Seconds_Text->SetVisibility(ESlateVisibility::Hidden);
-		TimeDisplay_Hundrets_Text->SetVisibility(ESlateVisibility::Hidden);
-		_One->SetVisibility(ESlateVisibility::Hidden);
-		_Two->SetVisibility(ESlateVisibility::Hidden);
+		Checkpoint_Time_Display->SetVisibility(ESlateVisibility::Hidden);
 
 		//Timer_SnapShot = false;
 		CheckpointTimerDisplay_Timer = 0;
@@ -480,8 +527,8 @@ void UHUD_PlayerShip::SetRealTimeDisplay()
 	else
 		RealTimeDisplay_Seconds_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Real_Secounds)));
 
-	if (Real_Hundrets < 10)
-		RealTimeDisplay_Hundrets_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Real_Hundrets)));
+	if (Real_Hundrets <= 15)
+		RealTimeDisplay_Hundrets_Text->SetText(FText::FromString("00"));
 	else
 		RealTimeDisplay_Hundrets_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Real_Hundrets)));
 	#pragma endregion

@@ -659,6 +659,8 @@ void APlayerShipPhysics::Shoot()
 	{
 		if (GameInstance->bRaceNotStarted) { return; }
 
+		if (GameInstance->TimeAttackMode) { return; }
+
 		ShootTimer = 0.f;
 		if (GameInstance)
 		{
