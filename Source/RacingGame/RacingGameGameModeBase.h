@@ -20,18 +20,9 @@ public:
 	ARacingGameGameModeBase();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-
-	enum ESaveType : uint8
-	{
-		GameState,
-		GhostImage
-	};
 	
-	UPROPERTY()
-	TArray<FVector> LocationArr;
-
-	UPROPERTY()
-	TArray<FRotator> RotationArr;
+	
+	
 
 
 	UPROPERTY()
@@ -58,6 +49,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AGhostImageShip> GhostShipClass;
 
+	UPROPERTY()
+	TArray<FVector> LocationArr;
+
+	UPROPERTY()
+	TArray<FRotator> RotationArr;
+
 	UFUNCTION(BlueprintCallable)
 	void StartRecording();
 
@@ -66,8 +63,6 @@ public:
 
 	UFUNCTION()
 	void RecordTick();
-	
-	bool LoadGameState();
 
 	/** Loads a ghost of x difficulty into the memory. */
 	bool LoadGhost(int32 Difficulty);
@@ -75,8 +70,6 @@ public:
 	/** Loads and spawns a ghost of x difficulty. */
 	UFUNCTION(BlueprintCallable)
 	bool SpawnGhost(int32 Difficulty);
-
-	bool SaveGame(ESaveType SaveType);
 
 	void StartRace();
 

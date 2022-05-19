@@ -316,3 +316,33 @@ void UMenu_Settings::UpdateGlobalVolume(const float NewVolume)
 		GameInstance->GlobalVolumeMultiplier = NewVolume;
 	}
 }
+
+
+void UMenu_Settings::ColorButton7Clicked()
+{
+	
+}
+
+void UMenu_Settings::ColorButton6Clicked()
+{
+}
+
+void UMenu_Settings::ColorButton5Clicked()
+{
+}
+
+void UMenu_Settings::ColorButton4Clicked()
+{
+}
+
+void UMenu_Settings::ColorButton3Clicked()
+{
+}
+
+void UMenu_Settings::ColorButton2Clicked()
+{
+}
+
+void UMenu_Settings::ColorButtonClicked()
+{
+}

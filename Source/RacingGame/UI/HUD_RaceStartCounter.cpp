@@ -13,6 +13,7 @@ void UHUD_RaceStartCounter::NativeConstruct()
 {
 	Super::NativeConstruct();
 }
+
 void UHUD_RaceStartCounter::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
@@ -22,6 +23,7 @@ void UHUD_RaceStartCounter::NativeOnInitialized()
 
 	UGameplayStatics::PlaySound2D(GetWorld(), Track_Start, 1.f * GameInstance->GlobalVolumeMultiplier);
 }
+
 void UHUD_RaceStartCounter::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {
 	ReadySetGo(DeltaTime);

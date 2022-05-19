@@ -132,9 +132,43 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* GlobalVolumeNumber;
 
+	/** Colorbuttons */
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* ColorButton;
+	
+	UPROPERTY(meta = (BindWidget))
+	UButton* ColorButton2;
+	
+	UPROPERTY(meta = (BindWidget))
+	UButton* ColorButton3;
+	
+	UPROPERTY(meta = (BindWidget))
+	UButton* ColorButton4;
+	
+	UPROPERTY(meta = (BindWidget))
+	UButton* ColorButton5;
+	
+	UPROPERTY(meta = (BindWidget))
+	UButton* ColorButton6;
+	
+	UPROPERTY(meta = (BindWidget))
+	UButton* ColorButton7;
+	
+	void ColorButtonClicked();
+	void ColorButton2Clicked();
+	void ColorButton3Clicked();
+	void ColorButton4Clicked();
+	void ColorButton5Clicked();
+	void ColorButton6Clicked();
+	void ColorButton7Clicked();
+	
+
 	UFUNCTION()
 	void UpdateGlobalVolume(const float NewVolume);
 
 	UPROPERTY()
 	class UGlobal_Variables* GlobalVars; 
 };
+
+

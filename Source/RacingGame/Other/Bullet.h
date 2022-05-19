@@ -52,6 +52,8 @@ private:
 
 	UPROPERTY()
 	class UGlobal_Variables* GameInstance;
+
+	bool bForward{true};
 	
 
 	UFUNCTION()

@@ -7,6 +7,8 @@
 #include "Components/Button.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "RacingGame/RacingGameGameModeBase.h"
+#include "Components/CanvasPanel.h"
 
 void UMenu_Start::NativeConstruct()
 {
@@ -21,17 +23,38 @@ void UMenu_Start::NativeOnInitialized()
 	{
 		GameInstance->Racing = false;
 		GameInstance->bRaceNotStarted = false;
+		if (GameInstance->bIsGameLoaded)
+		{
+			bool saved = GameInstance->SaveGame(UGlobal_Variables::GameState);
+			UE_LOG(LogTemp, Warning, TEXT("Ran savegame function, hilsen Menu_Start"))
+			if (saved)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("SUCESSFULLY SAVED!"))
+			}
+		}
+
+		if (!GameInstance->bIsGameLoaded)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Started loading game"))
+			GameInstance->LoadGameState();
+			GameInstance->bIsGameLoaded = true;
+		}
+		else
+		{
+			EntryPanel->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
+
+	
 
 	//Buttons
 	Start_Button->OnClicked.AddDynamic(this, &UMenu_Start::Start_Button_Clickd);
 	Shop_Button->OnClicked.AddDynamic(this, &UMenu_Start::Shop_Button_Clickd);
 	Settings_Button->OnClicked.AddDynamic(this, &UMenu_Start::Settings_Button_Clickd);
 	Quit_Button->OnClicked.AddDynamic(this, &UMenu_Start::Quit_Button_Clickd);
-
-	//Music
+	EntryButton->OnClicked.AddDynamic(this, &UMenu_Start::RemoveEntryScreen);
 	
-
+	
 }
 void UMenu_Start::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {	
@@ -76,5 +99,10 @@ void UMenu_Start::Quit_Button_Clickd()
 		TEnumAsByte<EQuitPreference::Type> Quit;
 		UKismetSystemLibrary::QuitGame(GetWorld(), 0, Quit, false);
 	}
+}
+
+void UMenu_Start::RemoveEntryScreen()
+{
+	EntryPanel->SetVisibility(ESlateVisibility::Hidden);
 }
 

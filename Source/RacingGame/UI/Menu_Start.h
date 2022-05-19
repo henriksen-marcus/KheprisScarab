@@ -42,4 +42,14 @@ public:
 		class UButton* Settings_Button;
 	UPROPERTY(meta = (BindWidget))
 		class UButton* Quit_Button;
+
+
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* EntryPanel;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* EntryButton;
+
+	UFUNCTION()
+	void RemoveEntryScreen();
 };

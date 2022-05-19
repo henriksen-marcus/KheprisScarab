@@ -19,10 +19,11 @@ ABullet::ABullet()
 	{
 		BaseMesh->SetStaticMesh(BulletRef.Object);
 	}
-	//BaseMesh->SetRelativeScale3D(FVector(7.f, 7.f, 7.f));
-	BaseMesh->SetCollisionProfileName(FName("OverlapAll"));
 	BaseMesh->CastShadow = true;
 	SetRootComponent(BaseMesh);
+
+	BaseMesh->SetSimulatePhysics(true);
+	BaseMesh->SetEnableGravity(false);
 	
 
 	/*TScriptDelegate<FWeakObjectPtr> StopDelegate;
@@ -52,6 +53,7 @@ void ABullet::BeginPlay()
 	// Unreal uses cm measurement, we are converting it from km/h
 	BulletSpeed /= 0.036f;
 
+	BaseMesh->SetPhysicsLinearVelocity(GetActorForwardVector() * BulletSpeed);
 	
 }
 
@@ -60,8 +62,6 @@ void ABullet::BeginPlay()
 void ABullet::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	AddActorLocalOffset(FVector(BulletSpeed * DeltaTime, 0.f,0.f), true);
 	
 	if (TimeLived > TimeBeforeDestroy) { this->Destroy(); }
 	TimeLived += DeltaTime;
@@ -103,7 +103,7 @@ void ABullet::OnOverlapBegin (
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_BulletHitFX, SweepResult.ImpactPoint, Rot, FVector(5.f));
 	}
 	
-	this->Destroy();
+	//this->Destroy();
 }
 
 

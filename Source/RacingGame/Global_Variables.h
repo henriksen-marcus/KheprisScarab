@@ -115,6 +115,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Variable")
 		bool Racing{};
 
+
+	UPROPERTY(BlueprintReadOnly)
 	bool TimeAttackMode{};
 	#pragma endregion
 
@@ -122,7 +124,10 @@ public:
 	bool CheckPoint_Connected{ false };
 	bool NewCheckPoint{ false };
 	int PlayerCheckpointNumber{};
+
+	UPROPERTY(BlueprintReadOnly)
 	int CurrentLap_Counter{ 1 };
+	
 	int MaxLap_Counter{ 3 };
 	#pragma endregion
 
@@ -141,6 +146,12 @@ public:
 	float InGame_Timer{};
 	#pragma endregion
 
+	enum ESaveType : uint8
+	{
+		GameState,
+		GhostImage
+	};
+
 
 	UPROPERTY()
 	class APlayerShipPhysics* PlayerRef;
@@ -150,9 +161,18 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ChangeLevel();
+	
+	bool LoadGameState();
 
-	UFUNCTION()
-	void MapLoadCompleted();
+	/** Blends the ships texture with the given color. This function also works as a color-enabler. */
+	UFUNCTION(BlueprintCallable)
+	void ChangeColor(FLinearColor NewColor);
+
+	/** Removes the color blend on the ships texture, revealing the original texture. */
+	UFUNCTION(BlueprintCallable)
+	void RemoveColor();
+
+	bool SaveGame(ESaveType SaveType);
 
 	enum EGhostDifficulty : uint8
 	{
@@ -167,6 +187,13 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	UUserWidget* PauseScreenRef;
 
+	UPROPERTY(BlueprintReadWrite)
+	FLinearColor ShipColor;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bUseShipColor{};
+
+	bool bIsGameLoaded{};
 
 	//----------------------------------------
 

@@ -60,7 +60,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 	// SpringArm
 	{
 		BackSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("BackSpringArm"));
-		BackSpringArm->SetRelativeRotation(FRotator(-22.f, 0.f, 0.f));
+		BackSpringArm->SetRelativeRotation(FRotator(-15.f, 0.f, 0.f));
 		BackSpringArm->TargetArmLength = TargetSpringArmLength;
 		BackSpringArm->bEnableCameraLag = false;
 		BackSpringArm->CameraLagSpeed = 30.f; // Lower = More delay
@@ -224,6 +224,15 @@ void APlayerShipPhysics::BeginPlay()
 	GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	GamemodeBase = Cast<ARacingGameGameModeBase>(GetWorld()->GetAuthGameMode());
 
+	if (GameInstance)
+	{
+		GameInstance->PlayerRef = this;
+		if (GameInstance->bUseShipColor)
+		{
+			ChangeColor(GameInstance->ShipColor);
+		}
+	}
+
 	//Checkpoint
 	InitialLocation = GetActorLocation();
 	if (GameInstance->TimeAttackMode)
@@ -324,33 +333,33 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	}
 	else
 	{
-		OffTrackTimer += DeltaTime;
-		
-		if (OffTrackTimer >= 1.f)
+		if (!CheckAgainForSurface())
 		{
-			bIsOnRoad = false;
-			SpeedMultiplier = 0.3f;
+			OffTrackTimer += DeltaTime;
+		
+			if (OffTrackTimer >= 1.f)
+			{
+				bIsOnRoad = false;
+				SpeedMultiplier = 0.3f;
 			
-			GameInstance->AddHealth(-8 * DeltaTime);
-			if (Root->GetPhysicsLinearVelocity().Size() > 5000.f)
-			{
-				UGameplayStatics::PlayWorldCameraShake(GetWorld(), CamShake, ActiveCamera->GetComponentLocation(), 20, 40);
-			}
+				GameInstance->AddHealth(-8 * DeltaTime);
+				if (Root->GetPhysicsLinearVelocity().Size() > 5000.f)
+				{
+					UGameplayStatics::PlayWorldCameraShake(GetWorld(), CamShake, ActiveCamera->GetComponentLocation(), 5, 10);
+				}
 
-			if (OffTrackScreen)
-			{
-				OffTrackScreen->SetVisibility(ESlateVisibility::Visible);
-			}
+				if (OffTrackScreen)
+				{
+					OffTrackScreen->SetVisibility(ESlateVisibility::Visible);
+				}
+			}	
 		}
 	}
 
 	CameraCenteringTimer += DeltaTime;
 	ShootTimer += DeltaTime;
 	JumpTimer += DeltaTime;
-	HitSoundCooldown += DeltaTime;
-
-
-	
+	HitCooldown += DeltaTime;
 }
 
 
@@ -545,6 +554,43 @@ FString APlayerShipPhysics::CheckSurface(FVector &HitLocation)
 	return FString();
 }
 
+bool APlayerShipPhysics::CheckAgainForSurface()
+{
+	/** How far to check for underlying surface */
+	static float CheckDistance = 20000.f;
+	
+	FHitResult HitRes;
+	FVector Start = GetActorLocation();
+	FVector End = GetActorLocation() - FVector::DownVector * CheckDistance;
+
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Red);
+	
+	if (GetWorld()->LineTraceSingleByChannel(HitRes, Start, End, ECC_Visibility))
+	{
+		if (GetWorld()->LineTraceSingleByChannel(HitRes, Start, End, ECC_Visibility))
+		{
+			if (HitRes.bBlockingHit)
+			{
+				if (IsValid(HitRes.Component.Get()))
+				{
+					if (IsValid(HitRes.Component.Get()->GetMaterial(0)))
+					{
+						if (IsValid(HitRes.Component.Get()->GetMaterial(0)->GetPhysicalMaterial()))
+						{
+							UPhysicalMaterial* PhysMat = HitRes.Component.Get()->GetMaterial(0)->GetPhysicalMaterial();
+							if (PhysMat->GetName() != "")
+							{
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
 void APlayerShipPhysics::SpawnSandEffect(FVector HitLoc)
 {
 	if (!SandSystemPtr)
@@ -603,7 +649,7 @@ void APlayerShipPhysics::Tunnel(bool bIsInside)
 void APlayerShipPhysics::ChangeColor(FLinearColor NewColor) const
 {
 	DynMat->SetVectorParameterValue(FName("ShipColor"), NewColor);
-	DynMat->SetScalarParameterValue(FName("ColorLerp"), 0.8f);
+	DynMat->SetScalarParameterValue(FName("ColorLerp"), 0.5f);
 }
 
 void APlayerShipPhysics::RemoveColor() const 
@@ -695,6 +741,7 @@ void APlayerShipPhysics::Jump()
 		if (GameInstance->bRaceNotStarted || bIsJumping || JumpTimer < 2.f) { return; }
 
 		bIsJumping = true;
+		bShouldGroundStickingWait = true;
 		JumpTimer = 0.f;
 
 		FTimerHandle TimerHandle;
@@ -704,6 +751,15 @@ void APlayerShipPhysics::Jump()
 		TimerDelegate.BindLambda([&]
 			{
 				bIsJumping = false;
+
+				FTimerHandle a;
+				FTimerDelegate b;
+				b.BindLambda([&]
+				{
+					bShouldGroundStickingWait = false;
+				});
+				GetWorld()->GetTimerManager().SetTimer(a, b, 2.f, false);
+			
 			});
 
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, 0.07f, false);
@@ -953,7 +1009,7 @@ void APlayerShipPhysics::HoverRaycast()
 			float NormalizedDistance = UKismetMathLibrary::Vector_Distance(Start, HitRes.Location) / TargetHeight;
 
 			// If we are above our target hovering distance, add a downwards force to keep us on the track
-			if (NormalizedDistance > 1.f && !bIsJumping)
+			if (NormalizedDistance > 1.f && !bIsJumping && !bShouldGroundStickingWait)
 			{
 				FVector UpVector = GetActorUpVector();
 				float Constant = Gravity / 2.f;
@@ -1079,7 +1135,7 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num) const
 	// If we are close enough to the ground to give thrust
 	if (NormalizedDistance < 1.f)
 	{
-		const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(NormalizedDistance) * UpVector).GetClampedToMaxSize(11000000.f);
+		const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(NormalizedDistance) * UpVector).GetClampedToMaxSize(19000000.f);
 		const FVector Damping = ZVelocity * -UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 1600;
 		Root->AddForceAtLocation(ThrustForce, CompLocation);
 		Root->AddForceAtLocation(Damping, CompLocation);
@@ -1192,9 +1248,9 @@ void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 void APlayerShipPhysics::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (!OtherActor || OtherActor == this) { return; }
-	UE_LOG(LogTemp, Warning, TEXT("We hit something."))
-	if (HitSound1 && HitSound2 && HitSoundCooldown > 0.5f)
+	if (!OtherActor || OtherActor == this || HitCooldown < 1.f) { return; }
+	
+	if (HitSound1 && HitSound2)
 	{
 		USoundBase* Sound;
 		switch (FMath::RandRange(0,1))
@@ -1214,14 +1270,14 @@ void APlayerShipPhysics::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound, Hit.ImpactPoint, 0.6f * GameInstance->GlobalVolumeMultiplier);
 		}
-		
-		HitSoundCooldown = 0.f;
 	}
 
 	if (GameInstance)
 	{
 		// The amount of damage to cause to the player when they crash at x speed
-		const float Amount = FMath::Lerp(5, 30, Speed/18000.f);
+		const float Amount = FMath::Lerp(15, 60, Speed/18000.f);
 		GameInstance->AddHealth(-Amount);
 	}
+
+	HitCooldown = 0.f;
 }

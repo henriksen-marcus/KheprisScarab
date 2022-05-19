@@ -12,6 +12,7 @@
 #include "Engine/Texture2D.h"
 #include "Blueprint/UserWidget.h"
 #include <Components/CanvasPanel.h>
+#include "../RacingGameGameModeBase.h"
 
 void UHUD_PlayerShip::NativeConstruct()
 {
@@ -588,6 +589,19 @@ void UHUD_PlayerShip::RaceFinished()
 					SpawnWidget = true;
 
 					UE_LOG(LogTemp, Warning, TEXT("HUD_PLayerShip - Spawning in Win_Screen UUUEEE"));
+
+					ARacingGameGameModeBase* GameModeBase = Cast<ARacingGameGameModeBase>(GetWorld()->GetAuthGameMode());
+					
+					if (GameModeBase)
+					{
+						GameModeBase->StopRecording();
+
+						if (TrackTimer_Accurate < GameInstance->HighScoreTime || !GameInstance->HighScoreTime)
+						{
+							GameInstance->HighScoreTime = TrackTimer_Accurate;
+							GameInstance->SaveGame(UGlobal_Variables::GhostImage);
+						}
+					}
 				}
 			}
 		}

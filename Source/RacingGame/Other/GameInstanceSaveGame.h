@@ -133,5 +133,14 @@ public:
 	float GlobalVolumeMultiplier{};
 
 	UPROPERTY()
+	float HighScoreTime{};
+
+	UPROPERTY()
+	FLinearColor ShipColor{};
+
+	UPROPERTY()
+	bool bUseShipColor{};
+	
+	UPROPERTY()
 	FDateTime SaveDate;
 };

@@ -289,10 +289,14 @@ public:
 	void Tunnel(bool bIsInside);
 
 	/** Blends the ships texture with the given color. This function also works as a color-enabler. */
+	UFUNCTION(BlueprintCallable)
 	void ChangeColor(FLinearColor NewColor) const;
 
 	/** Removes the color blend on the ships texture, revealing the original texture. */
+	UFUNCTION(BlueprintCallable)
 	void RemoveColor() const;
+
+	bool CheckAgainForSurface();
 
 	
 	// ---------- Variables ---------- //
@@ -340,7 +344,9 @@ public:
 	 */
 	UPROPERTY()
 	UMaterialInstanceDynamic* DynMat;
-	
+
+	UPROPERTY(BlueprintReadWrite)
+	FLinearColor StartColor;
 	
 	/** Timers */
 	
@@ -348,7 +354,7 @@ public:
 	float JumpTimer{};
 	float OffTrackTimer{};
 	float SandEndSystemTimer{};
-	float HitSoundCooldown{};
+	float HitCooldown{};
 	
 
 	/** Bools */
