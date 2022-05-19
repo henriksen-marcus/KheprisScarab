@@ -344,14 +344,14 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 		{
 			UGameplayStatics::PlayWorldCameraShake(GetWorld(), CamShake, ActiveCamera->GetComponentLocation(), 5, 10);
 		}
+
+		SpeedMultiplier = 0.3f;
+		GameInstance->AddHealth(-8 * DeltaTime);
 		
 		if (OffTrackTimer >= 1.5f) // Off-road effect is triggered
 		{
 			bIsOnRoad = false;
-			SpeedMultiplier = 0.3f;
 			TargetHeight = 600.f;
-			GameInstance->AddHealth(-8 * DeltaTime);
-
 			if (OffTrackScreen)
 			{
 				OffTrackScreen->SetVisibility(ESlateVisibility::Visible);
