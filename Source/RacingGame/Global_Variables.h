@@ -55,9 +55,9 @@ public:
 		float MaxBoost{};
 
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		int TimeCount{};
+		int TimeCount{60};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
-		int TimeStartCount{60};
+		int TimeStartCount{65};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
 		int TimeAdded{};
 	UPROPERTY(EditAnywhere, Category = "Upgradeable Variables")
@@ -79,6 +79,8 @@ public:
 	int TimeUpgradeTier{};
 	float TimeUpgradeCost{ 2 };
 	#pragma endregion
+
+	int TimeAddedFromShop{};
 
 	#pragma region Settings_Menu
 	bool Health_Display{ true };
@@ -173,23 +175,14 @@ public:
 	void RemoveColor();
 
 	bool SaveGame(ESaveType SaveType);
-
 	
-
-	enum EGhostDifficulty : uint8
-	{
-		Player,
-		Gold,
-		Silver,
-		Bronze
-	};
 	
-	EGhostDifficulty GhostDifficulty{};
+	int32 GhostDifficulty{};
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 GhostDiffBP{};
 
-	void SetDifficulty(EGhostDifficulty Difficulty);
+	void SetDifficulty(int32 Difficulty);
 
 	UPROPERTY(BlueprintReadWrite)
 	UUserWidget* PauseScreenRef;

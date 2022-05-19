@@ -16,7 +16,6 @@ UGlobal_Variables::UGlobal_Variables()
 	CurrentHealth = MaxHealth;
 	MaxAmmo = 10;
 	CurrentAmmo = MaxAmmo;
-	TimeCount = 60;
 	TimeAdded = 15;
 	
 }
@@ -120,6 +119,8 @@ bool UGlobal_Variables::SaveGame(ESaveType SaveType)
 			SGI->HighScoreTime = HighScoreTime;
 			SGI->ShipColor = ShipColor;
 			SGI->bUseShipColor = bUseShipColor;
+			SGI->TimeAddedFromShop = TimeAddedFromShop;
+			SGI->TimeStartCount = TimeStartCount;
 			
 			if (UGameplayStatics::SaveGameToSlot(SGI, TEXT("GameState"), 0))
 			{
@@ -148,10 +149,10 @@ bool UGlobal_Variables::SaveGame(ESaveType SaveType)
 				SaveGameInstance->RotationArr = GameModeBase->RotationArr;
 				UE_LOG(LogTemp, Warning, TEXT("Saved game... Location Arr size in saveinstance: %d"), SaveGameInstance->LocationArr.Num())
 			}
-
-			if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("GhostSave"), 1))
+			
+			if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("PlayerGhost"), 0))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Successfully saved the ghost image on index 1. Recording size: %d"), GameModeBase->LocationArr.Num())
+				UE_LOG(LogTemp, Warning, TEXT("Successfully saved the Bronze ghost image. Recording size: %d"), GameModeBase->LocationArr.Num())
 				return true;
 			}
 			else
@@ -168,7 +169,7 @@ bool UGlobal_Variables::SaveGame(ESaveType SaveType)
 	return false;
 }
 
-void UGlobal_Variables::SetDifficulty(EGhostDifficulty Difficulty)
+void UGlobal_Variables::SetDifficulty(int32 Difficulty)
 {
 	GhostDifficulty = Difficulty;
 	GhostDiffBP = Difficulty;
@@ -224,6 +225,8 @@ bool UGlobal_Variables::LoadGameState()
 	ShipColor = SGI->ShipColor;
 	bUseShipColor = SGI->bUseShipColor;
 	HighScoreTime = SGI->HighScoreTime;
+	TimeAddedFromShop = SGI->TimeAddedFromShop;
+	TimeStartCount = SGI->TimeStartCount;
 	
 	return true;
 }

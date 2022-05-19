@@ -47,44 +47,34 @@ void ARacingGameGameModeBase::BeginPlay()
 		PlayerShipRef->SetActorRotation(CheckpointArrowRotation);
 	}
 
-	if (UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 0))
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("PlayerGhost"), 0))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found player ghost"))
-		//UGameplayStatics::DeleteGameInSlot("GhostSave", 0);
-	}else
+	} else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't find player ghost"))
 	}
-	if (UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 1))
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("GoldGhost"), 0))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found gold ghost"))
-		//UGameplayStatics::DeleteGameInSlot("GhostSave", 1);
-	}else
+	} else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't find gold ghost"))
 	}
-	if (UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 2))
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("SilverGhost"), 0))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found silver ghost"))
-		//UGameplayStatics::DeleteGameInSlot("GhostSave", 2);
-	}else
+	} else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't find silver ghost"))
 	}
-	if (UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 3))
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("BronzeGhost"), 0))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found bronze ghost"))
-		//UGameplayStatics::DeleteGameInSlot("GhostSave", 3);
-	}else
+	} else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't find bronze ghost"))
 	}
-
-	
-	
-	
-	
-	
 }
 
 
@@ -98,10 +88,55 @@ bool ARacingGameGameModeBase::LoadGhost(int32 Difficulty)
 {
 	// Create an instance of the save-game class
 
-	if (!UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), Difficulty)) { return false; }
+	UE_LOG(LogTemp, Warning, TEXT("Starting loadghost, difficulty requested: %d"), Difficulty)
+	
+	bool bDoesSaveGameExist{};
+	
+	switch (Difficulty)
+	{
+	case 0:
+		bDoesSaveGameExist = UGameplayStatics::DoesSaveGameExist(TEXT("PlayerGhost"), 0);
+		break;
+	case 1:
+		bDoesSaveGameExist = UGameplayStatics::DoesSaveGameExist(TEXT("GoldGhost"), 0);
+		break;
+	case 2:
+		bDoesSaveGameExist = UGameplayStatics::DoesSaveGameExist(TEXT("SilverGhost"), 0);
+		break;
+	case 3:
+		bDoesSaveGameExist = UGameplayStatics::DoesSaveGameExist(TEXT("BronzeGhost"), 0);
+		break;
+	default:
+		break;
+	}
+
+	if (!bDoesSaveGameExist)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("bDoesSaveGameExist is false, returning."))
+		return false;
+	}
 		
 	UGhostImageSaveGame* SaveGameInstance;
-	SaveGameInstance = Cast<UGhostImageSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("GhostSave"), Difficulty));
+
+	switch (Difficulty)
+	{
+	case 0:
+		SaveGameInstance = Cast<UGhostImageSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("PlayerGhost"), 0));
+		break;
+	case 1:
+		SaveGameInstance = Cast<UGhostImageSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("GoldGhost"), 0));
+		break;
+	case 2:
+		SaveGameInstance = Cast<UGhostImageSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("SilverGhost"), 0));
+		break;
+	case 3:
+		SaveGameInstance = Cast<UGhostImageSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("BronzeGhost"), 0));
+		break;
+	default:
+		SaveGameInstance = Cast<UGhostImageSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("PlayerGhost"), 0));
+		break;
+	}
+	
 	if (SaveGameInstance)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SaveGameInstance in loadgame is valid. LocationArr size: %d  %s"), SaveGameInstance->LocationArr.Num(), *SaveGameInstance->SaveName)
@@ -111,7 +146,7 @@ bool ARacingGameGameModeBase::LoadGhost(int32 Difficulty)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("LoadGame failed."))
+		UE_LOG(LogTemp, Warning, TEXT("LoadGame failed, save object was not valid."))
 		return false;
 	}
 }

@@ -273,7 +273,7 @@ void UMenu_Settings::EasyDisplay_Button_Clicked()
 		GameInstance->Difficulty_Normal = false;
 		GameInstance->Difficulty_Hard = false;
 
-		GameInstance->TimeStartCount = 75;
+		GameInstance->TimeStartCount = 80;
 	}
 }
 void UMenu_Settings::NormalDisplay_Button_Clicked()
@@ -287,7 +287,7 @@ void UMenu_Settings::NormalDisplay_Button_Clicked()
 		GameInstance->Difficulty_Normal = true;
 		GameInstance->Difficulty_Hard = false;
 
-		GameInstance->TimeStartCount = 60;
+		GameInstance->TimeStartCount = 65;
 	}
 }
 void UMenu_Settings::HardDisplay_Button_Clicked()
@@ -301,7 +301,7 @@ void UMenu_Settings::HardDisplay_Button_Clicked()
 		GameInstance->Difficulty_Normal = false;
 		GameInstance->Difficulty_Hard = true;
 
-		GameInstance->TimeStartCount = 45;
+		GameInstance->TimeStartCount = 50;
 	}
 }
 

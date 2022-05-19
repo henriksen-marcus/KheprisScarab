@@ -19,7 +19,7 @@ void UGhostSelectScreen::NativeOnInitialized()
 	SilverBtn->OnClicked.AddDynamic(this, &UGhostSelectScreen::SilverBtnClicked);
 	BronzeBtn->OnClicked.AddDynamic(this, &UGhostSelectScreen::BronzeBtnClicked);
 
-	GameInstance = Cast<UGlobal_Variables>(GetWorld()->GetAuthGameMode());
+	GameInstance = Cast<UGlobal_Variables>(GetWorld()->GetGameInstance());
 }
 
 
@@ -27,7 +27,7 @@ void UGhostSelectScreen::HighscoreBtnClicked()
 {
 	if (GameInstance)
 	{
-		GameInstance->SetDifficulty(UGlobal_Variables::EGhostDifficulty::Player);
+		GameInstance->SetDifficulty(0);
 	}
 }
 
@@ -35,7 +35,7 @@ void UGhostSelectScreen::GoldBtnClicked()
 {
 	if (GameInstance)
 	{
-		GameInstance->SetDifficulty(UGlobal_Variables::EGhostDifficulty::Gold);
+		GameInstance->SetDifficulty(1);
 	}
 }
 
@@ -43,7 +43,7 @@ void UGhostSelectScreen::SilverBtnClicked()
 {
 	if (GameInstance)
 	{
-		GameInstance->SetDifficulty(UGlobal_Variables::EGhostDifficulty::Silver);
+		GameInstance->SetDifficulty(2);
 	}
 }
 
@@ -51,6 +51,6 @@ void UGhostSelectScreen::BronzeBtnClicked()
 {
 	if (GameInstance)
 	{
-		GameInstance->SetDifficulty(UGlobal_Variables::EGhostDifficulty::Bronze);
+		GameInstance->SetDifficulty(3);
 	}
 }

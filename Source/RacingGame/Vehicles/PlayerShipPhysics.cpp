@@ -245,7 +245,7 @@ void APlayerShipPhysics::BeginPlay()
 
 	if (GameInstance)
 	{
-		GameInstance->TimeAdded = 15;
+		GameInstance->TimeAdded = 18 + GameInstance->TimeAddedFromShop;
 	}
 }
 
@@ -266,7 +266,7 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 
 	if (bLogSpeed)
 	{
-		//UE_LOG(LogTemp,Warning,TEXT("Speed is: %f"), Speed);
+		UE_LOG(LogTemp,Warning,TEXT("Speed is: %f"), Speed);
 	}
 
 	if (AudioComp && CustomCurve2 && GameInstance)
@@ -660,8 +660,6 @@ void APlayerShipPhysics::RemoveColor() const
 
 void APlayerShipPhysics::Shoot()
 {
-	GamemodeBase->StopRecording();
-	GameInstance->SaveGame(UGlobal_Variables::GhostImage);
 	if (GameInstance)
 	{
 		if (GameInstance->bRaceNotStarted) { return; }
@@ -917,17 +915,23 @@ void APlayerShipPhysics::MovementUpdate()
 	Root->AddForce(CombinedGravity * (Gravity));
 	//Root->AddForce(Gravity * FVector::DownVector);
 
-	// Local forwards force
-	Root->AddForce(GetActorForwardVector() * Force.X, FName(), true);
+	if (!bHUDDisable)
+	{
+		// Local forwards force
+		Root->AddForce(GetActorForwardVector() * Force.X, FName(), true);
+	}
 	
 	// Limit speed
-	if (Root->GetPhysicsLinearVelocity().Size() > 15000.f)
+	if (Root->GetPhysicsLinearVelocity().Size() > 16000.f)
 	{
 		if (bIsDashing && Root->GetPhysicsLinearVelocity().Size() > 22000.f)
 		{
-			Root->SetPhysicsLinearVelocity(Root->GetPhysicsLinearVelocity().GetSafeNormal() * 22000.f);
+			Root->SetPhysicsLinearVelocity(Root->GetPhysicsLinearVelocity().GetSafeNormal() * 21000.f);
 		}
-		Root->SetPhysicsLinearVelocity(Root->GetPhysicsLinearVelocity().GetSafeNormal() * 15000.f);
+		else if (!bIsDashing)
+		{
+			Root->SetPhysicsLinearVelocity(Root->GetPhysicsLinearVelocity().GetSafeNormal() * 15000.f);
+		}
 	}
 
 	// Drag

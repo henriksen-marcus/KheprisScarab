@@ -68,6 +68,8 @@ void UHUD_PlayerShip::NativeOnInitialized()
 	//Set Start Round Counter text
 	Current_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->CurrentLap_Counter)));
 	Max_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->MaxLap_Counter)));
+
+	HighScoreDisplay();
 }
 void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {
@@ -94,6 +96,8 @@ void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 	CheckDefeat();
 	RaceFinished();
+	
+	//HighScoreDisplay();
 }
 
 
@@ -280,7 +284,7 @@ void UHUD_PlayerShip::SetSpeedDisplay()
 		if (PlayerShipPhysics)
 		{
 			//Set angle of Speed_Arrow_Image
-			Speed_Arrow->SetRenderTransformAngle(FMath::Lerp(-135, 135, PlayerShipPhysics->Speed / 19000));
+			Speed_Arrow->SetRenderTransformAngle(FMath::Clamp(FMath::Lerp(-135, 135, PlayerShipPhysics->Speed / 22000), -135, 135));
 		}
 	}
 }
@@ -307,7 +311,7 @@ void UHUD_PlayerShip::HighScoreDisplay()
 	if (!GameInstance) { return; }
 
 	#pragma region Setup Timer Display
-	Timer_Temp = GameInstance->InGame_Timer;
+	Timer_Temp = GameInstance->HighScoreTime;
 
 	while (Timer_Temp >= 60)
 	{
@@ -327,7 +331,7 @@ void UHUD_PlayerShip::HighScoreDisplay()
 	HighScore_Hundrets = Timer_Temp;
 
 	HighScore_Hundrets = Hundrets * 100;
-	HighScore_Hundrets -= 2;
+	//HighScore_Hundrets -= 2;
 
 	#pragma endregion
 
@@ -354,6 +358,10 @@ void UHUD_PlayerShip::HighScoreDisplay()
 		HighScore_Display_Panel->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
+	{
+		HighScore_Display_Panel->SetVisibility(ESlateVisibility::Hidden);
+	}
+	if (!GameInstance->HighScoreTime)
 	{
 		HighScore_Display_Panel->SetVisibility(ESlateVisibility::Hidden);
 	}
@@ -575,6 +583,12 @@ void UHUD_PlayerShip::CheckDefeat()
 						Screen_Lose->SetVisibility(ESlateVisibility::Visible);
 						FInputModeUIOnly InData;
 						GetWorld()->GetFirstPlayerController()->SetInputMode(InData);
+
+						APlayerShipPhysics* ShipRef = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
+						if (ShipRef)
+						{
+							ShipRef->bHUDDisable = true;
+						}
 					}
 				}
 			}
@@ -603,6 +617,12 @@ void UHUD_PlayerShip::CheckDefeat()
 						Screen_Lose->SetVisibility(ESlateVisibility::Visible);
 						FInputModeUIOnly InData;
 						GetWorld()->GetFirstPlayerController()->SetInputMode(InData);
+
+						APlayerShipPhysics* ShipRef = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
+						if (ShipRef)
+						{
+							ShipRef->bHUDDisable = true;
+						}
 					}
 				}
 			}
@@ -640,6 +660,12 @@ void UHUD_PlayerShip::RaceFinished()
 					FInputModeUIOnly InData;
 					GetWorld()->GetFirstPlayerController()->SetInputMode(InData);
 
+					APlayerShipPhysics* ShipRef = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
+					if (ShipRef)
+					{
+						ShipRef->bHUDDisable = true;
+					}
+
 					SpawnWidget = true;
 
 					UE_LOG(LogTemp, Warning, TEXT("HUD_PLayerShip - Spawning in Win_Screen UUUEEE"));
@@ -648,14 +674,12 @@ void UHUD_PlayerShip::RaceFinished()
 					
 					if (GameModeBase)
 					{
-						GameModeBase->StopRecording();
-						GameInstance->SaveGame(UGlobal_Variables::GhostImage);
-						UE_LOG(LogTemp, Warning, TEXT("Saved new ghost, mvh hud playership"))
-						/*if (TrackTimer_Accurate < GameInstance->HighScoreTime || !GameInstance->HighScoreTime)
+						if (TrackTimer_Accurate < GameInstance->HighScoreTime || !GameInstance->HighScoreTime)
 						{
+							UE_LOG(LogTemp, Warning, TEXT("Beat Highscore! Updating."))
 							GameInstance->HighScoreTime = TrackTimer_Accurate;
 							GameInstance->SaveGame(UGlobal_Variables::GhostImage);
-						}*/
+						}
 					}
 				}
 			}

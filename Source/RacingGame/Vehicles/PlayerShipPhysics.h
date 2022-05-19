@@ -101,7 +101,7 @@ public:
 	/* BLUEPRINT VARIABLES */
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float MaxSpeedBoost{2.f};
+	float MaxSpeedBoost{1.5f};
 
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
 	float SpeedMultiplier{1.f};
@@ -366,6 +366,7 @@ public:
 	
 	bool bIsJumping{};
 	bool bShouldGroundStickingWait{};
+	bool bHUDDisable{};
 	
 
 	/** Floats */

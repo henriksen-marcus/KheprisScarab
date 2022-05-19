@@ -205,7 +205,7 @@ void UMenu_Shop::HealthShop_Button_Clicked()
 
 					GameInstance->Currency1 -= GameInstance->HealthUpgradeCost;
 					GameInstance->HealthUpgradeTier += 1;
-					GameInstance->HealthUpgradeCost += 1;
+					GameInstance->HealthUpgradeCost += 3;
 					GameInstance->MaxHealth += 20;
 				}
 				else
@@ -333,7 +333,7 @@ void UMenu_Shop::AmmoShop_Button_Clicked()
 
 					GameInstance->Currency1 -= GameInstance->AmmoUpgradeCost;
 					GameInstance->AmmoUpgradeTier += 1;
-					GameInstance->AmmoUpgradeCost += 1;
+					GameInstance->AmmoUpgradeCost += 3;
 					GameInstance->MaxAmmo += 3;
 				}
 				else
@@ -462,7 +462,7 @@ void UMenu_Shop::BoostShop_Button_Clicked()
 
 					GameInstance->Currency1 -= GameInstance->BoostUpgradeCost;
 					GameInstance->BoostUpgradeTier += 1;
-					GameInstance->BoostUpgradeCost += 1;
+					GameInstance->BoostUpgradeCost += 3;
 					GameInstance->DashTimer += 0.5f;
 				}
 				else
@@ -570,7 +570,7 @@ void UMenu_Shop::SetTimeUpgrade_Display()
 		else
 			TimeShop_Button_Text->SetText(FText::FromString(""));
 
-		MaxTime_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->TimeAdded)));
+		MaxTime_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->TimeAddedFromShop + 18)));
 	}
 }
 void UMenu_Shop::TimeShop_Button_Clicked()
@@ -591,8 +591,8 @@ void UMenu_Shop::TimeShop_Button_Clicked()
 
 					GameInstance->Currency1 -= GameInstance->TimeUpgradeCost;
 					GameInstance->TimeUpgradeTier += 1;
-					GameInstance->TimeUpgradeCost += 1;
-					GameInstance->TimeAdded += 2;
+					GameInstance->TimeUpgradeCost += 3;
+					GameInstance->TimeAddedFromShop += 2;
 				}
 				else
 					UGameplayStatics::PlaySound2D(GetWorld(), NotEnoughMoneySound, 1.f * GameInstance->GlobalVolumeMultiplier);

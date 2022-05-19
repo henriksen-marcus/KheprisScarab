@@ -140,6 +140,12 @@ public:
 
 	UPROPERTY()
 	bool bUseShipColor{};
+
+	UPROPERTY()
+	int TimeAddedFromShop{};
+
+	UPROPERTY()
+	int TimeStartCount{};
 	
 	UPROPERTY()
 	FDateTime SaveDate;
