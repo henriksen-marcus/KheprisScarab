@@ -74,8 +74,13 @@ public:
 	UPROPERTY()
 	USpringArmComponent* ActiveSpringArm;
 
+	/** The camera shake class that plays when off-road. */
 	UPROPERTY(EditAnywhere, Category = "CameraVariables")
 	TSubclassOf<UCameraShakeBase> CamShake;
+
+	/** The camera shake class that plays when hitting something. */
+	UPROPERTY(EditAnywhere, Category = "CameraVariables")
+	TSubclassOf<UCameraShakeBase> HitCamShake;
 
 
 	/* CURVES */
@@ -103,11 +108,11 @@ public:
 
 	/** What field of view the camera should interpolate towards */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float TargetCameraFOV{105.f};
+	float TargetCameraFOV{115.f};
 
 	/** Target spring arm length, constantly interpolated towards */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float TargetSpringArmLength{700.f};
+	float TargetSpringArmLength{500.f};
 
 	/** The ship's target height above the ground */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")

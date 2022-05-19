@@ -10,9 +10,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "../../Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraCommon.h"
-#include "AnimNodes/AnimNode_RandomPlayer.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/CapsuleComponent.h"
 
 // Sets default values
 APlayerShipPhysics::APlayerShipPhysics()
@@ -60,7 +58,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 	// SpringArm
 	{
 		BackSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("BackSpringArm"));
-		BackSpringArm->SetRelativeRotation(FRotator(-15.f, 0.f, 0.f));
+		BackSpringArm->SetRelativeRotation(FRotator(-18.f, 0.f, 0.f));
 		BackSpringArm->TargetArmLength = TargetSpringArmLength;
 		BackSpringArm->bEnableCameraLag = false;
 		BackSpringArm->CameraLagSpeed = 30.f; // Lower = More delay
@@ -87,6 +85,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 	{
 		BackCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("BackCamera"));
 		BackCamera->bUsePawnControlRotation = false;
+		BackCamera->FieldOfView = TargetCameraFOV;
 		BackCamera->SetupAttachment(BackSpringArm, USpringArmComponent::SocketName);
 		BackCamera->SetRelativeRotation(FRotator(12.f, 0.f, 0.f));
 
@@ -99,7 +98,7 @@ APlayerShipPhysics::APlayerShipPhysics()
 		
 		FrontCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FrontCamera"));
 		FrontCamera->bUsePawnControlRotation = false;
-		FrontCamera->FieldOfView = 120.f;
+		FrontCamera->FieldOfView = 122.f;
 		FrontCamera->SetupAttachment(GetRootComponent());
 		FrontCamera->SetRelativeLocation(FVector(160.f, 0.f, -20.f));
 
@@ -138,10 +137,10 @@ APlayerShipPhysics::APlayerShipPhysics()
 		Thrust3->SetupAttachment(GetRootComponent());
 		Thrust4->SetupAttachment(GetRootComponent());
 
-		Thrust1->SetRelativeLocationAndRotation(FVector(300.f, -100.f, 0.f), FRotator(-90.f, 90.f, 0.f));
-		Thrust2->SetRelativeLocationAndRotation(FVector(300.f, 100.f, 0.f), FRotator(-90.f, -90.f, 0.f));
-		Thrust3->SetRelativeLocationAndRotation(FVector(-300.f, -100.f, 0.f), FRotator(-90.f, 90.f, 0.f));
-		Thrust4->SetRelativeLocationAndRotation(FVector(-300.f, 100.f, 0.f), FRotator(-90.f, -90.f, 0.f));
+		Thrust1->SetRelativeLocationAndRotation(FVector(300.f, -150.f, 0.f), FRotator(-90.f, 90.f, 0.f));
+		Thrust2->SetRelativeLocationAndRotation(FVector(300.f, 150.f, 0.f), FRotator(-90.f, -90.f, 0.f));
+		Thrust3->SetRelativeLocationAndRotation(FVector(-300.f, -150.f, 0.f), FRotator(-90.f, 90.f, 0.f));
+		Thrust4->SetRelativeLocationAndRotation(FVector(-300.f, 150.f, 0.f), FRotator(-90.f, -90.f, 0.f));
 
 		BulletSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("BulletSpawnPoint"));
 		BulletSpawnPoint->SetupAttachment(GetRootComponent());
@@ -268,9 +267,10 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 	if (AudioComp && CustomCurve2 && GameInstance)
 	{
 		// Interp to smooth out speed/audio fluctuations
-		AudioComp->PitchMultiplier = FMath::FInterpTo(AudioComp->PitchMultiplier, (CustomCurve2->GetFloatValue(Speed/20000.f) + 1), DeltaTime, 1.5f);
+		AudioComp->PitchMultiplier = FMath::FInterpTo(AudioComp->PitchMultiplier, (CustomCurve2->GetFloatValue(Speed/16000.f) + 1), DeltaTime, 1.5f);
 		AudioComp->SetPitchMultiplier(AudioComp->PitchMultiplier);
-		AudioComp->VolumeMultiplier = AudioComp->VolumeMultiplier * GameInstance->GlobalVolumeMultiplier;
+		//AudioComp->SetFloatParameter(FName("ShipSpeed"), Speed/20.f);
+		AudioComp->VolumeMultiplier = GameInstance->GlobalVolumeMultiplier * 2;
 	}
 
 	// Turning
@@ -331,29 +331,27 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 			OffTrackScreen->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
-	else
+	else if (!CheckAgainForSurface()) // Check directly downwards, long raycast
 	{
-		if (!CheckAgainForSurface())
-		{
-			OffTrackTimer += DeltaTime;
-		
-			if (OffTrackTimer >= 1.f)
-			{
-				bIsOnRoad = false;
-				SpeedMultiplier = 0.3f;
-			
-				GameInstance->AddHealth(-8 * DeltaTime);
-				if (Root->GetPhysicsLinearVelocity().Size() > 5000.f)
-				{
-					UGameplayStatics::PlayWorldCameraShake(GetWorld(), CamShake, ActiveCamera->GetComponentLocation(), 5, 10);
-				}
+		OffTrackTimer += DeltaTime;
 
-				if (OffTrackScreen)
-				{
-					OffTrackScreen->SetVisibility(ESlateVisibility::Visible);
-				}
-			}	
+		if (CamShake)
+		{
+			UGameplayStatics::PlayWorldCameraShake(GetWorld(), CamShake, ActiveCamera->GetComponentLocation(), 5, 10);
 		}
+		
+		if (OffTrackTimer >= 1.5f) // Off-road effect is triggered
+		{
+			bIsOnRoad = false;
+			SpeedMultiplier = 0.3f;
+			TargetHeight = 600.f;
+			GameInstance->AddHealth(-8 * DeltaTime);
+
+			if (OffTrackScreen)
+			{
+				OffTrackScreen->SetVisibility(ESlateVisibility::Visible);
+			}
+		}	
 	}
 
 	CameraCenteringTimer += DeltaTime;
@@ -561,9 +559,7 @@ bool APlayerShipPhysics::CheckAgainForSurface()
 	
 	FHitResult HitRes;
 	FVector Start = GetActorLocation();
-	FVector End = GetActorLocation() - FVector::DownVector * CheckDistance;
-
-	//DrawDebugLine(GetWorld(), Start, End, FColor::Red);
+	FVector End = GetActorLocation() + FVector::DownVector * CheckDistance;
 	
 	if (GetWorld()->LineTraceSingleByChannel(HitRes, Start, End, ECC_Visibility))
 	{
@@ -699,7 +695,7 @@ if (bIsDashing) { return; }
 		{
 			GameInstance->BoostPickup = false;
 		
-			static float CamFovChange = 15.f;
+			static float CamFovChange = 20.f;
 			static float SpringArmChange = 200.f;
 
 			TargetCameraFOV += CamFovChange;
@@ -829,22 +825,22 @@ void APlayerShipPhysics::ChangeCameraAngle()
 		BackCamera->SetActive(true);
 		ActiveCamera = BackCamera;
 		
-		TargetSpringArmLength = 700.f;
+		TargetSpringArmLength = 500.f;
 		break;
 	case Far:
 		FrontCamera->SetActive(false);
 		BackCamera->SetActive(true);
 		ActiveCamera = BackCamera;
 		
-		TargetSpringArmLength = 1200.f;
+		TargetSpringArmLength = 1000.f;
 		break;
 	case Front:
 		BackCamera->SetActive(false);
 		FrontCamera->SetActive(true);
 		ActiveCamera = FrontCamera;
 
-		TargetSpringArmLength = 700.f;
-		BackSpringArm->TargetArmLength = 700.f;
+		TargetSpringArmLength = 500.f;
+		BackSpringArm->TargetArmLength = 500.f;
 		break;
 	case END_ENUM:
 		CurrentCameraAngle = -1;
@@ -1135,7 +1131,7 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num) const
 	// If we are close enough to the ground to give thrust
 	if (NormalizedDistance < 1.f)
 	{
-		const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(NormalizedDistance) * UpVector).GetClampedToMaxSize(19000000.f);
+		const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(NormalizedDistance) * UpVector).GetClampedToMaxSize(21000000.f);
 		const FVector Damping = ZVelocity * -UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 1600;
 		Root->AddForceAtLocation(ThrustForce, CompLocation);
 		Root->AddForceAtLocation(Damping, CompLocation);
@@ -1249,6 +1245,12 @@ void APlayerShipPhysics::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (!OtherActor || OtherActor == this || HitCooldown < 1.f) { return; }
+
+	if (HitCamShake)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Camshake"))
+		UGameplayStatics::PlayWorldCameraShake(GetWorld(), HitCamShake, ActiveCamera->GetComponentLocation(), 20, 40);
+	}
 	
 	if (HitSound1 && HitSound2)
 	{

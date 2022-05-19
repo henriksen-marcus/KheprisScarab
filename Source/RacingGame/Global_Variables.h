@@ -174,6 +174,8 @@ public:
 
 	bool SaveGame(ESaveType SaveType);
 
+	
+
 	enum EGhostDifficulty : uint8
 	{
 		Player,
@@ -181,8 +183,13 @@ public:
 		Silver,
 		Bronze
 	};
-
+	
 	EGhostDifficulty GhostDifficulty{};
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 GhostDiffBP{};
+
+	void SetDifficulty(EGhostDifficulty Difficulty);
 
 	UPROPERTY(BlueprintReadWrite)
 	UUserWidget* PauseScreenRef;

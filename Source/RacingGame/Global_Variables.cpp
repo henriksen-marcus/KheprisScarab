@@ -151,7 +151,7 @@ bool UGlobal_Variables::SaveGame(ESaveType SaveType)
 				UE_LOG(LogTemp, Warning, TEXT("Saved game... Location Arr size in saveinstance: %d"), SaveGameInstance->LocationArr.Num())
 			}
 
-			if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("GhostSave"), 0))
+			if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("GhostSave"), 3))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Successfully saved the ghost image. Recording size: %d"), GameModeBase->LocationArr.Num())
 				return true;
@@ -168,6 +168,12 @@ bool UGlobal_Variables::SaveGame(ESaveType SaveType)
 	}
 	
 	return false;
+}
+
+void UGlobal_Variables::SetDifficulty(EGhostDifficulty Difficulty)
+{
+	GhostDifficulty = Difficulty;
+	GhostDiffBP = Difficulty;
 }
 
 bool UGlobal_Variables::LoadGameState()

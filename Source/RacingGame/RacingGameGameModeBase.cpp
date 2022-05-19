@@ -46,6 +46,36 @@ void ARacingGameGameModeBase::BeginPlay()
 		PlayerShipRef->SetActorLocation(CheckpointArrowLocation);
 		PlayerShipRef->SetActorRotation(CheckpointArrowRotation);
 	}
+
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 0))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found player ghost"))
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't find player ghost"))
+	}
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 1))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found gold ghost"))
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't find gold ghost"))
+	}
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 2))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found silver ghost"))
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't find silver ghost"))
+	}
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), 3))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found bronze ghost"))
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't find bronze ghost"))
+	}
+	
 }
 
 
@@ -57,7 +87,7 @@ void ARacingGameGameModeBase::Tick(float DeltaTime)
 
 bool ARacingGameGameModeBase::LoadGhost(int32 Difficulty)
 {
-	//Create an instance of the save-game class
+	// Create an instance of the save-game class
 
 	if (!UGameplayStatics::DoesSaveGameExist(TEXT("GhostSave"), Difficulty)) { return false; }
 		
