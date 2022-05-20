@@ -7,7 +7,7 @@
 #include "Components/Button.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "RacingGame/RacingGameGameModeBase.h"
+#include "../RacingGameGameModeBase.h"
 #include "Components/CanvasPanel.h"
 
 void UMenu_Start::NativeConstruct()

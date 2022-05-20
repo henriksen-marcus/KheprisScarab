@@ -5,12 +5,12 @@
 #include "../Global_Variables.h"
 #include "../Vehicles/PlayerShipPhysics.h"
 #include "Components/TextBlock.h"
-#include "Kismet/GameplayStatics.h"
+//#include "Kismet/GameplayStatics.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/Slider.h"
 #include "Engine/Texture2D.h"
-#include "RacingGame/Global_Variables.h"
+#include "../Global_Variables.h"
 
 void UMenu_Settings::NativeConstruct()
 {
@@ -315,34 +315,4 @@ void UMenu_Settings::UpdateGlobalVolume(const float NewVolume)
 		GlobalVolumeNumber->SetText(FText::FromString(Str));
 		GameInstance->GlobalVolumeMultiplier = NewVolume;
 	}
-}
-
-
-void UMenu_Settings::ColorButton7Clicked()
-{
-	
-}
-
-void UMenu_Settings::ColorButton6Clicked()
-{
-}
-
-void UMenu_Settings::ColorButton5Clicked()
-{
-}
-
-void UMenu_Settings::ColorButton4Clicked()
-{
-}
-
-void UMenu_Settings::ColorButton3Clicked()
-{
-}
-
-void UMenu_Settings::ColorButton2Clicked()
-{
-}
-
-void UMenu_Settings::ColorButtonClicked()
-{
 }

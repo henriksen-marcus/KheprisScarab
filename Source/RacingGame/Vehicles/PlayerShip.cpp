@@ -3,10 +3,10 @@
 
 #include "PlayerShip.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "DrawDebugHelpers.h"
-#include "ToolContextInterfaces.h"
-#include "AnimGraphRuntime/Public/CommonAnimationTypes.h"
-#include "GenericPlatform/GenericPlatformMisc.h"
+//#include "DrawDebugHelpers.h"
+//#include "ToolContextInterfaces.h"
+//#include "AnimGraphRuntime/Public/CommonAnimationTypes.h"
+//#include "GenericPlatform/GenericPlatformMisc.h"
 #include "Matinee/MatineeInterface.h"
 
 
@@ -413,7 +413,7 @@ FRotator APlayerShip::GetSurfaceNormal()
 
 		if (bEnableDebugLines)
 		{
-			DrawDebugLine(GetWorld(), Start, End, FColor::White, false, -1.f, 0, 12.f);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::White, false, -1.f, 0, 12.f);
 		}
 		
 		// Raycast
@@ -422,7 +422,7 @@ FRotator APlayerShip::GetSurfaceNormal()
 			if (bEnableDebugLines)
 			{
 				// Sphere at collision point
-				DrawDebugSphere(GetWorld(), HitPoints[i].Location, 60.f, 16, FColor::Blue);
+				//DrawDebugSphere(GetWorld(), HitPoints[i].Location, 60.f, 16, FColor::Blue);
 			}
 		}
 		else // If the raycast didn't hit anything within the raycast length
@@ -509,7 +509,7 @@ FRotator APlayerShip::GetSurfaceNormal()
 			TargetLocation = (HitPoints[0].Location + HitPoints[1].Location + HitPoints[2].Location + HitPoints[3].Location) / 4;
 			TargetLocation += NewUpVector.GetSafeNormal() * TargetHeight;
 		
-			if (bEnableDebugLines) { DrawDebugSphere(GetWorld(), TargetLocation, 100.f, 16, FColor::Emerald); }
+			if (bEnableDebugLines) { /*DrawDebugSphere(GetWorld(), TargetLocation, 100.f, 16, FColor::Emerald);*/ }
 		}
 	}
 	else // If all points hit
@@ -544,20 +544,20 @@ FRotator APlayerShip::GetSurfaceNormal()
 		if (bEnableDebugLines)
 		{
 			// Cross product above A
-			DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[0].Location + CrossA.GetSafeNormal() * 1000, FColor::Red, false, -1.f, 0, 12.f);
+			//DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[0].Location + CrossA.GetSafeNormal() * 1000, FColor::Red, false, -1.f, 0, 12.f);
 		
 			//Cross product above D
-			DrawDebugLine(GetWorld(), HitPoints[3].Location, HitPoints[3].Location + CrossD.GetSafeNormal() * 1000, FColor::Blue, false, -1.f, 0, 12.f);
+			//DrawDebugLine(GetWorld(), HitPoints[3].Location, HitPoints[3].Location + CrossD.GetSafeNormal() * 1000, FColor::Blue, false, -1.f, 0, 12.f);
 		
 			//Lines between points
-			DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[1].Location, FColor::White, false, -1.f, 0, 10.f);
-			DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[2].Location, FColor::White, false, -1.f, 0, 10.f);
-			DrawDebugLine(GetWorld(), HitPoints[2].Location, HitPoints[1].Location, FColor::Red, false, -1.f, 0, 10.f);
-			DrawDebugLine(GetWorld(), HitPoints[1].Location, HitPoints[3].Location, FColor::White, false, -1.f, 0, 10.f);
-			DrawDebugLine(GetWorld(), HitPoints[2].Location, HitPoints[3].Location, FColor::White, false, -1.f, 0, 10.f);
+			//DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[1].Location, FColor::White, false, -1.f, 0, 10.f);
+			//DrawDebugLine(GetWorld(), HitPoints[0].Location, HitPoints[2].Location, FColor::White, false, -1.f, 0, 10.f);
+			//DrawDebugLine(GetWorld(), HitPoints[2].Location, HitPoints[1].Location, FColor::Red, false, -1.f, 0, 10.f);
+			//DrawDebugLine(GetWorld(), HitPoints[1].Location, HitPoints[3].Location, FColor::White, false, -1.f, 0, 10.f);
+			//DrawDebugLine(GetWorld(), HitPoints[2].Location, HitPoints[3].Location, FColor::White, false, -1.f, 0, 10.f);
 
 			//Center line representing the combination of the cross product vectors (new up vector)
-			DrawDebugLine(GetWorld(), (HitPoints[0].Location + HitPoints[3].Location) / 2, (HitPoints[0].Location + HitPoints[3].Location) / 2 + NewUpVector.GetSafeNormal() * 500, FColor::Green, false, -1.f, 0, 12.f);	
+			//DrawDebugLine(GetWorld(), (HitPoints[0].Location + HitPoints[3].Location) / 2, (HitPoints[0].Location + HitPoints[3].Location) / 2 + NewUpVector.GetSafeNormal() * 500, FColor::Green, false, -1.f, 0, 12.f);	
 		}
 
 		// Get the target vector in world space, relative to the hit points casted from the player. This detaches us from world "up" & "down".
@@ -565,7 +565,7 @@ FRotator APlayerShip::GetSurfaceNormal()
 			TargetLocation = (HitPoints[0].Location + HitPoints[1].Location + HitPoints[2].Location + HitPoints[3].Location) / 4;
 			TargetLocation += NewUpVector.GetSafeNormal() * TargetHeight;
 		
-			if (bEnableDebugLines) { DrawDebugSphere(GetWorld(), TargetLocation, 100.f, 16, FColor::Emerald); }
+			if (bEnableDebugLines) { /*DrawDebugSphere(GetWorld(), TargetLocation, 100.f, 16, FColor::Emerald);*/ }
 		}
 	}
 	
@@ -617,7 +617,7 @@ FRotator APlayerShip::GetSurfaceNormalSimple()
 		
 		FCollisionQueryParams CollisionParams;
 
-		DrawDebugLine(GetWorld(), Start, End, FColor::White, false, -1.f, 0, 12.f);
+		//DrawDebugLine(GetWorld(), Start, End, FColor::White, false, -1.f, 0, 12.f);
 		
 		// Raycast
 		if (GetWorld()->LineTraceSingleByChannel(HitPoints[i], Start, End, ECC_Visibility, CollisionParams))
@@ -627,7 +627,7 @@ FRotator APlayerShip::GetSurfaceNormalSimple()
 			{
 				// Raycast visuals
 				
-				DrawDebugSphere(GetWorld(), HitPoints[i].Location, 60.f, 16, FColor::Blue);
+				//DrawDebugSphere(GetWorld(), HitPoints[i].Location, 60.f, 16, FColor::Blue);
 			}
 		}
 		else
@@ -649,7 +649,7 @@ FRotator APlayerShip::GetSurfaceNormalSimple()
 	NewRotation.Yaw = GetActorRotation().Yaw;
 	
 	// Upwards line
-	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + NewUpVector * 1000, FColor::Green, false, -1.f, 0, 12.f);
+	//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + NewUpVector * 1000, FColor::Green, false, -1.f, 0, 12.f);
 	
 	return NewRotation;
 	// Clamp angles so that  the ship cannot flip

@@ -150,25 +150,25 @@ APlayerShipPhysics::APlayerShipPhysics()
 	// Curves
 	{
 		CustomCurve1 = ConstructorHelpers::FObjectFinder<UCurveFloat>(TEXT("CurveFloat'/Game/Misc/Curves/CustomCurve1.CustomCurve1'")).Object;
-		if (!CustomCurve1)
+		/*if (!CustomCurve1)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Could not find CustomCurve1."));
-		}
+		}*/
 		CustomCurve2 = ConstructorHelpers::FObjectFinder<UCurveFloat>(TEXT("CurveFloat'/Game/Misc/Curves/CustomCurve2.CustomCurve2'")).Object;
-		if (!CustomCurve2)
+		/*if (!CustomCurve2)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Could not find CustomCurve2."));
-		}
+		}*/
 		HoverForceCurve = ConstructorHelpers::FObjectFinder<UCurveFloat>(TEXT("CurveFloat'/Game/Misc/Curves/HoverForceCurve.HoverForceCurve'")).Object;
-		if (!HoverForceCurve)
+		/*if (!HoverForceCurve)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Could not find HoverForceCurve"));
-		}
+		}*/
 		MinusHoverForceCurve = ConstructorHelpers::FObjectFinder<UCurveFloat>(TEXT("CurveFloat'/Game/Misc/Curves/MinusHoverForceCurve.MinusHoverForceCurve'")).Object;
-		if (!MinusHoverForceCurve)
+		/*if (!MinusHoverForceCurve)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Could not find MinusHoverForceCurve"));
-		}
+		}*/
 	}
 
 	
@@ -651,6 +651,7 @@ void APlayerShipPhysics::ChangeColor(FLinearColor NewColor) const
 {
 	DynMat->SetVectorParameterValue(FName("ShipColor"), NewColor);
 	DynMat->SetScalarParameterValue(FName("ColorLerp"), 0.5f);
+	UE_LOG(LogTemp, Warning, TEXT("Changing Color!"))
 }
 
 void APlayerShipPhysics::RemoveColor() const 
@@ -984,19 +985,19 @@ void APlayerShipPhysics::HoverRaycast()
 
 		FCollisionQueryParams CollisionParams;
 
-		if (bEnableDebugLines)
+		/*if (bEnableDebugLines)
 		{
 			DrawDebugLine(GetWorld(), Start, End, FColor::White, false, -1.f, 0, 5.f);
-		}
+		}*/
 
 		// Raycast
 		if (GetWorld()->LineTraceSingleByChannel(HitPoints[i], Start, End, ECC_Visibility, CollisionParams))
 		{
-			if (bEnableDebugLines)
+			/*if (bEnableDebugLines)
 			{
 				// Sphere at collision point
 				DrawDebugSphere(GetWorld(), HitPoints[i].Location, 60.f, 12, FColor::Blue);
-			}
+			}*/
 		}
 		else
 		{

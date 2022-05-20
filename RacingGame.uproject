@@ -11,7 +11,6 @@
 			"AdditionalDependencies": [
 				"Engine",
 				"UMG",
-				"UMGEditor"
 			]
 		}
 	],
@@ -20,8 +19,5 @@
 			"Name": "ApexDestruction",
 			"Enabled": true
 		}
-	],
-	"TargetPlatforms": [
-		"WindowsNoEditor"
 	]
 }

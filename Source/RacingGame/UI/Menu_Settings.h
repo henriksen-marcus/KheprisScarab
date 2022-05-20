@@ -155,14 +155,6 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* ColorButton7;
 	
-	void ColorButtonClicked();
-	void ColorButton2Clicked();
-	void ColorButton3Clicked();
-	void ColorButton4Clicked();
-	void ColorButton5Clicked();
-	void ColorButton6Clicked();
-	void ColorButton7Clicked();
-	
 
 	UFUNCTION()
 	void UpdateGlobalVolume(const float NewVolume);

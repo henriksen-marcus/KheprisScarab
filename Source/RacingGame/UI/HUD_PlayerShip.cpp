@@ -11,7 +11,7 @@
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
 #include "Blueprint/UserWidget.h"
-#include <Components/CanvasPanel.h>
+#include "Components/CanvasPanel.h"
 #include "../RacingGameGameModeBase.h"
 
 void UHUD_PlayerShip::NativeConstruct()

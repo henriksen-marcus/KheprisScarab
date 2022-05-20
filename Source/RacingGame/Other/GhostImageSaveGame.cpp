@@ -2,9 +2,6 @@
 
 
 #include "GhostImageSaveGame.h"
-
-#include <concrt.h>
-
 #include "Kismet/KismetMathLibrary.h"
 
 UGhostImageSaveGame::UGhostImageSaveGame()
