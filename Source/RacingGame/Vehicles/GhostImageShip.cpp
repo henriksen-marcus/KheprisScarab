@@ -155,6 +155,13 @@ void AGhostImageShip::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 			UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 			if (!GameInstance) { return; }
 
+			static bool bHasSkippedStart;
+			if (GameInstance->CurrentLap_Counter == 1 && GhostCheckPoint_Temp->bIsGoal && !bHasSkippedStart)
+			{
+				bHasSkippedStart = true;
+				return;
+			}
+
 			GameInstance->GhostCheckpointTime[GameInstance->GhostCheckpointEntered] = GameInstance->TimerCheck;
 
 			UE_LOG(LogTemp, Warning, TEXT("Ghost Time: %f"), GameInstance->GhostCheckpointTime[GameInstance->GhostCheckpointEntered]);
