@@ -1,6 +1,4 @@
-# RacingGame
-
-Khepri's Scarab
+# Khepri's Scarab
 
 A racing game taking place in ancient egypt, where you drive a hovercraft in the blazing time-attack mode or the exiting survival-adventure mode!
 

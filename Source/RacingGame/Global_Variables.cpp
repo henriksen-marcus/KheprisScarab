@@ -18,11 +18,14 @@ UGlobal_Variables::UGlobal_Variables()
 	CurrentAmmo = MaxAmmo;
 	TimeAdded = 15;
 
-	for (size_t i = 0; i < 100; i++)
+	/*for (size_t i = 0; i < 100; i++)
 	{
 		PlayerCheckpointTime_Array.Add(false);
 		GhostCheckpointTime.Add(false);
-	}
+	}*/
+
+	PlayerCheckpointTime_Array.Init(false, 100);
+	GhostCheckpointTime.Init(false, 100);
 }
 
 void UGlobal_Variables::BeginPlay()
@@ -152,12 +155,13 @@ bool UGlobal_Variables::SaveGame(ESaveType SaveType)
 				UE_LOG(LogTemp, Warning, TEXT("Saving game... Location Arr size: %d"), GameModeBase->LocationArr.Num())
 				SaveGameInstance->LocationArr = GameModeBase->LocationArr;
 				SaveGameInstance->RotationArr = GameModeBase->RotationArr;
-				UE_LOG(LogTemp, Warning, TEXT("Saved game... Location Arr size in saveinstance: %d"), SaveGameInstance->LocationArr.Num())
+				SaveGameInstance->Time = GameModeBase->RecordingTimer;
+				UE_LOG(LogTemp, Warning, TEXT("Saved game. Location Arr size in saveinstance: %d"), SaveGameInstance->LocationArr.Num())
 			}
 			
 			if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("PlayerGhost"), 0))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Successfully saved the Bronze ghost image. Recording size: %d"), GameModeBase->LocationArr.Num())
+				UE_LOG(LogTemp, Warning, TEXT("Successfully saved the Player ghost image. Recording size: %d"), GameModeBase->LocationArr.Num())
 				return true;
 			}
 			else

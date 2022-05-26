@@ -20,15 +20,12 @@ public:
 	ARacingGameGameModeBase();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	
-	
-	
-
 
 	UPROPERTY()
-		FVector CheckpointArrowLocation{};
+	FVector CheckpointArrowLocation{};
+	
 	UPROPERTY()
-		FRotator CheckpointArrowRotation{};
+	FRotator CheckpointArrowRotation{};
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsRecording{};
@@ -55,6 +52,8 @@ public:
 	UPROPERTY()
 	TArray<FRotator> RotationArr;
 
+	float RecordingTimer{};
+
 	UFUNCTION(BlueprintCallable)
 	void StartRecording();
 
@@ -74,4 +73,6 @@ public:
 	void StartRace();
 
 	void ChangeLevel();
+
+	static void LogGhostSaves();
 };

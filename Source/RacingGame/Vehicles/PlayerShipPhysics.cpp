@@ -455,7 +455,7 @@ void APlayerShipPhysics::Turn(const float Value)
 		}
 		
 		// Yaw
-		YawMove = FMath::FInterpTo(YawMove, Value * 2.2f, GetWorld()->GetDeltaSeconds(), 5.f);
+		YawMove = FMath::FInterpTo(YawMove, Value * 2.2f, GetWorld()->GetDeltaSeconds(), 4.f);
 	}
 }
 
@@ -913,6 +913,11 @@ void APlayerShipPhysics::LookBehind()
 
 void APlayerShipPhysics::MovementUpdate()
 {
+	if (GameInstance->bRaceNotStarted)
+	{
+		SetActorLocation(FVector(InitialLocation.X, InitialLocation.Y, GetActorLocation().Z));
+	}
+
 	// Local + Global gravity, added a little more force the the opposing (local) force
 	const FVector CombinedGravity = ( FVector::DownVector - (GetActorUpVector() * 1.1f) ).GetSafeNormal();
 	Root->AddForce(CombinedGravity * (Gravity));

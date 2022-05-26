@@ -6,12 +6,12 @@
 #include "Vehicles/GhostImageShip.h"
 #include "Vehicles/PlayerShipPhysics.h"
 #include "Other/GameInstanceSaveGame.h"
+#include "Other/GhostSpline.h"
 
 ARacingGameGameModeBase::ARacingGameGameModeBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
-
 
 void ARacingGameGameModeBase::BeginPlay()
 {
@@ -47,42 +47,15 @@ void ARacingGameGameModeBase::BeginPlay()
 		PlayerShipRef->SetActorRotation(CheckpointArrowRotation);
 	}
 
-	if (UGameplayStatics::DoesSaveGameExist(TEXT("PlayerGhost"), 0))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Found player ghost"))
-	} else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Can't find player ghost"))
-	}
-	if (UGameplayStatics::DoesSaveGameExist(TEXT("GoldGhost"), 0))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Found gold ghost"))
-	} else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Can't find gold ghost"))
-	}
-	if (UGameplayStatics::DoesSaveGameExist(TEXT("SilverGhost"), 0))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Found silver ghost"))
-	} else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Can't find silver ghost"))
-	}
-	if (UGameplayStatics::DoesSaveGameExist(TEXT("BronzeGhost"), 0))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Found bronze ghost"))
-	} else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Can't find bronze ghost"))
-	}
+	LogGhostSaves();
 }
-
 
 void ARacingGameGameModeBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-}
 
+	if (bIsRecording) { RecordingTimer += DeltaTime; }
+}
 
 bool ARacingGameGameModeBase::LoadGhost(int32 Difficulty)
 {
@@ -142,6 +115,7 @@ bool ARacingGameGameModeBase::LoadGhost(int32 Difficulty)
 		UE_LOG(LogTemp, Warning, TEXT("SaveGameInstance in loadgame is valid. LocationArr size: %d  %s"), SaveGameInstance->LocationArr.Num(), *SaveGameInstance->SaveName)
 		LocationArr = SaveGameInstance->LocationArr;
 		RotationArr = SaveGameInstance->RotationArr;
+		RecordingTimer = SaveGameInstance->Time;
 		return true;
 	}
 	else
@@ -175,9 +149,10 @@ void ARacingGameGameModeBase::StartRecording()
 
 	LocationArr.Empty();
 	RotationArr.Empty();
+	RecordingTimer = 0;
 
 	// The function "RecordTick" is now running in a loop via the "RecordingTimerHandle".
-	GetWorld()->GetTimerManager().SetTimer(RecordingTimerHandle, this, &ARacingGameGameModeBase::RecordTick, 0.0166666667f, true);
+	GetWorld()->GetTimerManager().SetTimer(RecordingTimerHandle, this, &ARacingGameGameModeBase::RecordTick, 0.0166666666666667f,true, true);
 }
 
 void ARacingGameGameModeBase::StopRecording()
@@ -225,8 +200,7 @@ bool ARacingGameGameModeBase::SpawnGhost(int32 Difficulty)
 
 		if (GhostShipRef)
 		{
-			GhostShipRef->LocationArr = LocationArr;
-			GhostShipRef->RotationArr = RotationArr;
+			GhostShipRef->SpawnSpline()->GenerateSpline(LocationArr, RotationArr, RecordingTimer);
 			return true;
 		} 
 	}
@@ -239,5 +213,37 @@ void ARacingGameGameModeBase::ChangeLevel()
 	//Change Level
 	FName NewLevel = FName("Master_Map");
 	UGameplayStatics::OpenLevel(GetWorld(), NewLevel);
+}
+
+void ARacingGameGameModeBase::LogGhostSaves()
+{
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("PlayerGhost"), 0))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found player ghost"))
+	} else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't find player ghost"))
+	}
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("GoldGhost"), 0))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found gold ghost"))
+	} else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't find gold ghost"))
+	}
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("SilverGhost"), 0))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found silver ghost"))
+	} else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't find silver ghost"))
+	}
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("BronzeGhost"), 0))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found bronze ghost"))
+	} else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't find bronze ghost"))
+	}
 }
 

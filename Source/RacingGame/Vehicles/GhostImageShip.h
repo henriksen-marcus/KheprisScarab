@@ -29,10 +29,12 @@ public:
 	/** Root replacement, using this for potential overlap events */
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
 	UBoxComponent* Root;
-	
+
+	/** Deprecated */
 	UPROPERTY()
 	TArray<FVector> LocationArr;
 
+	/** Deprecated */
 	UPROPERTY()
 	TArray<FRotator> RotationArr;
 
@@ -54,6 +56,9 @@ public:
 
 	void ResumePlayback() const;
 
+	/** Spawns a spline actor that the ship follows. This is to create a smooth track that is frame-independent. */
+	class AGhostSpline* SpawnSpline();
+
 	FVector CurrentLocTarget;
 	FRotator CurrentRotTarget;
 
@@ -66,8 +71,15 @@ public:
 
 	UPROPERTY()
 	class APlayerShipPhysics* PlayerRef;
-
+	
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UPROPERTY()
+	TArray<UMaterialInterface*> MatArr;
+
+	float TickTimer{};
+
+	UPROPERTY()
+	class AGhostSpline* SplineRef;
 };

@@ -23,7 +23,11 @@ public:
 	UPROPERTY()
 	FString DateTime;
 
-	// Information is stored at 10Hz/10 FPS.
+	/** The time it took to complete the race. */
+	UPROPERTY()
+	float Time{};
+
+	// Information is stored at 30Hz/30 FPS.
 	UPROPERTY()
 	TArray<FVector> LocationArr;
 
