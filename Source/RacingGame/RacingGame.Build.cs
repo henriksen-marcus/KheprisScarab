@@ -8,7 +8,7 @@ public class RacingGame : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" , "AnimGraphRuntime", "Niagara"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" , "AnimGraphRuntime", "Niagara", "SlateCore" });
 
 		//PrivateDependencyModuleNames.AddRange(new string[] {  });
 

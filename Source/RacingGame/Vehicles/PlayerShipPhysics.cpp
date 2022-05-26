@@ -247,6 +247,8 @@ void APlayerShipPhysics::BeginPlay()
 	{
 		GameInstance->TimeAdded = 18 + GameInstance->TimeAddedFromShop;
 	}
+
+	GameInstance->PlayerCheckpointsPassed = 0;
 }
 
 

@@ -30,6 +30,7 @@ class RACINGGAME_API UHUD_PlayerShip : public UUserWidget
 	void HighScoreDisplay();
 	void LapsDisplay();
 	void CheckDefeat();
+	void SetGhostCheckpointTimeDisplay(float DeltaTime);
 
 	void SetTimer(float DeltaTime);
 
@@ -78,6 +79,8 @@ public:
 
 	//Time Attack
 	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* Fuel_Time_Static_Text;
+	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* Time_Text;
 	UPROPERTY(meta = (BindWidget))
 		class UCanvasPanel* Fuel_Panel;
@@ -118,8 +121,14 @@ public:
 
 	//Checkpoint Timer Display
 	#pragma region Checkpoint Timer Display
+	FSlateColor GreenColor = FSlateColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+	FSlateColor RedColor = FSlateColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+	FSlateColor BlackColor = FSlateColor(FLinearColor(0.f, 0.f, 0.f, 1.f));
+
 	UPROPERTY(EditAnywhere, Category = "Sound")
 		USoundBase* CheckPointSound;
+	UPROPERTY(EditAnywhere, Category = "Sound")
+		USoundBase* LowOnFuel_Sound;
 
 	UPROPERTY(meta = (BindWidget))
 		class UCanvasPanel* Checkpoint_Time_Display;
@@ -134,6 +143,29 @@ public:
 		class UTextBlock* _One;
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* _Two;
+
+
+	UPROPERTY(meta = (BindWidget))
+		class UCanvasPanel* GhostTime_Panel;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* GhostDisplay_Minutes_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* GhostDisplay_Seconds_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* GhostDisplay_Hundrets_Text;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* Ghost_One;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* Ghost_Two;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* Positive;
+	float GhostCheckpointTimerDisplay_Timer{};
+	int Ghost_Minutes{};
+	int Ghost_Secounds{};
+	float Ghost_Hundrets{};
+	float GhostDeltaTimeDisplay{};
+	bool GhostTimeDisplay_Temp{};
+	int CheckpointArray_Check{};
 
 	float CheckpointTimerDisplay_Timer{};
 	int Minutes{};

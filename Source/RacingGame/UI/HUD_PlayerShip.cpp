@@ -25,6 +25,17 @@ void UHUD_PlayerShip::NativeOnInitialized()
 
 	GameInstance->CheckPoint_Connected = false;
 	GameInstance->CurrentLap_Counter = 1;
+	GameInstance->PlayerCheckpointsPassed = 0;
+
+	for (size_t i = 0; i < 100; i++)
+	{
+		GameInstance->PlayerCheckpointTime_Array[i] = 0;
+		GameInstance->GhostCheckpointTime[i] = 0;
+	}
+
+	GameInstance->PlayerCheckpointEntered = 0;
+	GameInstance->GhostCheckpointEntered = 0;
+	CheckpointArray_Check = 0;
 	
 	//Set Start Time based on Difficulty
 	GameInstance->TimeCount = 0;
@@ -42,6 +53,7 @@ void UHUD_PlayerShip::NativeOnInitialized()
 	//Set Display for each Mode
 	if (GameInstance->TimeAttackMode)
 	{
+		GhostTime_Panel->SetVisibility(ESlateVisibility::Hidden);
 		Currency1_Panel->SetVisibility(ESlateVisibility::Hidden);
 		Currency2_Panel->SetVisibility(ESlateVisibility::Hidden);
 		Boost_Panel->SetVisibility(ESlateVisibility::Hidden);
@@ -93,6 +105,8 @@ void UHUD_PlayerShip::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 	LapsDisplay();
 
 	SetlapCounter();
+
+	SetGhostCheckpointTimeDisplay(DeltaTime);
 
 	CheckDefeat();
 	RaceFinished();
@@ -241,6 +255,16 @@ void UHUD_PlayerShip::SetTimer_Display()
 
 			GameInstance->Time_Display = true;
 			Time_Text->SetVisibility(ESlateVisibility::Visible);
+			if (GameInstance->TimeCount < 10)
+			{
+				Fuel_Time_Static_Text->SetColorAndOpacity(RedColor);
+				Time_Text->SetColorAndOpacity(RedColor);
+			}
+			else
+			{
+				Fuel_Time_Static_Text->SetColorAndOpacity(BlackColor);
+				Time_Text->SetColorAndOpacity(BlackColor);
+			}
 		}
 		else
 		{
@@ -268,9 +292,17 @@ void UHUD_PlayerShip::SetTimer(float DeltaTime)
 			GameInstance->DeltaTimeCount = 0;
 
 			if (GameInstance->TimeCount <= 0)
+			{
 				GameInstance->TimeCount = 0;
+			}
 			else
+			{
 				GameInstance->TimeCount -= 1;
+				if (GameInstance->TimeCount < 10)
+				{
+					UGameplayStatics::PlaySound2D(GetWorld(), LowOnFuel_Sound, 1.f * GameInstance->GlobalVolumeMultiplier);
+				}
+			}
 		}
 	}
 }
@@ -384,11 +416,12 @@ void UHUD_PlayerShip::LapsDisplay()
 	}
 }
 
-
 void UHUD_PlayerShip::SetTrackTimer(float DeltaTime)
 {
 	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 	if (!GameInstance) { return; }
+
+	GameInstance->TimerCheck = TrackTimer_Accurate;
 
 	//Makes in-game timer counter
 	if (!GameInstance->bRaceNotStarted) 
@@ -482,6 +515,13 @@ void UHUD_PlayerShip::SetTimeDisplay_Timer(float DeltaTime)
 
 			Checkpoint_Time_Display->SetVisibility(ESlateVisibility::Visible);
 
+			GameInstance->PlayerCheckpointTime_Array[GameInstance->PlayerCheckpointEntered] = TrackTimer_Accurate;
+
+			UE_LOG(LogTemp, Warning, TEXT("Player Time: %f"), GameInstance->PlayerCheckpointTime_Array[GameInstance->PlayerCheckpointEntered]);
+			UE_LOG(LogTemp, Warning, TEXT("PlayerCheckpointEntered: %d"), GameInstance->PlayerCheckpointEntered);
+
+			GameInstance->PlayerCheckpointEntered += 1;
+
 			GameInstance->NewCheckPoint = false;
 			CheckpointTimerDisplay_Timer = 0;
 		}
@@ -502,6 +542,7 @@ void UHUD_PlayerShip::SetTimeDisplay_Timer(float DeltaTime)
 		CheckpointTimerDisplay_Timer = 0;
 	}
 }
+//Has checkpoint variables to check
 
 void UHUD_PlayerShip::SetRealTimeDisplay()
 {
@@ -553,6 +594,142 @@ void UHUD_PlayerShip::SetlapCounter()
 		Current_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->CurrentLap_Counter)));
 
 	Max_Round_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(GameInstance->MaxLap_Counter)));
+}
+
+void UHUD_PlayerShip::SetGhostCheckpointTimeDisplay(float DeltaTime)
+{
+	UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+	if (!GameInstance) { return; }
+
+	if (GameInstance->PlayerCheckpointTime_Array[CheckpointArray_Check] > 0 && GameInstance->GhostCheckpointTime[CheckpointArray_Check] > 0)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), CheckPointSound, 0.4f * GameInstance->GlobalVolumeMultiplier);
+
+		if (GameInstance->PlayerCheckpointTime_Array[CheckpointArray_Check] > GameInstance->GhostCheckpointTime[CheckpointArray_Check])
+		{
+			GameInstance->PlayerAheadOfGhost = false;
+			GameInstance->CheckpointTimeDifference = GameInstance->PlayerCheckpointTime_Array[CheckpointArray_Check] - GameInstance->GhostCheckpointTime[CheckpointArray_Check];
+		}
+		else
+		{
+			GameInstance->PlayerAheadOfGhost = true;
+			GameInstance->CheckpointTimeDifference = GameInstance->GhostCheckpointTime[CheckpointArray_Check] - GameInstance->PlayerCheckpointTime_Array[CheckpointArray_Check];
+
+		}
+
+		/*if (GameInstance->PlayerCheckpointsPassed <= 0)
+		{
+			if (GameInstance->PlayerCheckpointTime > GameInstance->GhostCheckpointTime[0])
+			{
+				GameInstance->PlayerAheadOfGhost = false;
+				GameInstance->CheckpointTimeDifference = GameInstance->PlayerCheckpointTime - GameInstance->GhostCheckpointTime[0];
+			}
+			else
+			{
+				GameInstance->PlayerAheadOfGhost = true;
+				GameInstance->CheckpointTimeDifference = GameInstance->GhostCheckpointTime[0] - GameInstance->PlayerCheckpointTime;
+			}
+		}
+		else
+		{
+			if (GameInstance->PlayerCheckpointTime > GameInstance->GhostCheckpointTime[GameInstance->PlayerCheckpointsPassed - 1])
+			{
+				GameInstance->PlayerAheadOfGhost = false;
+				GameInstance->CheckpointTimeDifference = GameInstance->PlayerCheckpointTime - GameInstance->GhostCheckpointTime[GameInstance->PlayerCheckpointsPassed - 1];
+			}
+			else
+			{
+				GameInstance->PlayerAheadOfGhost = true;
+				GameInstance->CheckpointTimeDifference = GameInstance->GhostCheckpointTime[GameInstance->PlayerCheckpointsPassed - 1] - GameInstance->PlayerCheckpointTime;
+			}
+		}*/
+
+		UE_LOG(LogTemp, Warning, TEXT("Checkpoint TimeDifference: %f"), GameInstance->CheckpointTimeDifference);
+
+
+		//Calculating text display
+		#pragma region Calculating text display
+		float GhostTrackTimer_TempAccurate = GameInstance->CheckpointTimeDifference;
+		Ghost_Minutes = 0;
+		Ghost_Secounds = 0;
+
+		while (GhostTrackTimer_TempAccurate >= 60)
+		{
+			GhostTrackTimer_TempAccurate -= 60;
+			Ghost_Minutes += 1;
+		}
+
+		while (GhostTrackTimer_TempAccurate >= 1)
+		{
+			GhostTrackTimer_TempAccurate -= 1;
+			Ghost_Secounds += 1;
+		}
+
+		Ghost_Hundrets = GhostTrackTimer_TempAccurate;
+
+		//Display
+		Ghost_Hundrets = Ghost_Hundrets * 100;
+
+		if (GameInstance->PlayerAheadOfGhost)
+			Positive->SetText(FText::FromString("+"));
+		else
+			Positive->SetText(FText::FromString("-"));
+
+		if (Ghost_Minutes < 10)
+			GhostDisplay_Minutes_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Ghost_Minutes)));
+		else
+			GhostDisplay_Minutes_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Ghost_Minutes)));
+
+		if (Ghost_Secounds < 10)
+			GhostDisplay_Seconds_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Ghost_Secounds)));
+		else
+			GhostDisplay_Seconds_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Ghost_Secounds)));
+
+		if (Ghost_Hundrets < 10)
+			GhostDisplay_Hundrets_Text->SetText(FText::FromString("0" + UKismetStringLibrary::Conv_IntToString(Ghost_Hundrets)));
+		else
+			GhostDisplay_Hundrets_Text->SetText(FText::FromString(UKismetStringLibrary::Conv_IntToString(Ghost_Hundrets)));
+
+		if (GameInstance->PlayerAheadOfGhost)
+		{
+			Positive->SetColorAndOpacity(GreenColor);
+			GhostDisplay_Minutes_Text->SetColorAndOpacity(GreenColor);
+			GhostDisplay_Seconds_Text->SetColorAndOpacity(GreenColor);
+			GhostDisplay_Hundrets_Text->SetColorAndOpacity(GreenColor);
+			Ghost_One->SetColorAndOpacity(GreenColor);
+			Ghost_Two->SetColorAndOpacity(GreenColor);
+		}
+		else
+		{
+			Positive->SetColorAndOpacity(RedColor);
+			GhostDisplay_Minutes_Text->SetColorAndOpacity(RedColor);
+			GhostDisplay_Seconds_Text->SetColorAndOpacity(RedColor);
+			GhostDisplay_Hundrets_Text->SetColorAndOpacity(RedColor);
+			Ghost_One->SetColorAndOpacity(RedColor);
+			Ghost_Two->SetColorAndOpacity(RedColor);
+		}
+
+		GhostTime_Panel->SetVisibility(ESlateVisibility::Visible);
+		#pragma endregion
+
+		GhostTimeDisplay_Temp = true;
+
+		GameInstance->PlayerCheckpointTime_Array[CheckpointArray_Check] = 0;
+		GameInstance->GhostCheckpointTime[CheckpointArray_Check] = 0;
+		CheckpointArray_Check += 1;
+	}
+
+	if (GhostTimeDisplay_Temp)
+	{
+		GhostDeltaTimeDisplay += DeltaTime;
+
+		if (GhostDeltaTimeDisplay >= TrackTime_DisplayTime)
+		{
+			GhostTimeDisplay_Temp = false;
+			GhostDeltaTimeDisplay = 0;
+			GhostTime_Panel->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
 }
 
 void UHUD_PlayerShip::CheckDefeat()

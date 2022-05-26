@@ -131,6 +131,18 @@ public:
 	int CurrentLap_Counter{ 1 };
 	
 	int MaxLap_Counter{ 3 };
+
+	TArray<float> PlayerCheckpointTime_Array{};
+	TArray<float> GhostCheckpointTime{};
+
+	int PlayerCheckpointEntered{};
+	int GhostCheckpointEntered{};
+
+	float TimerCheck{};
+	float CheckpointTimeDifference{};
+	bool PlayerAheadOfGhost{};
+	int PlayerCheckpointsPassed{};
+	float PlayerCheckpointTime{};
 	#pragma endregion
 
 	#pragma region StartRace

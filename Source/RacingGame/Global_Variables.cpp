@@ -17,7 +17,12 @@ UGlobal_Variables::UGlobal_Variables()
 	MaxAmmo = 10;
 	CurrentAmmo = MaxAmmo;
 	TimeAdded = 15;
-	
+
+	for (size_t i = 0; i < 100; i++)
+	{
+		PlayerCheckpointTime_Array.Add(false);
+		GhostCheckpointTime.Add(false);
+	}
 }
 
 void UGlobal_Variables::BeginPlay()

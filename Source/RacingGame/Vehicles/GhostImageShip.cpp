@@ -7,6 +7,7 @@
 #include "../Global_Variables.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PlayerShipPhysics.h"
+#include "../Environment/CheckPoint.h"
 
 AGhostImageShip::AGhostImageShip()
 {
@@ -18,6 +19,11 @@ AGhostImageShip::AGhostImageShip()
 	Root->SetSimulatePhysics(false);
 	Root->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Root->SetCollisionProfileName(FName("NoCollision"));
+
+	Root->SetCollisionProfileName(FName("OverlapAll"));
+
+	Root->SetGenerateOverlapEvents(true);
+	Root->OnComponentBeginOverlap.AddDynamic(this, &AGhostImageShip::OnOverlapBegin);
 	
 	BaseMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ShipMesh"));
 	BaseMesh->SetSkeletalMesh(ConstructorHelpers::FObjectFinder<USkeletalMesh>(TEXT("SkeletalMesh'/Game/3DAssets/New_Ship/MasterShip.MasterShip'")).Object);
@@ -25,6 +31,9 @@ AGhostImageShip::AGhostImageShip()
 	BaseMesh->SetupAttachment(GetRootComponent());
 	BaseMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BaseMesh->SetCollisionProfileName(FName("NoCollision"));
+
+	//BaseMesh->SetGenerateOverlapEvents(true);
+	//BaseMesh->OnComponentBeginOverlap.AddDynamic(this, &AGhostImageShip::OnOverlapBegin);
 	
 	//BaseMesh->SetMaterial(0, ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT("Material'/Game/3DAssets/New_Ship/TMaterials/Ship_2.Ship_2'")).Object);
 	//BaseMesh->SetMaterial(1, ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT("Material'/Game/3DAssets/New_Ship/TMaterials/windows_2.windows_2'")).Object);
@@ -110,3 +119,23 @@ void AGhostImageShip::ResumePlayback() const
 	GetWorld()->GetTimerManager().UnPauseTimer(PlayBackTimerHandle);
 }
 
+void AGhostImageShip::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor->IsA(ACheckPoint::StaticClass()))
+	{
+		ACheckPoint* GhostCheckPoint_Temp = Cast<ACheckPoint>(OtherActor);
+
+		if (GhostCheckPoint_Temp)
+		{
+			UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
+			if (!GameInstance) { return; }
+
+			GameInstance->GhostCheckpointTime[GameInstance->GhostCheckpointEntered] = GameInstance->TimerCheck;
+
+			UE_LOG(LogTemp, Warning, TEXT("Ghost Time: %f"), GameInstance->GhostCheckpointTime[GameInstance->GhostCheckpointEntered]);
+			UE_LOG(LogTemp, Warning, TEXT("GhostCheckpointEntered: %d"), GameInstance->GhostCheckpointEntered);
+			
+			GameInstance->GhostCheckpointEntered += 1;
+		}
+	}
+}
