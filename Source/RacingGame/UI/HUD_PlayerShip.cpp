@@ -75,6 +75,7 @@ void UHUD_PlayerShip::NativeOnInitialized()
 		Boost_Panel->SetVisibility(ESlateVisibility::Visible);
 		Ammo_Panel->SetVisibility(ESlateVisibility::Visible);
 		HighScore_Display_Panel->SetVisibility(ESlateVisibility::Hidden);
+		GhostTime_Panel->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	//Set Start Round Counter text
@@ -709,7 +710,10 @@ void UHUD_PlayerShip::SetGhostCheckpointTimeDisplay(float DeltaTime)
 			Ghost_Two->SetColorAndOpacity(RedColor);
 		}
 
-		GhostTime_Panel->SetVisibility(ESlateVisibility::Visible);
+		if (GameInstance->TimeAttackMode)
+		{
+			GhostTime_Panel->SetVisibility(ESlateVisibility::Visible);
+		}
 		#pragma endregion
 
 		GhostTimeDisplay_Temp = true;
