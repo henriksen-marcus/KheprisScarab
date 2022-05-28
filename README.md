@@ -1,4 +1,5 @@
 # Khepri's Scarab
+![start_screen - Copy (2)](https://user-images.githubusercontent.com/89453098/170842155-94c7d3a3-109a-4542-8406-2415b265b7b2.png)
 
 A racing game taking place in ancient egypt, where you drive a hovercraft in the blazing time-attack mode or the exiting survival-adventure mode!
 
@@ -63,6 +64,9 @@ The settings menu lets you customize your HUD, change the volume and the color i
 ## Saving & Loading
 This happens automatically. Saving and loading of ghosts is explained in [Ghosts](#ghosts)  
 If you would like to delete your save, go to `RacingGame/Saved/SaveGames` and delete `GameInstance.sav`
+
+## Gameplay Video
+https://user-images.githubusercontent.com/89453098/170842446-517edab0-1a51-4b37-a75e-cff893610686.mp4
 
 ## Developers
 
