@@ -35,9 +35,10 @@ The settings menu lets you customize your HUD, change the volume and the color i
 |---|---|
 |Accelerate/Turn|WASD|
 |Look Behind|C|
+|Switch Camera|V|
 |Shoot|Left Click|
 |Jump|Spacebar|
-|Switch Camera|V|
+|Boost|Left Shift|
 |Respawn|T|
 |Pause|Esc/P|
   
@@ -52,6 +53,7 @@ The settings menu lets you customize your HUD, change the volume and the color i
 |Switch Camera|Select|
 |Shoot|Left Shoulder|
 |Jump|A|
+|Boost|X|
 |Respawn|D-Pad Right|
 |Pause|Start|
 

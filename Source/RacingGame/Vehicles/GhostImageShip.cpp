@@ -56,22 +56,22 @@ void AGhostImageShip::BeginPlay()
 {
 	Super::BeginPlay();
 
-	PlayerRef = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	ShipRef = Cast<APlayerShipPhysics>(GetWorld()->GetFirstPlayerController()->GetPawn());
 }
 
 void AGhostImageShip::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if (PlayerRef && WidgetComp)
+	if (ShipRef && WidgetComp)
 	{
-		WidgetComp->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), PlayerRef->ActiveCamera->GetComponentLocation()));
+		WidgetComp->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ShipRef->ActiveCamera->GetComponentLocation()));
 	}
 	
 	if (bPlayback)
 	{
-		SetActorLocation(SplineRef->Spline->GetLocationAtTime(TickTimer, ESplineCoordinateSpace::World));
-		SetActorRotation(SplineRef->Spline->GetRotationAtTime(TickTimer, ESplineCoordinateSpace::World));
+		SetActorLocation(SplineRef->Spline->GetLocationAtTime(RaceTimer, ESplineCoordinateSpace::World));
+		SetActorRotation(SplineRef->Spline->GetRotationAtTime(RaceTimer, ESplineCoordinateSpace::World));
 		
 		/*if (TickTimer >= 0.0166666667f)
 		{
@@ -79,7 +79,7 @@ void AGhostImageShip::Tick(float DeltaTime)
 
 			TickTimer = 0;
 		}*/
-		TickTimer += DeltaTime;
+		RaceTimer += DeltaTime;
 	}
 }
 
@@ -119,6 +119,12 @@ void AGhostImageShip::StartPlayback()
 	/*BaseMesh->SetMaterial(0, MatArr[0]);
 	BaseMesh->SetMaterial(1, MatArr[1]);
 	BaseMesh->SetMaterial(2, MatArr[2]);*/
+
+	// Set so that we can overlap with the goal (first checkpoint) after 10 seconds.
+	FTimerHandle Handle;
+	FTimerDelegate Delegate;
+	Delegate.BindLambda([&]{ bCanOverlapWithGoal = true; });
+	GetWorld()->GetTimerManager().SetTimer(Handle, Delegate, 10.f, false);
 }
 
 void AGhostImageShip::StopPlayback()
@@ -154,13 +160,8 @@ void AGhostImageShip::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 		{
 			UGlobal_Variables* GameInstance = Cast<UGlobal_Variables>(GetGameInstance());
 			if (!GameInstance) { return; }
-
-			static bool bHasSkippedStart;
-			if (GameInstance->CurrentLap_Counter == 1 && GhostCheckPoint_Temp->bIsGoal && !bHasSkippedStart)
-			{
-				bHasSkippedStart = true;
-				return;
-			}
+			
+			if (GameInstance->CurrentLap_Counter == 1 && GhostCheckPoint_Temp->bIsGoal && !bCanOverlapWithGoal) { return; }
 
 			GameInstance->GhostCheckpointTime[GameInstance->GhostCheckpointEntered] = GameInstance->TimerCheck;
 
@@ -171,6 +172,7 @@ void AGhostImageShip::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 		}
 	}
 }
+
 AGhostSpline* AGhostImageShip::SpawnSpline()
 {
 	// Spawn spline and get the reference

@@ -112,7 +112,7 @@ public:
 
 	/** Target spring arm length, constantly interpolated towards */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
-	float TargetSpringArmLength{500.f};
+	float TargetSpringArmLength{400.f};
 
 	/** The ship's target height above the ground */
 	UPROPERTY(EditAnywhere, Category = "EditableVariables")
@@ -395,6 +395,7 @@ public:
 	float ForwardsSpeed{6500.f};
 	float InitialTargetHeight{};
 	float Gravity{};
+	float MaxSpeed{16500.f};
 	
 	float NextRollPosition{};
 	float NextPitchPosition{};

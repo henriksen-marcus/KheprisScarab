@@ -65,12 +65,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UWidgetComponent* WidgetComp;
 
+	/** If we are currently playing back the ghost data. No movement will occur if this variable is false. */
 	bool bPlayback{};
 	
 	FTimerHandle PlayBackTimerHandle;
 
 	UPROPERTY()
-	class APlayerShipPhysics* PlayerRef;
+	class APlayerShipPhysics* ShipRef;
 	
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -78,8 +79,13 @@ public:
 	UPROPERTY()
 	TArray<UMaterialInterface*> MatArr;
 
-	float TickTimer{};
+	/** The amount of time elapsed since the race started. */
+	float RaceTimer{};
 
+	/** Pointer to the spline the ghost is following. */
 	UPROPERTY()
 	class AGhostSpline* SplineRef;
+
+	/** Decides whether the ship can overlap with the first checkpoint (goal) or not. */
+	bool bCanOverlapWithGoal{};
 };

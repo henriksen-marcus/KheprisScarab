@@ -27,11 +27,17 @@ void UHUD_PlayerShip::NativeOnInitialized()
 	GameInstance->CurrentLap_Counter = 1;
 	GameInstance->PlayerCheckpointsPassed = 0;
 
-	for (size_t i = 0; i < 100; i++)
+	/*for (size_t i = 0; i < 100; i++)
 	{
 		GameInstance->PlayerCheckpointTime_Array[i] = 0;
 		GameInstance->GhostCheckpointTime[i] = 0;
-	}
+	}*/
+
+	GameInstance->PlayerCheckpointTime_Array.Empty();
+	GameInstance->PlayerCheckpointTime_Array.Init(0, 100);
+
+	GameInstance->GhostCheckpointTime.Empty();
+	GameInstance->GhostCheckpointTime.Init(0, 100);
 
 	GameInstance->PlayerCheckpointEntered = 0;
 	GameInstance->GhostCheckpointEntered = 0;

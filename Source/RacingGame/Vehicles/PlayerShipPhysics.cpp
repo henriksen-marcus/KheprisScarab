@@ -233,7 +233,6 @@ void APlayerShipPhysics::BeginPlay()
 	}
 
 	//Checkpoint
-	InitialLocation = GetActorLocation();
 	if (GameInstance->TimeAttackMode)
 	{
 		GameInstance->PlayerCheckpointNumber = CheckPointsAmount;
@@ -263,14 +262,14 @@ void APlayerShipPhysics::Tick(const float DeltaTime)
 		Root->AddForce(GetActorUpVector() * Gravity * 15);
 	}
 
-	// Engine dynamic audio
-	Speed = Root->GetPhysicsLinearVelocity().Size();
-
 	if (bLogSpeed)
 	{
 		UE_LOG(LogTemp,Warning,TEXT("Speed is: %f"), Speed);
 	}
 
+	// Engine dynamic audio
+	Speed = Root->GetPhysicsLinearVelocity().Size();
+	
 	if (AudioComp && CustomCurve2 && GameInstance)
 	{
 		// Interp to smooth out speed/audio fluctuations
@@ -515,7 +514,24 @@ void APlayerShipPhysics::CameraUpdate()
 	ActiveSpringArm->SetRelativeRotation(CurRot);
 
 	/** Camera effects */
-	BackCamera->SetFieldOfView(FMath::FInterpTo(BackCamera->FieldOfView, TargetCameraFOV, GetWorld()->GetDeltaSeconds(), 5.f));
+
+	// Braking FOV effect
+	if (!bIsDashing && bIsBraking && ActiveCamera != FrontCamera)
+	{
+		ActiveCamera->SetFieldOfView(FMath::FInterpTo(ActiveCamera->FieldOfView, TargetCameraFOV - 15.f, GetWorld()->GetDeltaSeconds(), 2.f));
+	}
+
+	// FOV interpolation
+	if (bIsDashing && ActiveCamera != FrontCamera)
+	{
+		ActiveCamera->SetFieldOfView(FMath::FInterpTo(ActiveCamera->FieldOfView, TargetCameraFOV, GetWorld()->GetDeltaSeconds(), 4.f));
+	}
+	else if (ActiveCamera != FrontCamera)
+	{
+		const float FOVIncrease = FMath::Lerp(0.f, 20.f, Speed/MaxSpeed);
+		ActiveCamera->SetFieldOfView(FMath::FInterpTo(ActiveCamera->FieldOfView, TargetCameraFOV + FOVIncrease, GetWorld()->GetDeltaSeconds(), 3.f));
+	}
+	
 	BackSpringArm->TargetArmLength = FMath::FInterpTo(BackSpringArm->TargetArmLength, TargetSpringArmLength, GetWorld()->GetDeltaSeconds(), 10.f);
 
 	// Minimap camera
@@ -562,7 +578,7 @@ FString APlayerShipPhysics::CheckSurface(FVector &HitLocation)
 bool APlayerShipPhysics::CheckAgainForSurface()
 {
 	/** How far to check for underlying surface */
-	static float CheckDistance = 20000.f;
+	static float CheckDistance = 100000.f;
 	
 	FHitResult HitRes;
 	FVector Start = GetActorLocation();
@@ -631,7 +647,7 @@ void APlayerShipPhysics::Tunnel(bool bIsInside)
 {
 	if (bIsInside)
 	{
-		ForceScalar = 2.f;
+		ForceScalar = 3.f;
 		Root->SetPhysicsMaxAngularVelocityInDegrees(500.f);
 		Thrust1->SetRelativeLocation(FVector(300.f, -300.f, 0.f));
 		Thrust2->SetRelativeLocation(FVector(300.f, 300.f, 0.f));
@@ -695,7 +711,7 @@ void APlayerShipPhysics::DashNotifyEvent_Implementation()
 
 void APlayerShipPhysics::Dash()
 {
-if (bIsDashing) { return; }
+	if (bIsDashing) { return; }
 
 	if (GameInstance)
 	{
@@ -704,12 +720,14 @@ if (bIsDashing) { return; }
 		if (GameInstance->BoostPickup)
 		{
 			GameInstance->BoostPickup = false;
+
+			Root->AddImpulse(GetActorForwardVector() * 1000, FName(), true);
 		
-			static float CamFovChange = 15.f;
-			static float SpringArmChange = 200.f;
+			static float CamFovChange = 20.f;
+			float SpringArmChange = 150.f;
 
 			TargetCameraFOV += CamFovChange;
-			TargetSpringArmLength -= SpringArmChange;
+			//TargetSpringArmLength -= SpringArmChange;
 			BackSpringArm->CameraLagSpeed = 35.f;
 			BackSpringArm->CameraRotationLagSpeed = 20.f;
 			SpeedBoost = MaxSpeedBoost;
@@ -717,7 +735,7 @@ if (bIsDashing) { return; }
 
 			if (BoostSound)
 			{
-				UGameplayStatics::PlaySound2D(GetWorld(), BoostSound, 0.5f * GameInstance->GlobalVolumeMultiplier);
+				UGameplayStatics::PlaySound2D(GetWorld(), BoostSound, 0.7f * GameInstance->GlobalVolumeMultiplier);
 			}
 
 			FTimerHandle TimerHandle;
@@ -726,7 +744,7 @@ if (bIsDashing) { return; }
 			TimerDelegate.BindLambda([&]
 				{
 					TargetCameraFOV -= CamFovChange;
-					TargetSpringArmLength += SpringArmChange;
+					//TargetSpringArmLength += SpringArmChange;
 					BackSpringArm->CameraLagSpeed = 30.f;
 					BackSpringArm->CameraRotationLagSpeed = 15.f;
 					SpeedBoost = 1.f;
@@ -835,22 +853,22 @@ void APlayerShipPhysics::ChangeCameraAngle()
 		BackCamera->SetActive(true);
 		ActiveCamera = BackCamera;
 		
-		TargetSpringArmLength = 500.f;
+		TargetSpringArmLength = 400.f;
 		break;
 	case Far:
 		FrontCamera->SetActive(false);
 		BackCamera->SetActive(true);
 		ActiveCamera = BackCamera;
 		
-		TargetSpringArmLength = 1000.f;
+		TargetSpringArmLength = 800.f;
 		break;
 	case Front:
 		BackCamera->SetActive(false);
 		FrontCamera->SetActive(true);
 		ActiveCamera = FrontCamera;
 
-		TargetSpringArmLength = 500.f;
-		BackSpringArm->TargetArmLength = 500.f;
+		TargetSpringArmLength = 400.f;
+		BackSpringArm->TargetArmLength = 400.f;
 		break;
 	case END_ENUM:
 		CurrentCameraAngle = -1;
@@ -930,7 +948,7 @@ void APlayerShipPhysics::MovementUpdate()
 	}
 	
 	// Limit speed
-	if (Root->GetPhysicsLinearVelocity().Size() > 16000.f)
+	if (Root->GetPhysicsLinearVelocity().Size() > 16500.f)
 	{
 		if (bIsDashing && Root->GetPhysicsLinearVelocity().Size() > 22000.f)
 		{
@@ -1073,8 +1091,8 @@ void APlayerShipPhysics::HoverRaycast()
 	{
 		// Interpolate ship back to upright position if we are in the air
 		FRotator CurrentRotation = GetActorRotation();
-		CurrentRotation.Pitch = FMath::FInterpTo(CurrentRotation.Pitch, -10.f, GetWorld()->GetDeltaSeconds(), 0.6f);
-		CurrentRotation.Roll = FMath::FInterpTo(CurrentRotation.Roll, 0.f, GetWorld()->GetDeltaSeconds(), 1.f);
+		CurrentRotation.Pitch = FMath::FInterpTo(CurrentRotation.Pitch, -10.f, GetWorld()->GetDeltaSeconds(), 3.f);
+		CurrentRotation.Roll = FMath::FInterpTo(CurrentRotation.Roll, 0.f, GetWorld()->GetDeltaSeconds(), 4.f);
 		SetActorRotation(CurrentRotation);
 		Root->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
 	}
@@ -1150,7 +1168,7 @@ void APlayerShipPhysics::AddForce(FVector_NetQuantize End, int Num) const
 	//UE_LOG(LogTemp, Warning, TEXT("NormDist: %f"), NormalizedDistance)
 
 	// If we are close enough to the ground to give thrust
-	if (NormalizedDistance < 1.f)
+	if (NormalizedDistance < 1.05f)
 	{
 		const FVector ThrustForce = (Constant * HoverForceCurve->GetFloatValue(NormalizedDistance) * UpVector).GetClampedToMaxSize(21000000.f);
 		const FVector Damping = ZVelocity * -UpVector * (CustomCurve2->GetFloatValue(NormalizedDistance) + 1) * 1600;
@@ -1165,6 +1183,7 @@ void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 {
 	if (!OtherActor || OtherActor == this || !OtherComponent) { return; }
 
+	// Added by Adrian
 	if (OtherActor->IsA(ACheckPoint::StaticClass()))
 	{
 		ACheckPoint* CheckPoint_Temp = Cast<ACheckPoint>(OtherActor);
@@ -1223,6 +1242,7 @@ void APlayerShipPhysics::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 			else
 			{
 				if (GameInstance->PlayerCheckpointNumber == CheckPoint_Temp->ThisCheckpointNumber - 1)
+					
 				{
 					CheckPoint_Last = CheckPoint_Temp;
 					GameInstance->NewCheckPoint = true;

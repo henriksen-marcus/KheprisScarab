@@ -54,7 +54,11 @@ void UMenu_Start::NativeOnInitialized()
 	Quit_Button->OnClicked.AddDynamic(this, &UMenu_Start::Quit_Button_Clickd);
 	EntryButton->OnClicked.AddDynamic(this, &UMenu_Start::RemoveEntryScreen);
 	
-	
+	GameInstance->PlayerCheckpointTime_Array.Empty();
+	GameInstance->PlayerCheckpointTime_Array.Init(0, 100);
+
+	GameInstance->GhostCheckpointTime.Empty();
+	GameInstance->GhostCheckpointTime.Init(0, 100);
 }
 void UMenu_Start::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {	
