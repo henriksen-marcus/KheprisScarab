@@ -13,3 +13,4 @@ Saved
 *.xcodeproj
 *.xcworkspace
 Config/DefaultEditorPerProjectUserSettings.ini
+*.log
