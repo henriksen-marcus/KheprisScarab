@@ -721,9 +721,9 @@ void APlayerShipPhysics::Dash()
 		{
 			GameInstance->BoostPickup = false;
 
-			Root->AddImpulse(GetActorForwardVector() * 1000, FName(), true);
+			Root->AddImpulse(GetActorForwardVector() * 70000, FName(), true);
 		
-			static float CamFovChange = 20.f;
+			static float CamFovChange = 25.f;
 			float SpringArmChange = 150.f;
 
 			TargetCameraFOV += CamFovChange;
@@ -860,7 +860,7 @@ void APlayerShipPhysics::ChangeCameraAngle()
 		BackCamera->SetActive(true);
 		ActiveCamera = BackCamera;
 		
-		TargetSpringArmLength = 800.f;
+		TargetSpringArmLength = 700.f;
 		break;
 	case Front:
 		BackCamera->SetActive(false);
