@@ -71,12 +71,14 @@ If you would like to delete your save, go to `RacingGame/Saved/SaveGames` and de
 https://user-images.githubusercontent.com/89453098/170842446-517edab0-1a51-4b37-a75e-cff893610686.mp4
 
 ## Developers
-
-**Project Manager:**  Adrian Klausen  
-**Lead Programmer:**  Marcus Henriksen  
-**Lead Artist:**      Maja Synstad  
-**3D Artist:**        Jan-Roar Finseth  
-**2D Artist:**        Erika Mørkedal  
-**Level Designer:**   Frieder Prinz  
+|Role|Name|
+|---|---|
+|**Project Manager**<br>UI/Functional Programmer|Adrian Klausen|
+|**Lead Programmer**<br>Movement/Gamefeel Programmer|Marcus Henriksen|
+|**Lead Artist**<br>Concept Artist<br>Texturing|Maja Synstad|
+|**3D Artist**<br>Animator<br>Environment|Jan-Roar Finseth|
+|**2D Artist**<br>UI Artist|Erika Mørkedal|
+|**Level Designer**<br>Lead Environment|Frieder Prinz|
+  
 
 Developed with Unreal Engine 4
