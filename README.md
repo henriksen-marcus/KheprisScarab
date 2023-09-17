@@ -8,7 +8,7 @@ Race for the best time against your own ghost or a preset difficulty.
 
 ### Ghosts
 Your gameplay is always recorded locally. If you beat your own highscore, your ghost will be overwritten.  
-If you try to play agaisn't your own ghost but have not recorded one, no ghost will spawn.
+If you try to play against your own ghost but have not recorded one, no ghost will spawn.
 
 ### Fuel
 In time-attack, you have a fuel counter ticking down. If it reaches zero, your lose! You get fuel for passing checkpoints.
