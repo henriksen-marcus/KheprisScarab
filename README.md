@@ -24,7 +24,7 @@ Collect coins and powerups, shoot destructible pillars on the road and find hidd
 Spend your hard earned cash in the shop to unlock upgrades. You can upgrade things like speed boost duration, max health and more.  
 To unlock upgrades you need **special coins** which you can find at hidden locations in the adventure mode.  
   
-The settings menu lets you customize your HUD, change the volume and the color if your ship.
+The settings menu lets you customize your HUD, change the volume and the color of your ship.
 
 ## Controls
 <table>
